@@ -38,7 +38,11 @@ The `.claude/commands/` directory contains opinionated prompts for specific work
 - `/plan` — break a task into steps before executing
 - `/review` — code review the current branch or diff
 - `/update-memory` — refresh the memory bank from this session's work
-- `/weekly-update` — draft a stakeholder-ready weekly update from the bank and recent activity
+- `/weekly-update` — stakeholder-ready weekly update from the bank and recent activity
+- `/retro` — sprint or weekly retrospective drawing from progress and git log
+- `/risk-review` — surface risks not yet documented in the bank
+- `/decision-log` — record an architectural decision in ADR format
+- `/handoff` — generate a handoff doc for someone picking up the project cold
 - `/ship` — pre-merge checklist
 - `/runbook` — generate or update an operational runbook
 - `/security-check` — OWASP + STRIDE pass on the current change

@@ -31,7 +31,11 @@ your-project/
 │       ├── plan.md           # plan before executing
 │       ├── review.md         # code review the current branch
 │       ├── update-memory.md  # refresh the bank
-│       ├── weekly-update.md  # draft a stakeholder-ready weekly update
+│       ├── weekly-update.md  # stakeholder-ready weekly update
+│       ├── retro.md          # sprint or weekly retrospective
+│       ├── risk-review.md    # surface undocumented risks
+│       ├── decision-log.md   # record an architectural decision (ADR)
+│       ├── handoff.md        # generate a handoff doc for the next person
 │       ├── ship.md           # pre-merge checklist
 │       ├── runbook.md        # generate/update an operational runbook
 │       └── security-check.md # OWASP + STRIDE pass

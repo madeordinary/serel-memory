@@ -1,0 +1,63 @@
+---
+description: Record an architectural decision in ADR format
+---
+
+# /decision-log
+
+Record an architectural or design decision in standard ADR (Architecture Decision Record) format. Use this when a decision is significant enough that future-you (or a future teammate) will want to know why it was made.
+
+Steps:
+
+1. If the user hasn't already stated the decision, ask: "What's the decision you want to record?"
+2. Read `memory-bank/systemPatterns.md` and `memory-bank/techContext.md` for related context.
+3. Check `docs/decisions/` for existing ADRs to determine the next number.
+4. Draft the ADR.
+
+Use this structure:
+
+~~~
+# [NNN]. [Short imperative title — e.g., "Use Postgres for state, not SQLite"]
+
+## Status
+
+Proposed | Accepted | Deprecated | Superseded by [NNN]
+
+## Context
+
+[What's the situation that's forcing this decision? What constraints are in play? Be specific about what's actually true today.]
+
+## Decision
+
+[What did we decide? Be definitive. "We will use X" not "We're considering X."]
+
+## Alternatives considered
+
+- **[Alternative A]**: [brief description and why it was rejected]
+- **[Alternative B]**: [brief description and why it was rejected]
+
+## Consequences
+
+**Positive**:
+- [what this decision enables or makes easier]
+
+**Negative**:
+- [what this decision costs us or makes harder]
+
+**Neutral**:
+- [side effects that aren't clearly good or bad but should be known]
+
+## References
+
+- [link to relevant code, doc, discussion, ticket]
+~~~
+
+Save to `docs/decisions/NNN-<slug>.md`, where NNN is the next sequential number padded to 3 digits (e.g., `001-use-postgres-for-state.md`).
+
+After writing, ask the user whether `memory-bank/systemPatterns.md` should be updated to reference this decision under "Key decisions."
+
+Rules:
+
+- ADRs are for *real* decisions — ones with alternatives that were genuinely considered. Don't ADR trivial things ("we use 2-space indents").
+- Status starts as "Proposed" unless the decision is already in effect. The user updates to "Accepted" when they're confident.
+- Alternatives section should be honest. If you didn't seriously consider others, say so — that's also useful context.
+- Consequences should be balanced. If you can't think of negatives, you probably haven't thought hard enough about the decision.
