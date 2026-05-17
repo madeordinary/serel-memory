@@ -27,9 +27,11 @@ your-project/
 ├── .claude/
 │   └── commands/
 │       ├── start.md          # session opener
+│       ├── init-memory.md    # analyze codebase, propose memory bank contents
 │       ├── plan.md           # plan before executing
 │       ├── review.md         # code review the current branch
 │       ├── update-memory.md  # refresh the bank
+│       ├── weekly-update.md  # draft a stakeholder-ready weekly update
 │       ├── ship.md           # pre-merge checklist
 │       ├── runbook.md        # generate/update an operational runbook
 │       └── security-check.md # OWASP + STRIDE pass
@@ -67,11 +69,7 @@ rsync -av --ignore-existing \
 rm -rf /tmp/basecamp
 ```
 
-Then — and this is the part most people miss — *don't fill the memory bank by hand.* Open the agent and prompt it:
-
-> "I just added basecamp to this project. Read the codebase, the README, and any docs/. Then propose contents for each file in `memory-bank/`. Show me the proposals; don't write anything yet."
-
-Review the drafts, edit, then have it write. This is faster than filling templates from blank, and it catches things you'd forget to write down.
+Then — and this is the part most people miss — *don't fill the memory bank by hand.* Open Claude Code and run `/init-memory`. The agent reads your codebase, your README, and your dependencies, then proposes contents for each memory bank file. Review the drafts, edit anything that's off, approve, and the agent writes them. This is faster than filling templates from blank and catches things you'd forget to write down.
 
 After that, `/start` to verify the bootstrap works.
 

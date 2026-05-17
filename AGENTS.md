@@ -34,9 +34,11 @@ Refresh every file in `memory-bank/`. Focus especially on `activeContext.md` and
 The `.claude/commands/` directory contains opinionated prompts for specific workflows:
 
 - `/start` — read the bank, summarize state, ask where to pick up
+- `/init-memory` — analyze the codebase and propose initial memory bank contents (use when bank is empty)
 - `/plan` — break a task into steps before executing
 - `/review` — code review the current branch or diff
 - `/update-memory` — refresh the memory bank from this session's work
+- `/weekly-update` — draft a stakeholder-ready weekly update from the bank and recent activity
 - `/ship` — pre-merge checklist
 - `/runbook` — generate or update an operational runbook
 - `/security-check` — OWASP + STRIDE pass on the current change
