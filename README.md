@@ -27,6 +27,7 @@ your-project/
 ├── .claude/
 │   └── commands/
 │       ├── start.md          # session opener
+│       ├── discover.md       # define a project from a rough idea (no code yet)
 │       ├── init-memory.md    # analyze codebase, propose memory bank contents
 │       ├── plan.md           # plan before executing
 │       ├── review.md         # code review the current branch
@@ -55,10 +56,14 @@ That's all of it. Markdown files in folders. The agent does the work.
 npx degit gusfeliciano/basecamp my-new-project
 cd my-new-project
 git init
-$EDITOR memory-bank/projectbrief.md   # one paragraph about what you're building
 ```
 
-Then open the project in Claude Code or run Codex CLI. Both auto-read `CLAUDE.md` / `AGENTS.md` at session start. In Claude Code, type `/start`. In Codex, paste the contents of `.claude/commands/start.md`.
+Then open the project in Claude Code. There are two paths from here depending on how formed your idea is:
+
+- **If you have a clear idea already** (a paragraph or a draft PRD): paste it into `memory-bank/projectbrief.md`, then run `/start`. The agent reads the bank and asks where to pick up.
+- **If your idea is still rough** ("I want to build something that does X..."): run `/discover` instead. The agent walks you through targeted questions about the user, problem, scope, and constraints, then proposes memory bank contents based on the dialogue. Good for projects you haven't fully articulated yet.
+
+For Codex CLI users, paste the contents of `.claude/commands/start.md` or `.claude/commands/discover.md` into the session — same prompts, no native slash command support.
 
 ### On an existing project
 

@@ -34,7 +34,8 @@ Refresh every file in `memory-bank/`. Focus especially on `activeContext.md` and
 The `.claude/commands/` directory contains opinionated prompts for specific workflows:
 
 - `/start` — read the bank, summarize state, ask where to pick up
-- `/init-memory` — analyze the codebase and propose initial memory bank contents (use when bank is empty)
+- `/discover` — help the user define a project from a rough idea; produces initial memory bank (use when starting fresh with no code yet)
+- `/init-memory` — analyze the codebase and propose initial memory bank contents (use when bank is empty but code already exists)
 - `/plan` — break a task into steps before executing
 - `/review` — code review the current branch or diff
 - `/update-memory` — refresh the memory bank from this session's work
