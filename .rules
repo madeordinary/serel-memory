@@ -1,0 +1,40 @@
+# Project Rules & Learnings
+
+> The learning journal. Append non-obvious patterns, preferences, and gotchas as they're discovered.
+> This file grows. Don't delete things unless they're wrong — strike them through or note "no longer true" instead.
+
+## User preferences
+
+<!-- How the human you're working with wants things done. Tone, formatting, levels of detail, when to ask vs. just do, etc. -->
+
+-
+
+## Code patterns
+
+<!-- Conventions this codebase follows that aren't enforced by linter or formatter. -->
+
+-
+
+## Gotchas
+
+<!-- Non-obvious things that bit us. The "I lost an hour to this" entries. -->
+
+-
+
+## Workflow
+
+<!-- How we work together that matters. Branch naming, commit style, when to PR vs. push to main, etc. -->
+
+-
+
+## Things we've tried and rejected
+
+<!-- Saves the next agent (and the next human) from re-litigating decisions. -->
+
+-
+
+## Style and tone
+
+<!-- For projects where copy/docs matter: voice, vocabulary, things to avoid. -->
+
+-
