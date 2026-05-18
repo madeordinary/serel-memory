@@ -31,7 +31,8 @@ your-project/
 │       ├── basecamp-from-prd/
 │       ├── basecamp-init-memory/
 │       ├── basecamp-update-memory/
-│       └── basecamp-ship/
+│       ├── basecamp-ship/
+│       └── basecamp-ask-claude/
 ├── .claude/
 │   └── commands/
 │       ├── start.md          # session opener
@@ -46,6 +47,7 @@ your-project/
 │       ├── risk-review.md    # surface undocumented risks
 │       ├── decision-log.md   # record an architectural decision (ADR)
 │       ├── handoff.md        # generate a handoff doc for the next person
+│       ├── ask-codex.md      # ask Codex CLI for a second opinion
 │       ├── ship.md           # pre-merge checklist
 │       ├── runbook.md        # generate/update an operational runbook
 │       └── security-check.md # OWASP + STRIDE pass
@@ -176,6 +178,15 @@ The adapters are native to each tool:
 - Claude Code uses `.claude/commands/<name>.md` slash commands.
 - Codex uses `.agents/skills/basecamp-*/SKILL.md` skills.
 - Optional hooks can auto-load context for either tool, but the memory bank still works without hooks.
+
+## Optional Second Opinions
+
+If you use both Claude Code and Codex, basecamp includes an advanced second-opinion workflow:
+
+- In Claude Code, run `/ask-codex` to ask Codex CLI to review a plan, architecture decision, PRD interpretation, or risk assessment.
+- In Codex, invoke `$basecamp-ask-claude` to ask Claude Code CLI for the same kind of review.
+
+These workflows shell out to the other CLI; they do not require MCP. They assume the other CLI is installed and authenticated. The default mode is a single read-only review. A bounded loop is available only when you explicitly ask for it, capped at 2 rounds by default, and should end with a synthesis rather than autonomous edits.
 
 ## Why this exists
 

@@ -45,6 +45,7 @@ The `.claude/commands/` directory contains Claude Code slash commands, and `.age
 - `/risk-review` — surface risks not yet documented in the bank
 - `/decision-log` — record an architectural decision in ADR format
 - `/handoff` — generate a handoff doc for someone picking up the project cold
+- `/ask-codex` / `$basecamp-ask-claude` — ask the other CLI for an optional second opinion on plans, risks, and decisions
 - `/ship` / `$basecamp-ship` — pre-merge checklist
 - `/runbook` — generate or update an operational runbook
 - `/security-check` — OWASP + STRIDE pass on the current change
