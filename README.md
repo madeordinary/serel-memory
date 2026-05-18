@@ -28,6 +28,7 @@ your-project/
 │   └── skills/             # Codex-native workflow skills
 │       ├── basecamp-start/
 │       ├── basecamp-discover/
+│       ├── basecamp-from-prd/
 │       ├── basecamp-init-memory/
 │       ├── basecamp-update-memory/
 │       └── basecamp-ship/
@@ -35,6 +36,7 @@ your-project/
 │   └── commands/
 │       ├── start.md          # session opener
 │       ├── discover.md       # define a project from a rough idea (no code yet)
+│       ├── from-prd.md       # seed memory bank from a PRD or brief
 │       ├── init-memory.md    # analyze codebase, propose memory bank contents
 │       ├── plan.md           # plan before executing
 │       ├── review.md         # code review the current branch
@@ -66,16 +68,41 @@ cd my-new-project
 git init
 ```
 
-Then open the project in Claude Code or Codex. There are two paths from here depending on how formed your idea is:
+Then open the project in Claude Code or Codex. There are three paths from here depending on how formed your idea is:
 
-- **If you have a clear idea already** (a paragraph or a draft PRD): paste it into `memory-bank/projectbrief.md`, then run `/start` in Claude Code or invoke `$basecamp-start` in Codex. The agent reads the bank and asks where to pick up.
+- **If you have a clear idea already** (a paragraph or short brief): paste it into `memory-bank/projectbrief.md`, then run `/start` in Claude Code or invoke `$basecamp-start` in Codex. The agent reads the bank and asks where to pick up.
+- **If you already have a PRD or brief**: put it in the repo, usually under `docs/`, then run `/from-prd docs/prd.md` in Claude Code or invoke `$basecamp-from-prd docs/prd.md` in Codex. The agent reads the document, asks only for important gaps, then proposes memory bank contents.
 - **If your idea is still rough** ("I want to build something that does X..."): run `/discover` in Claude Code or invoke `$basecamp-discover` in Codex. The agent walks you through targeted questions about the user, problem, scope, and constraints, then proposes memory bank contents based on the dialogue. Good for projects you haven't fully articulated yet.
 
 Codex also discovers the checked-in skills from `.agents/skills/`; use `/skills` or type `$basecamp-...` to invoke one explicitly.
 
+### On a new project with an existing PRD
+
+If all you have is a PRD, make basecamp the starting repo and bring the PRD into it:
+
+```bash
+npx degit gusfeliciano/basecamp my-new-project
+cd my-new-project
+mkdir -p docs
+cp /path/to/prd.md docs/prd.md
+git init
+```
+
+Then run:
+
+```text
+# Claude Code
+/from-prd docs/prd.md
+
+# Codex
+$basecamp-from-prd docs/prd.md
+```
+
+`degit gusfeliciano/basecamp` uses GitHub shorthand for `https://github.com/gusfeliciano/basecamp` and downloads the current repo contents without the `.git` history. It is a starter-copy step, not a future `git pull` relationship.
+
 ### On an existing project
 
-Drop basecamp's files in without clobbering anything that's already there:
+If the project already has code or important files, drop basecamp's files in without clobbering anything that's already there:
 
 ```bash
 cd ~/path/to/your-existing-project
