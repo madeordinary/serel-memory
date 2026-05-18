@@ -25,8 +25,16 @@ Use this skill when a project has a PRD, product brief, strategy doc, or similar
    - Constraints
    - Stack, platform, or architecture hints
    - Risks, open questions, and unresolved decisions
-5. Ask at most 3 targeted follow-up questions for material gaps that would make the memory bank misleading if guessed. Skip questions where `TBD` is acceptable.
-6. Propose contents for every memory bank file:
+5. Before proposing memory-bank contents, present a clarifications checkpoint:
+
+   ```text
+   CLARIFYING QUESTIONS:
+   - [question] or "(none - PRD is sufficient for initial seeding)"
+   ```
+
+   Ask at most 3 targeted follow-up questions for material gaps that would make the memory bank misleading if guessed. Skip questions where `TBD` is acceptable.
+6. If there are clarifying questions, stop and wait for the user's answers before synthesis. If there are none, say so and proceed.
+7. Propose contents for every memory bank file:
    - `memory-bank/projectbrief.md`
    - `memory-bank/productContext.md`
    - `memory-bank/systemPatterns.md`
