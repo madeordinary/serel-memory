@@ -53,6 +53,14 @@ QUESTIONS / ASSUMPTIONS: <only if needed>
 
 After all six proposals, stop and wait. Do not write anything until the user approves or revises.
 
+## Output quality
+
+- Do not wrap an entire file proposal in a Markdown code fence if the proposed file itself contains fenced code blocks.
+- If a proposal includes a code block, close the fence before continuing with the next heading or metadata line.
+- Keep architecture sketches simple unless a code fence is genuinely useful.
+- Keep `CONFIDENCE`, `SOURCE`, and `QUESTIONS / ASSUMPTIONS` outside the proposed file body.
+- End by asking whether the user wants to approve, revise, or inspect a specific file first.
+
 ## Rules
 
 - Treat the PRD as source material, not absolute truth.
