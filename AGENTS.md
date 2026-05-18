@@ -16,7 +16,7 @@ Read these files, in this order, before doing anything else:
 
 Then read the last 5–10 git commits for recent context.
 
-If any memory bank file is missing or empty, note it and ask the user before proceeding.
+If any memory bank file is missing, empty, or still only template placeholders, note it and ask the user before proceeding.
 
 ## While working
 
@@ -29,26 +29,26 @@ If any memory bank file is missing or empty, note it and ask the user before pro
 
 Refresh every file in `memory-bank/`. Focus especially on `activeContext.md` and `progress.md`. Show diffs before writing.
 
-## Available slash commands
+## Available workflows
 
-The `.claude/commands/` directory contains opinionated prompts for specific workflows:
+The `.claude/commands/` directory contains Claude Code slash commands, and `.agents/skills/` contains Codex-native skills for core basecamp workflows:
 
-- `/start` — read the bank, summarize state, ask where to pick up
-- `/discover` — help the user define a project from a rough idea; produces initial memory bank (use when starting fresh with no code yet)
-- `/init-memory` — analyze the codebase and propose initial memory bank contents (use when bank is empty but code already exists)
+- `/start` / `$basecamp-start` — read the bank, summarize state, ask where to pick up
+- `/discover` / `$basecamp-discover` — help the user define a project from a rough idea; produces initial memory bank (use when starting fresh with no code yet)
+- `/init-memory` / `$basecamp-init-memory` — analyze the codebase and propose initial memory bank contents (use when bank is empty but code already exists)
 - `/plan` — break a task into steps before executing
 - `/review` — code review the current branch or diff
-- `/update-memory` — refresh the memory bank from this session's work
+- `/update-memory` / `$basecamp-update-memory` — refresh the memory bank from this session's work
 - `/weekly-update` — stakeholder-ready weekly update from the bank and recent activity
 - `/retro` — sprint or weekly retrospective drawing from progress and git log
 - `/risk-review` — surface risks not yet documented in the bank
 - `/decision-log` — record an architectural decision in ADR format
 - `/handoff` — generate a handoff doc for someone picking up the project cold
-- `/ship` — pre-merge checklist
+- `/ship` / `$basecamp-ship` — pre-merge checklist
 - `/runbook` — generate or update an operational runbook
 - `/security-check` — OWASP + STRIDE pass on the current change
 
-If you're not running in Claude Code (which natively loads slash commands), the prompts in those files are still useful — read them as guidance for the corresponding action.
+If a workflow does not yet have a Codex skill, read the corresponding `.claude/commands/<name>.md` file as guidance for the action.
 
 ## Ground rules
 

@@ -4,7 +4,7 @@ description: Initialize the memory bank by analyzing the existing codebase
 
 # /init-memory
 
-Use this when basecamp has just been dropped into an existing project and the memory bank files are still empty. You'll read the codebase and propose what each file should contain — the user reviews and edits before anything gets written.
+Use this when basecamp has just been dropped into an existing project and the memory bank files are still empty or template-only. You'll read the codebase and propose what each file should contain — the user reviews and edits before anything gets written.
 
 Steps:
 

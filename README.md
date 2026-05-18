@@ -1,6 +1,6 @@
 # basecamp
 
-A portable memory bank and slash command kit for AI coding agents. Works with Claude Code and Codex CLI out of the box.
+A portable memory bank and workflow kit for AI coding agents. Works with Claude Code and Codex out of the box.
 
 ## The problem
 
@@ -24,6 +24,13 @@ your-project/
 │   ├── techContext.md      # stack, constraints, dependencies
 │   ├── activeContext.md    # current focus — changes most often
 │   └── progress.md         # what works, what's left
+├── .agents/
+│   └── skills/             # Codex-native workflow skills
+│       ├── basecamp-start/
+│       ├── basecamp-discover/
+│       ├── basecamp-init-memory/
+│       ├── basecamp-update-memory/
+│       └── basecamp-ship/
 ├── .claude/
 │   └── commands/
 │       ├── start.md          # session opener
@@ -43,7 +50,8 @@ your-project/
 └── hooks/                    # optional auto-fire (off by default)
     ├── session-start.sh      # auto-load memory bank at session start
     ├── pre-compact.sh        # auto-update memory bank before context loss
-    └── enable-hooks.sh       # one-shot script to register the hooks
+    ├── enable-hooks.sh       # register Claude Code hooks
+    └── enable-codex-hooks.sh # register Codex hooks
 ```
 
 That's all of it. Markdown files in folders. The agent does the work.
@@ -58,12 +66,12 @@ cd my-new-project
 git init
 ```
 
-Then open the project in Claude Code. There are two paths from here depending on how formed your idea is:
+Then open the project in Claude Code or Codex. There are two paths from here depending on how formed your idea is:
 
-- **If you have a clear idea already** (a paragraph or a draft PRD): paste it into `memory-bank/projectbrief.md`, then run `/start`. The agent reads the bank and asks where to pick up.
-- **If your idea is still rough** ("I want to build something that does X..."): run `/discover` instead. The agent walks you through targeted questions about the user, problem, scope, and constraints, then proposes memory bank contents based on the dialogue. Good for projects you haven't fully articulated yet.
+- **If you have a clear idea already** (a paragraph or a draft PRD): paste it into `memory-bank/projectbrief.md`, then run `/start` in Claude Code or invoke `$basecamp-start` in Codex. The agent reads the bank and asks where to pick up.
+- **If your idea is still rough** ("I want to build something that does X..."): run `/discover` in Claude Code or invoke `$basecamp-discover` in Codex. The agent walks you through targeted questions about the user, problem, scope, and constraints, then proposes memory bank contents based on the dialogue. Good for projects you haven't fully articulated yet.
 
-For Codex CLI users, paste the contents of `.claude/commands/start.md` or `.claude/commands/discover.md` into the session — same prompts, no native slash command support.
+Codex also discovers the checked-in skills from `.agents/skills/`; use `/skills` or type `$basecamp-...` to invoke one explicitly.
 
 ### On an existing project
 
@@ -74,13 +82,13 @@ cd ~/path/to/your-existing-project
 
 git clone --depth 1 https://github.com/gusfeliciano/basecamp.git /tmp/basecamp
 rsync -av --ignore-existing \
-  /tmp/basecamp/{memory-bank,.claude,.rules,AGENTS.md,CLAUDE.md,hooks} .
+  /tmp/basecamp/{memory-bank,.agents,.claude,.rules,AGENTS.md,CLAUDE.md,hooks} .
 rm -rf /tmp/basecamp
 ```
 
-Then — and this is the part most people miss — *don't fill the memory bank by hand.* Open Claude Code and run `/init-memory`. The agent reads your codebase, your README, and your dependencies, then proposes contents for each memory bank file. Review the drafts, edit anything that's off, approve, and the agent writes them. This is faster than filling templates from blank and catches things you'd forget to write down.
+Then — and this is the part most people miss — *don't fill the memory bank by hand.* Open Claude Code and run `/init-memory`, or open Codex and invoke `$basecamp-init-memory`. The agent reads your codebase, your README, and your dependencies, then proposes contents for each memory bank file. Review the drafts, edit anything that's off, approve, and the agent writes them. This is faster than filling templates from blank and catches things you'd forget to write down.
 
-After that, `/start` to verify the bootstrap works.
+After that, run `/start` or invoke `$basecamp-start` to verify the bootstrap works.
 
 ## A 5-minute tour
 
@@ -92,13 +100,13 @@ After that, `/start` to verify the bootstrap works.
 
 **At session end:** run `/update-memory`. The agent refreshes `activeContext.md` and `progress.md`, shows you the diffs, and asks before writing.
 
-Slash commands are just markdown files. Read them. Change them. They're your prompts, not anyone else's.
+Claude slash commands and Codex skills are just markdown files. Read them. Change them. They're your workflows, not anyone else's.
 
 ## Hooks (optional)
 
-Slash commands depend on you remembering to type them. Hooks make `/start` and `/update-memory` happen automatically. They're **off by default** — opt in per project.
+Manual workflows depend on you remembering to run them. Hooks make session-start memory loading happen automatically, and Claude Code hooks also remind you to update memory before compaction. They're **off by default** — opt in per project.
 
-To enable on a project:
+To enable Claude Code hooks on a project:
 
 ```bash
 bash hooks/enable-hooks.sh
@@ -117,21 +125,33 @@ export BASECAMP_HOOKS=off
 
 To disable permanently, remove the entries from `.claude/settings.json`.
 
+To enable Codex hooks on a project:
+
+```bash
+bash hooks/enable-codex-hooks.sh
+```
+
+That adds a repo-local `.codex/hooks.json` with a `SessionStart` hook. Codex will ask you to review/trust the hook before running it.
+
 Enable hooks on projects where memory continuity matters and you'd rather not type the commands. Keep them off for exploratory hacking where the bank is overhead. See `hooks/README.md` for the full details.
 
 ## Works with both Claude and Codex
 
 The trick is that `AGENTS.md` is the canonical bootstrap and `CLAUDE.md` is a one-line file that imports it. Codex CLI auto-reads `AGENTS.md`. Claude Code auto-reads `CLAUDE.md` and follows the `@AGENTS.md` import. Same source of truth, both tools.
 
-Slash commands are native to Claude Code. For Codex, the prompts are still useful — paste the relevant `.claude/commands/<name>.md` into your session.
+The adapters are native to each tool:
+
+- Claude Code uses `.claude/commands/<name>.md` slash commands.
+- Codex uses `.agents/skills/basecamp-*/SKILL.md` skills.
+- Optional hooks can auto-load context for either tool, but the memory bank still works without hooks.
 
 ## Why this exists
 
-The memory bank pattern is borrowed from [cline's memory bank](https://github.com/nickbaumann98/cline_docs), which is excellent but Cline-specific. The slash command shape is borrowed in spirit from [gstack](https://github.com/garrytan/gstack), which is excellent but ships 23 commands when most projects need seven.
+The memory bank pattern is borrowed from [cline's memory bank](https://github.com/nickbaumann98/cline_docs), which is excellent but Cline-specific. The workflow-command shape is borrowed in spirit from [gstack](https://github.com/garrytan/gstack), which is excellent but ships 23 commands when most projects need seven.
 
-basecamp is the smallest thing that delivers both — a tool-agnostic memory bank that works with Claude and Codex, plus a curated set of slash commands you'll actually run.
+basecamp is the smallest thing that delivers both — a tool-agnostic memory bank that works with Claude and Codex, plus a curated set of workflows you'll actually run.
 
-If you fork it, change everything. The slash commands especially. The whole point is that the prompts encode *your* opinions, not anyone else's.
+If you fork it, change everything. The workflows especially. The whole point is that the prompts encode *your* opinions, not anyone else's.
 
 ## License
 

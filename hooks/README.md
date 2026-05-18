@@ -1,6 +1,6 @@
 # basecamp hooks
 
-These hooks make basecamp's `/start` and `/update-memory` flows happen automatically. They're **off by default** — you opt in per project.
+These hooks automate part of basecamp's memory workflow. They're **off by default** — you opt in per project.
 
 ## What's here
 
@@ -8,9 +8,10 @@ These hooks make basecamp's `/start` and `/update-memory` flows happen automatic
 |------|-------|--------------|
 | `session-start.sh` | `SessionStart` | Reads the memory bank + `.rules` + recent git activity and injects it as session context. Replaces typing `/start`. |
 | `pre-compact.sh` | `PreCompact` | Reminds the agent to refresh `activeContext.md` and `progress.md` before Claude Code compacts context. Replaces remembering `/update-memory`. |
-| `enable-hooks.sh` | n/a | One-shot script that registers the two hooks above in `.claude/settings.json`. |
+| `enable-hooks.sh` | n/a | One-shot script that registers Claude Code hooks in `.claude/settings.json`. |
+| `enable-codex-hooks.sh` | n/a | One-shot script that registers the Codex `SessionStart` hook in `.codex/hooks.json`. |
 
-## Enable
+## Enable Claude Code Hooks
 
 ```bash
 bash hooks/enable-hooks.sh
@@ -19,6 +20,14 @@ bash hooks/enable-hooks.sh
 Idempotent — safe to re-run. Requires `jq` for the JSON manipulation; if jq isn't installed, the script prints the settings.json block for you to paste manually.
 
 After enabling, hooks fire on every Claude Code session in this project. No extra steps.
+
+## Enable Codex Hooks
+
+```bash
+bash hooks/enable-codex-hooks.sh
+```
+
+This writes `.codex/hooks.json` with a `SessionStart` hook that runs `hooks/session-start.sh`. Codex project hooks require review; open `/hooks` in Codex to inspect and trust the hook.
 
 ## Disable
 
@@ -30,7 +39,7 @@ export BASECAMP_HOOKS=off
 
 Both scripts check this env var and exit early. Useful when you want to hack quickly without the bank getting touched.
 
-**Permanently**: remove the basecamp entries from `.claude/settings.json`. Or delete the whole `hooks` object if you don't use any other hooks.
+**Permanently**: remove the basecamp entries from `.claude/settings.json` or `.codex/hooks.json`. Or delete the whole `hooks` object if you don't use any other hooks.
 
 ## When to enable
 
@@ -48,16 +57,16 @@ Keep them off for:
 
 ## How they work
 
-Claude Code's hook system lets you run shell commands at specific lifecycle events. Output to stdout is added to the model's context.
+Claude Code and Codex both let you run shell commands at specific lifecycle events. Output from the session-start hook is added to the model's context.
 
 - `session-start.sh` runs once per Claude Code session, just after the agent boots. Its stdout becomes additional context the agent sees alongside `CLAUDE.md`.
 - `pre-compact.sh` runs before context compaction (which happens automatically when context fills up or when the user runs `/compact`). Its stdout becomes the instruction the agent acts on during compaction.
 
-The scripts read `$CLAUDE_PROJECT_DIR` (set by Claude Code) to anchor paths. If it's not set, they fall back to `$PWD`.
+The scripts read `$CLAUDE_PROJECT_DIR` when Claude Code sets it. If it's not set, they fall back to `$PWD`; the Codex installer runs the hook from the git root so the same script works there too.
 
-## Codex CLI?
+## Codex CLI
 
-Codex doesn't use Claude Code's hook system. For Codex users, `AGENTS.md` already instructs the agent to read the memory bank at session start, so the SessionStart equivalent happens by convention. There's no PreCompact equivalent in Codex — you'll have to run the `/update-memory` prompt manually before long sessions.
+Codex uses its own hook system. `enable-codex-hooks.sh` registers only `SessionStart`, because Codex does not have Claude Code's `PreCompact` event. For memory refreshes, use the `$basecamp-update-memory` skill manually before ending long sessions.
 
 ## Customizing
 

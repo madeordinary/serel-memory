@@ -34,4 +34,4 @@ End with: **"Where do you want to pick up?"** Then wait.
 
 Do not start working on anything until the user answers.
 
-If any memory bank file is empty or missing, surface it in the summary as `BLANK` and ask the user whether to initialize it before proceeding.
+If any memory bank file is empty, missing, or still only template placeholders, surface it in the summary as `BLANK` or `UNINITIALIZED` and ask the user whether to initialize it before proceeding.

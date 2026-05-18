@@ -1,0 +1,4 @@
+interface:
+  display_name: "Basecamp Ship"
+  short_description: "Run pre-merge checks"
+  default_prompt: "Use $basecamp-ship to check whether this branch is ready to merge."
