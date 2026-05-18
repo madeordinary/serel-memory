@@ -76,6 +76,8 @@ Then open the project in Claude Code or Codex. There are three paths from here d
 
 Codex also discovers the checked-in skills from `.agents/skills/`; use `/skills` or type `$basecamp-...` to invoke one explicitly.
 
+If Codex shows "Select settings to import" and offers to migrate `.claude/commands` into `.agents/skills`, choose **Not now**. basecamp already includes native Codex skills, so importing the Claude commands is unnecessary and may create duplicate workflows.
+
 ### On a new project with an existing PRD
 
 If all you have is a PRD, make basecamp the starting repo and bring the PRD into it:
@@ -108,10 +110,11 @@ If the project already has code or important files, drop basecamp's files in wit
 cd ~/path/to/your-existing-project
 
 git clone --depth 1 https://github.com/gusfeliciano/basecamp.git /tmp/basecamp
-rsync -av --ignore-existing \
-  /tmp/basecamp/{memory-bank,.agents,.claude,.rules,AGENTS.md,CLAUDE.md,hooks} .
+rsync -av --ignore-existing /tmp/basecamp/memory-bank /tmp/basecamp/.agents /tmp/basecamp/.claude /tmp/basecamp/.rules /tmp/basecamp/AGENTS.md /tmp/basecamp/CLAUDE.md /tmp/basecamp/hooks .
 rm -rf /tmp/basecamp
 ```
+
+The `rsync` command is intentionally one line so shell line-continuation mistakes cannot drop the source/destination arguments. Existing files and folders, including something like `docs/prd.md`, are preserved because `--ignore-existing` skips paths that are already present.
 
 Do not run `degit` directly into an existing git repo with files unless you have already reviewed what it will overwrite. The `rsync --ignore-existing` path above is safer because it skips files that already exist. That also means existing `AGENTS.md`, `.rules`, `.claude/`, or `.agents/` files may need a manual merge to pick up basecamp's instructions and workflows.
 
