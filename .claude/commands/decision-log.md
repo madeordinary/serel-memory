@@ -9,9 +9,9 @@ Record an architectural or design decision in standard ADR (Architecture Decisio
 Steps:
 
 1. If the user hasn't already stated the decision, ask: "What's the decision you want to record?"
-2. Read `memory-bank/systemPatterns.md` and `memory-bank/techContext.md` for related context.
-3. Check `docs/decisions/` for existing ADRs to determine the next number.
-4. Draft the ADR.
+2. Read `memory-bank/systemPatterns.md`, `memory-bank/techContext.md`, and `memory-bank/decisionLog.md` for related context.
+3. Check `docs/decisions/` for existing ADRs to determine the next number. If the directory is missing, create it when the ADR is approved.
+4. Draft the ADR and a short `memory-bank/decisionLog.md` entry.
 
 Use this structure:
 
@@ -51,7 +51,9 @@ Proposed | Accepted | Deprecated | Superseded by [NNN]
 - [link to relevant code, doc, discussion, ticket]
 ~~~
 
-Save to `docs/decisions/NNN-<slug>.md`, where NNN is the next sequential number padded to 3 digits (e.g., `001-use-postgres-for-state.md`).
+Show the proposed ADR and memory-bank entry, then wait for confirmation before writing.
+
+When approved, save the ADR to `docs/decisions/NNN-<slug>.md`, where NNN is the next sequential number padded to 3 digits (e.g., `001-use-postgres-for-state.md`). Add the short entry to `memory-bank/decisionLog.md`.
 
 After writing, ask the user whether `memory-bank/systemPatterns.md` should be updated to reference this decision under "Key decisions."
 
@@ -61,3 +63,4 @@ Rules:
 - Status starts as "Proposed" unless the decision is already in effect. The user updates to "Accepted" when they're confident.
 - Alternatives section should be honest. If you didn't seriously consider others, say so — that's also useful context.
 - Consequences should be balanced. If you can't think of negatives, you probably haven't thought hard enough about the decision.
+- Do not silently overwrite an existing ADR or decision-log entry.

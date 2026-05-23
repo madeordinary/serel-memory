@@ -16,6 +16,7 @@ Steps:
 4. Touch other files only if they need it:
    - `systemPatterns.md` — only if a real architectural decision was made
    - `techContext.md` — only if dependencies, env vars, or runtime changed
+   - `decisionLog.md` — only if a durable architectural, product, workflow, or operational decision was made
    - `productContext.md` / `projectbrief.md` — only if the goal or user model actually shifted
 5. Append to `.rules` any non-obvious thing learned this session: a user preference, a gotcha, a rejected approach worth remembering.
 
@@ -35,3 +36,4 @@ Rules:
 - Don't bloat. Every line in the bank should still be earning its place.
 - Don't journal — this isn't a log. Old `activeContext.md` entries don't need to be preserved.
 - If `.rules` already covers a learning, refine the existing entry instead of duplicating.
+- Follow `docs/workflow-contract.md` when present: session state goes to `activeContext.md`, completed status to `progress.md`, durable decisions to `decisionLog.md`, reusable gotchas to `.rules`.

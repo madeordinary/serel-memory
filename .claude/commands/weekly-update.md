@@ -11,8 +11,9 @@ Steps:
 1. Read `memory-bank/projectbrief.md` for what this project is.
 2. Read `memory-bank/activeContext.md` for current focus and open questions.
 3. Read `memory-bank/progress.md` for what works and what's in progress.
-4. Run `git log --since="1 week ago" --oneline --all` for recent activity.
-5. Run `git status` to see current uncommitted work.
+4. Read `memory-bank/decisionLog.md` for decisions made or changed this week.
+5. Run `git log --since="1 week ago" --oneline --all` for recent activity.
+6. Run `git status` to see current uncommitted work.
 
 Then produce an update in this structure:
 
@@ -38,6 +39,10 @@ Then produce an update in this structure:
 - [risk or unresolved decision — impact, what's needed to resolve]
 - [risk]
 
+## Decisions
+- [decision made or changed this week — why it matters]
+- (or write "None this week")
+
 ## Asks
 - [anything needed from stakeholders — decisions, resources, feedback]
 - (or write "None this week")
@@ -48,6 +53,7 @@ Rules:
 - Keep each bullet to one line. If something needs more, it belongs in a separate doc with a link from the update.
 - "Shipped" means done and verifiable. Don't conflate intent with completion.
 - "Risks" should be specific. "Things might be hard" is not a risk. "External API rate limits could block X by Y date unless we get a quota increase" is.
+- "Decisions" should be durable choices, not normal task progress.
 - If a section has nothing to report, write "(none)" rather than omitting the section. Empty sections are signal too — they tell the reader you considered it.
 - This is a stakeholder document, not an engineering log. Skip technical detail unless a stakeholder needs to know it. If a teammate would need more detail, mention there's a longer doc available.
 

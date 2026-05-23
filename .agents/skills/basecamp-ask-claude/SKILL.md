@@ -12,6 +12,7 @@ Use this skill when the user wants an independent Claude Code review while worki
 - `claude` must be installed and authenticated.
 - The user must approve shell execution when required by the environment.
 - Do not pass secrets, credentials, private production data, or sensitive customer data into the prompt.
+- Follow `docs/cross-agent-review.md` when present.
 
 ## Default: Single-Pass Review
 
@@ -43,13 +44,19 @@ Use this skill when the user wants an independent Claude Code review while worki
    <plan/artifact/context>
    ```
 
-3. Run Claude in print/plan mode:
+3. Verify Claude CLI is available when practical:
+
+   ```bash
+   claude --version
+   ```
+
+4. Run Claude in print/plan mode:
 
    ```bash
    claude -p --permission-mode plan "<prompt>"
    ```
 
-4. Summarize Claude's response for the user:
+5. Summarize Claude's response for the user:
    - Agreements
    - Gaps or disagreements
    - Plan changes worth adopting

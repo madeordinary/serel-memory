@@ -22,4 +22,4 @@ Rules:
 
 - If the plan is longer than 7 steps, the task is too big — recommend splitting it.
 - If you have to assume something material, say so explicitly. Don't bury assumptions inside step descriptions.
-- If the memory bank doesn't have enough context for the plan, say what's missing and ask before guessing.
+- If the memory bank, including `decisionLog.md`, doesn't have enough context for the plan, say what's missing and ask before guessing.

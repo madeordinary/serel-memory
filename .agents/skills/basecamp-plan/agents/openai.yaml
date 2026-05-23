@@ -1,0 +1,4 @@
+interface:
+  display_name: "Basecamp Plan"
+  short_description: "Plan before editing"
+  default_prompt: "Use $basecamp-plan to break this task into a concrete plan before implementation."

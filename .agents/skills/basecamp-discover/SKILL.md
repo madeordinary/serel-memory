@@ -46,6 +46,9 @@ Once there is enough material, draft proposals for:
 - `memory-bank/productContext.md`
 - `memory-bank/systemPatterns.md`
 - `memory-bank/techContext.md`
+- `memory-bank/decisionLog.md`
+- `memory-bank/activeContext.md`
+- `memory-bank/progress.md`
 
 Show proposals one file at a time. After each proposal, wait for approval, revision, or pushback before writing.
 
@@ -55,4 +58,5 @@ Show proposals one file at a time. After each proposal, wait for approval, revis
 - Push back gently when the answer is too vague to create useful memory-bank content.
 - Resist adding scope.
 - Do not validate or endorse the idea; document and clarify it.
+- Use `decisionLog.md` only for explicit decisions made during discovery; otherwise keep it empty/template-light.
 - After all approved files are written, end with: **"Memory bank seeded. Use `$basecamp-start` to verify the bootstrap, or ask me to plan the first chunk of work."**

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Basecamp Handoff"
+  short_description: "Generate a handoff doc"
+  default_prompt: "Use $basecamp-handoff to generate a handoff document from the memory bank and recent activity."

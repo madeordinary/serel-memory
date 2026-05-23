@@ -14,7 +14,7 @@ Use this skill to decide whether the current branch or change is ready to merge.
 3. Documentation is updated.
 4. New environment variables are documented.
 5. Changelog is updated when the project has one.
-6. Memory bank is updated, especially `progress.md` and `activeContext.md`.
+6. Memory bank is updated, especially `progress.md`, `activeContext.md`, and `decisionLog.md` when decisions changed.
 7. No leftover debug code such as `console.log`, `print(`, `debugger`, untracked TODOs, or commented-out blocks.
 8. No leaked secrets in the diff.
 9. Commit history is reasonable, or there is a sensible squash plan.

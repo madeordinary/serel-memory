@@ -39,7 +39,10 @@ session's work is preserved:
    - Add new known issues
    - Update the phase if it changed
 
-3. If anything non-obvious was learned this session — a user preference, a
+3. Update `memory-bank/decisionLog.md` if a durable architectural, product,
+   workflow, or operational decision was made.
+
+4. If anything non-obvious was learned this session — a user preference, a
    gotcha, a rejected approach worth remembering — append it to `.rules`.
 
 Show the diffs to the user and ask for confirmation before writing. Then proceed

@@ -14,12 +14,25 @@ Use this skill to orient a Codex session around the basecamp memory bank.
    - `productContext.md`
    - `systemPatterns.md`
    - `techContext.md`
+   - `decisionLog.md`
    - `activeContext.md`
    - `progress.md`
 2. Read `.rules`.
-3. Run `git log --oneline -10`.
-4. Run `git status`.
-5. Produce this summary:
+3. Look for optional docs under `memory-bank/` that clearly match the user's task or active context, and read only the relevant ones.
+4. Run `git log --oneline -10`.
+5. Run `git status`.
+6. Produce a context audit:
+
+```text
+CONTEXT AUDIT:
+- Read: [memory-bank files and .rules]
+- Optional docs read: [paths or "(none)"]
+- Uninitialized: [missing, empty, or template-only files]
+- Recent commits not reflected in memory: [yes/no/unknown]
+- Working tree: [clean / dirty summary]
+```
+
+7. Produce this summary:
 
 ```text
 PROJECT: [one sentence - what we're building]

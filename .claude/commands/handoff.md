@@ -48,7 +48,7 @@ Then produce a handoff doc in this structure:
 
 ## Key decisions and why
 
-[Summary of the most important ADRs from docs/decisions/, with links to full versions.]
+[Summary of the most important entries from decisionLog.md and ADRs from docs/decisions/, with links to full versions.]
 
 ## Open questions and risks
 

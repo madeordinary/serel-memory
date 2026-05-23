@@ -22,6 +22,7 @@ your-project/
 │   ├── productContext.md   # user problem, UX goals
 │   ├── systemPatterns.md   # architecture, design decisions
 │   ├── techContext.md      # stack, constraints, dependencies
+│   ├── decisionLog.md      # durable decisions and ADR index
 │   ├── activeContext.md    # current focus — changes most often
 │   └── progress.md         # what works, what's left
 ├── .agents/
@@ -30,7 +31,12 @@ your-project/
 │       ├── basecamp-discover/
 │       ├── basecamp-from-prd/
 │       ├── basecamp-init-memory/
+│       ├── basecamp-plan/
+│       ├── basecamp-review/
 │       ├── basecamp-update-memory/
+│       ├── basecamp-risk-review/
+│       ├── basecamp-decision-log/
+│       ├── basecamp-handoff/
 │       ├── basecamp-ship/
 │       └── basecamp-ask-claude/
 ├── .claude/
@@ -51,11 +57,14 @@ your-project/
 │       ├── ship.md           # pre-merge checklist
 │       ├── runbook.md        # generate/update an operational runbook
 │       └── security-check.md # OWASP + STRIDE pass
-└── hooks/                    # optional auto-fire (off by default)
+├── hooks/                    # optional auto-fire (off by default)
     ├── session-start.sh      # auto-load memory bank at session start
     ├── pre-compact.sh        # auto-update memory bank before context loss
     ├── enable-hooks.sh       # register Claude Code hooks
     └── enable-codex-hooks.sh # register Codex hooks
+└── docs/
+    ├── workflow-contract.md  # how workflows should be shaped
+    └── cross-agent-review.md # second-opinion loop policy
 ```
 
 That's all of it. Markdown files in folders. The agent does the work.
@@ -130,11 +139,23 @@ After that, run `/start` or invoke `$basecamp-start` to verify the bootstrap wor
 
 **While working:** the agent keeps `activeContext.md` honest as the focus shifts. When it discovers a non-obvious pattern or preference, it appends to `.rules`.
 
+**When decisions matter:** run `/decision-log` or invoke `$basecamp-decision-log`. The agent drafts an ADR in `docs/decisions/` and adds a short entry to `memory-bank/decisionLog.md`, so future sessions can see both the decision and the rationale.
+
 **Before merging:** run `/ship`. It walks a checklist — tests pass, docs updated, env vars documented, `progress.md` reflects the change — and tells you ship or don't ship.
 
-**At session end:** run `/update-memory`. The agent refreshes `activeContext.md` and `progress.md`, shows you the diffs, and asks before writing.
+**At session end:** run `/update-memory`. The agent refreshes `activeContext.md`, `progress.md`, and `decisionLog.md` when decisions changed, shows you the diffs, and asks before writing.
 
 Claude slash commands and Codex skills are just markdown files. Read them. Change them. They're your workflows, not anyone else's.
+
+## When context gets full
+
+When a chat is getting long or the agent is losing the thread:
+
+1. Run `/update-memory` in Claude Code or invoke `$basecamp-update-memory` in Codex.
+2. Start a fresh conversation or session.
+3. Run `/start` or invoke `$basecamp-start`.
+
+Plain English works too: say "update memory bank", then "start from the memory bank."
 
 ## Hooks (optional)
 
@@ -149,7 +170,7 @@ bash hooks/enable-hooks.sh
 That adds entries to `.claude/settings.json` registering two hooks:
 
 - **SessionStart** runs `hooks/session-start.sh`, which reads the memory bank + `.rules` + recent git activity and injects it as session context. No more remembering `/start`.
-- **PreCompact** runs `hooks/pre-compact.sh`, which reminds the agent to update `activeContext.md` and `progress.md` before Claude Code compacts context and erases history. No more stale bank.
+- **PreCompact** runs `hooks/pre-compact.sh`, which reminds the agent to update `activeContext.md`, `progress.md`, and `decisionLog.md` before Claude Code compacts context and erases history. No more stale bank.
 
 To disable temporarily for a session:
 
@@ -179,6 +200,69 @@ The adapters are native to each tool:
 - Codex uses `.agents/skills/basecamp-*/SKILL.md` skills.
 - Optional hooks can auto-load context for either tool, but the memory bank still works without hooks.
 
+The highest-use workflows have native adapters on both sides:
+
+| Workflow | Claude Code | Codex |
+|----------|-------------|-------|
+| Start/resume | `/start` | `$basecamp-start` |
+| Discover from rough idea | `/discover` | `$basecamp-discover` |
+| Seed from PRD | `/from-prd` | `$basecamp-from-prd` |
+| Initialize from code | `/init-memory` | `$basecamp-init-memory` |
+| Plan | `/plan` | `$basecamp-plan` |
+| Review | `/review` | `$basecamp-review` |
+| Update memory | `/update-memory` | `$basecamp-update-memory` |
+| Risk review | `/risk-review` | `$basecamp-risk-review` |
+| Decision log | `/decision-log` | `$basecamp-decision-log` |
+| Handoff | `/handoff` | `$basecamp-handoff` |
+| Ship check | `/ship` | `$basecamp-ship` |
+| Ask other agent | `/ask-codex` | `$basecamp-ask-claude` |
+
+Other Claude commands remain available as compatibility workflows. If a Codex skill does not exist for one of them yet, Codex should read the matching `.claude/commands/<name>.md` file as guidance.
+
+You can also use plain English when that is more natural:
+
+| What you want | Plain English |
+|---------------|---------------|
+| Start | "start from the memory bank" |
+| Initialize from code | "initialize memory from this repo" |
+| Seed from PRD | "seed memory from this PRD" |
+| Update memory | "update memory bank" |
+| Record decision | "record this decision" |
+| Review plan with another agent | "ask Claude/Codex for a second opinion" |
+
+## Workflow design
+
+basecamp workflows follow a small contract: define the trigger, required reads, allowed writes, output shape, and stop conditions. See `docs/workflow-contract.md`.
+
+The core memory bank has a hierarchy:
+
+- `projectbrief.md` is the foundation: what and why.
+- `productContext.md` explains the user and job.
+- `systemPatterns.md`, `techContext.md`, and `decisionLog.md` capture durable implementation context.
+- `activeContext.md` is the current working state.
+- `progress.md` is the honest status snapshot.
+- `.rules` is the learning journal for reusable preferences and gotchas.
+
+The memory bank uses a promotion path:
+
+- Current session state belongs in `activeContext.md`.
+- Completed status belongs in `progress.md`.
+- Durable decisions belong in `decisionLog.md` and, when useful, `docs/decisions/`.
+- Reusable preferences, gotchas, and rejected approaches belong in `.rules`.
+
+This keeps the bank useful instead of turning it into a chat transcript.
+
+## Extending the memory bank
+
+Keep the core bank small. If a topic is too large for the core files, add focused optional docs under `memory-bank/`, for example:
+
+- `memory-bank/features/<feature>.md`
+- `memory-bank/integrations/<service>.md`
+- `memory-bank/ops/<runbook-context>.md`
+- `memory-bank/testing.md`
+
+These are optional. Agents should read them only when the current task touches that topic.
+
 ## Optional Second Opinions
 
 If you use both Claude Code and Codex, basecamp includes an advanced second-opinion workflow:
@@ -188,9 +272,11 @@ If you use both Claude Code and Codex, basecamp includes an advanced second-opin
 
 These workflows shell out to the other CLI; they do not require MCP. They assume the other CLI is installed and authenticated. The default mode is a single read-only review. A bounded loop is available only when you explicitly ask for it, capped at 2 rounds by default, and should end with a synthesis rather than autonomous edits.
 
+See `docs/cross-agent-review.md` for the CLI preflight, loop policy, and output contract.
+
 ## Why this exists
 
-The memory bank pattern is borrowed from [cline's memory bank](https://github.com/nickbaumann98/cline_docs), which is excellent but Cline-specific. The workflow-command shape is borrowed in spirit from [gstack](https://github.com/garrytan/gstack), which is excellent but ships 23 commands when most projects need seven.
+The memory bank pattern is borrowed from [cline's memory bank](https://github.com/nickbaumann98/cline_docs), which is excellent but Cline-specific. The workflow-command shape is borrowed in spirit from [gstack](https://github.com/garrytan/gstack), which is excellent but broader than most projects need on day one.
 
 basecamp is the smallest thing that delivers both — a tool-agnostic memory bank that works with Claude and Codex, plus a curated set of workflows you'll actually run.
 

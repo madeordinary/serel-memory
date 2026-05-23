@@ -13,6 +13,7 @@ This workflow shells out to the Codex CLI. It does not require MCP.
 - `codex` must be installed and authenticated.
 - The user must approve any shell execution required by their environment.
 - Do not pass secrets, credentials, private production data, or sensitive customer data into the prompt.
+- Follow `docs/cross-agent-review.md` when present.
 
 ## Default: Single-Pass Review
 
@@ -44,13 +45,19 @@ This workflow shells out to the Codex CLI. It does not require MCP.
    <plan/artifact/context>
    ```
 
-3. Run Codex in read-only mode:
+3. Verify Codex CLI is available when practical:
+
+   ```bash
+   codex --version
+   ```
+
+4. Run Codex in read-only mode:
 
    ```bash
    codex exec --cd "$PWD" --sandbox read-only "<prompt>"
    ```
 
-4. Summarize Codex's response for the user:
+5. Summarize Codex's response for the user:
    - Agreements
    - Gaps or disagreements
    - Plan changes worth adopting

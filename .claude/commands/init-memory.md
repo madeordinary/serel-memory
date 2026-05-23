@@ -20,6 +20,7 @@ Then propose contents for each memory bank file, in this order:
 - **productContext.md** — user problem and UX goals. Often the hardest to infer from code alone; flag what needs user input.
 - **systemPatterns.md** — architecture, key decisions, patterns in use. Visible from code structure and any architecture docs.
 - **techContext.md** — stack, dependencies, dev setup. Read directly from manifests and config files.
+- **decisionLog.md** — durable decisions already visible in docs, ADRs, architecture notes, or commits. If none are evident, say that no durable decisions have been recorded yet.
 - **activeContext.md** — current focus. Infer from recent commits, active branches, and open work in progress.
 - **progress.md** — what works, what's broken, status. Infer from existing tests, TODOs, open issues if visible.
 
@@ -35,7 +36,7 @@ REASONING: <one or two lines on what you based this on>
 QUESTIONS FOR USER: <anything you genuinely couldn't infer — leave blank if none>
 ```
 
-After all six files, **stop and wait**. Do not write anything until the user reviews and approves (or revises).
+After all proposals, **stop and wait**. Do not write anything until the user reviews and approves (or revises).
 
 Rules:
 

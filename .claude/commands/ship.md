@@ -13,7 +13,7 @@ Checklist:
 3. **Documentation updated.** README, docs/, comments on non-obvious code, anywhere users would look.
 4. **Env vars documented.** If new env vars were added, are they in README and/or `.env.example`?
 5. **CHANGELOG updated.** If the project has one, does this change appear in it?
-6. **Memory bank updated.** Does `progress.md` reflect what changed? Is `activeContext.md` current?
+6. **Memory bank updated.** Does `progress.md` reflect what changed? Is `activeContext.md` current? Does `decisionLog.md` reflect any durable decisions?
 7. **No leftover debug code.** Search for `console.log`, `print(`, `debugger`, TODOs without a tracking link, commented-out blocks.
 8. **No secrets leaked.** Scan diff for API keys, tokens, passwords, internal URLs.
 9. **Commit history is reasonable.** Either clean commits or a sensible squash plan.

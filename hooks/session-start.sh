@@ -33,7 +33,7 @@ code, the code is correct and the bank needs updating — flag this to the user.
 
 HEADER
 
-for f in projectbrief productContext systemPatterns techContext activeContext progress; do
+for f in projectbrief productContext systemPatterns techContext decisionLog activeContext progress; do
   file="$ROOT/memory-bank/$f.md"
   if [ -f "$file" ]; then
     echo "### memory-bank/$f.md"

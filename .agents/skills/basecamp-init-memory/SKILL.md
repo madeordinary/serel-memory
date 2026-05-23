@@ -19,6 +19,7 @@ Use this skill when basecamp has been dropped into an existing project and the m
    - `productContext.md`
    - `systemPatterns.md`
    - `techContext.md`
+   - `decisionLog.md`
    - `activeContext.md`
    - `progress.md`
 
@@ -34,7 +35,7 @@ REASONING: <one or two lines on evidence>
 QUESTIONS FOR USER: <anything that cannot be inferred>
 ```
 
-After all six proposals, stop and wait. Do not write anything until the user approves or revises.
+After all proposals, stop and wait. Do not write anything until the user approves or revises.
 
 ## Rules
 

@@ -7,7 +7,7 @@ These hooks automate part of basecamp's memory workflow. They're **off by defaul
 | File | Event | What it does |
 |------|-------|--------------|
 | `session-start.sh` | `SessionStart` | Reads the memory bank + `.rules` + recent git activity and injects it as session context. Replaces typing `/start`. |
-| `pre-compact.sh` | `PreCompact` | Reminds the agent to refresh `activeContext.md` and `progress.md` before Claude Code compacts context. Replaces remembering `/update-memory`. |
+| `pre-compact.sh` | `PreCompact` | Reminds the agent to refresh `activeContext.md`, `progress.md`, and `decisionLog.md` before Claude Code compacts context. Replaces remembering `/update-memory`. |
 | `enable-hooks.sh` | n/a | One-shot script that registers Claude Code hooks in `.claude/settings.json`. |
 | `enable-codex-hooks.sh` | n/a | One-shot script that registers the Codex `SessionStart` hook in `.codex/hooks.json`. |
 

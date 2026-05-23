@@ -10,11 +10,14 @@ Read these files, in this order, before doing anything else:
 2. `memory-bank/productContext.md` — the user problem and UX goals
 3. `memory-bank/systemPatterns.md` — architecture and design decisions
 4. `memory-bank/techContext.md` — stack, constraints, dependencies
-5. `memory-bank/activeContext.md` — current focus (most important)
-6. `memory-bank/progress.md` — what works, what's broken
-7. `.rules` — project-specific patterns and preferences
+5. `memory-bank/decisionLog.md` — durable decisions and ADR index
+6. `memory-bank/activeContext.md` — current focus (most important)
+7. `memory-bank/progress.md` — what works, what's broken
+8. `.rules` — project-specific patterns and preferences
 
 Then read the last 5–10 git commits for recent context.
+
+If the task clearly touches a specific feature, integration, deployment path, testing strategy, or API, look for relevant optional docs under `memory-bank/` and read only the ones that apply.
 
 If any memory bank file is missing, empty, or still only template placeholders, note it and ask the user before proceeding.
 
@@ -27,7 +30,7 @@ If any memory bank file is missing, empty, or still only template placeholders, 
 
 ## When the user says "update memory bank"
 
-Refresh every file in `memory-bank/`. Focus especially on `activeContext.md` and `progress.md`. Show diffs before writing.
+Refresh every file in `memory-bank/`. Focus especially on `activeContext.md`, `progress.md`, and `decisionLog.md` when decisions changed. Show diffs before writing.
 
 ## Available workflows
 
@@ -37,14 +40,14 @@ The `.claude/commands/` directory contains Claude Code slash commands, and `.age
 - `/discover` / `$basecamp-discover` — help the user define a project from a rough idea; produces initial memory bank (use when starting fresh with no code yet)
 - `/from-prd` / `$basecamp-from-prd` — seed the memory bank from an existing PRD, product brief, spec, or requirements doc
 - `/init-memory` / `$basecamp-init-memory` — analyze the codebase and propose initial memory bank contents (use when bank is empty but code already exists)
-- `/plan` — break a task into steps before executing
-- `/review` — code review the current branch or diff
+- `/plan` / `$basecamp-plan` — break a task into steps before executing
+- `/review` / `$basecamp-review` — code review the current branch or diff
 - `/update-memory` / `$basecamp-update-memory` — refresh the memory bank from this session's work
 - `/weekly-update` — stakeholder-ready weekly update from the bank and recent activity
 - `/retro` — sprint or weekly retrospective drawing from progress and git log
-- `/risk-review` — surface risks not yet documented in the bank
-- `/decision-log` — record an architectural decision in ADR format
-- `/handoff` — generate a handoff doc for someone picking up the project cold
+- `/risk-review` / `$basecamp-risk-review` — surface risks not yet documented in the bank
+- `/decision-log` / `$basecamp-decision-log` — record an architectural decision in ADR format
+- `/handoff` / `$basecamp-handoff` — generate a handoff doc for someone picking up the project cold
 - `/ask-codex` / `$basecamp-ask-claude` — ask the other CLI for an optional second opinion on plans, risks, and decisions
 - `/ship` / `$basecamp-ship` — pre-merge checklist
 - `/runbook` — generate or update an operational runbook

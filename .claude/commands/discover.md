@@ -52,6 +52,9 @@ Once you have enough, draft proposals for:
 - `memory-bank/productContext.md` — user, job, today's solution, UX principles
 - `memory-bank/systemPatterns.md` — keep light. Architecture often emerges later. Only capture what the user has clear opinions on.
 - `memory-bank/techContext.md` — keep light. Stack often emerges as the project takes shape.
+- `memory-bank/decisionLog.md` — only explicit decisions made during discovery; otherwise keep template-light.
+- `memory-bank/activeContext.md` — immediate next focus and open questions.
+- `memory-bank/progress.md` — planning status and what exists so far.
 
 Show proposals **one file at a time**. After each, wait for the user to approve, revise, or push back before moving to the next.
 
@@ -66,6 +69,6 @@ Show proposals **one file at a time**. After each, wait for the user to approve,
 
 ## Handoff
 
-When the four files are approved and written, end with:
+When the files are approved and written, end with:
 
 > "Memory bank seeded. Run `/start` to verify the bootstrap, or `/plan` if you want to break the first chunk of work into steps."

@@ -10,7 +10,7 @@ Steps:
 
 1. Run `git diff main...HEAD` (or `git diff` for uncommitted changes) to see what changed.
 2. Read modified files in full when context matters — not just the diff.
-3. Check the change against the memory bank: does it match `projectbrief.md` goals and `systemPatterns.md` decisions?
+3. Check the change against the memory bank: does it match `projectbrief.md` goals, `systemPatterns.md` architecture, and `decisionLog.md` decisions?
 
 Then produce findings in this exact format:
 

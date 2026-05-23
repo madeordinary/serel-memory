@@ -44,6 +44,7 @@ This sits between `/discover` and `/init-memory`:
    - `memory-bank/productContext.md`
    - `memory-bank/systemPatterns.md`
    - `memory-bank/techContext.md`
+   - `memory-bank/decisionLog.md`
    - `memory-bank/activeContext.md`
    - `memory-bank/progress.md`
 
@@ -59,7 +60,7 @@ SOURCE: <PRD section or evidence used>
 QUESTIONS / ASSUMPTIONS: <only if needed>
 ```
 
-After all six proposals, stop and wait. Do not write anything until the user approves or revises.
+After all proposals, stop and wait. Do not write anything until the user approves or revises.
 
 ## Output quality
 
@@ -74,6 +75,7 @@ After all six proposals, stop and wait. Do not write anything until the user app
 - Treat the PRD as source material, not absolute truth.
 - Do not invent details to fill empty sections. Use `<TBD>` or ask.
 - Keep `systemPatterns.md` and `techContext.md` light unless the PRD states real technical decisions.
+- Use `decisionLog.md` only for explicit decisions in the PRD; otherwise state that no durable decisions have been recorded yet.
 - Use `activeContext.md` to capture the immediate next focus after seeding the bank.
 - Use `progress.md` to reflect that the project is initialized/planning unless code already exists.
 - Do not overwrite the PRD.

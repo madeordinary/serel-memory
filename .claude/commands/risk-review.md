@@ -12,9 +12,10 @@ Steps:
 2. Read `memory-bank/productContext.md` for user/UX context.
 3. Read `memory-bank/systemPatterns.md` for architectural decisions and assumptions.
 4. Read `memory-bank/techContext.md` for stack, dependencies, constraints.
-5. Read `memory-bank/activeContext.md` for current focus.
-6. Read `memory-bank/progress.md` for status and known issues.
-7. Read `.rules` for any documented gotchas or rejected approaches.
+5. Read `memory-bank/decisionLog.md` for durable decisions and ADR references.
+6. Read `memory-bank/activeContext.md` for current focus.
+7. Read `memory-bank/progress.md` for status and known issues.
+8. Read `.rules` for any documented gotchas or rejected approaches.
 
 Then identify risks across these categories:
 
@@ -47,4 +48,4 @@ Rules:
 - Don't manufacture risks. If a category has nothing real, say so explicitly.
 - If a risk is genuinely "out of our control," still name it — visibility matters even when action doesn't.
 
-After the review, ask the user which risks belong in `memory-bank/activeContext.md` under "open questions" or "active decisions," and add them with confirmation.
+After the review, ask the user which risks belong in `memory-bank/activeContext.md`, `memory-bank/progress.md`, or `memory-bank/decisionLog.md`, and add them with confirmation.

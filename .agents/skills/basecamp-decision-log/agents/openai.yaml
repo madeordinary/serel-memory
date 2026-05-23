@@ -1,0 +1,4 @@
+interface:
+  display_name: "Basecamp Decision Log"
+  short_description: "Record a durable decision"
+  default_prompt: "Use $basecamp-decision-log to record this decision as an ADR and memory-bank entry."
