@@ -7,7 +7,8 @@
 
 ## Active decisions
 
-- **Bare skill names over prefixed**: Codex skills use `$start`, `$review`, etc. instead of `$basecamp-start`. Rationale: slash commands already use bare names; these are core workflows, not a plugin. Collision risk for downstream projects is accepted — documented in README.
+- **Bare skill names over prefixed**: Codex skills use `$start`, `$review`, etc. instead of prefixed names. Rationale: slash commands already use bare names; these are core workflows, not a plugin. Collision risk for downstream projects is accepted — documented in README.
+- **Asymmetric cross-agent naming**: `/ask-codex` (Claude command) maps to `$ask-claude` (Codex skill). Each names the *other* agent it calls. This is the one intentional parity exception — they are the same workflow, just inverted.
 - **Explicit framework file allowlist for sync**: Sync-upstream uses a strict allowlist (`docs/workflow-contract.md`, `docs/cross-agent-review.md`) instead of blanket `docs/`. Rationale: README tells users to put PRDs and decisions under `docs/`, so syncing all of `docs/` would overwrite project material.
 - **Two sync modes (fork vs template)**: Sync-upstream detects whether a merge base exists. Fork mode uses three-dot diffs; template mode (degit installs) requires user review for every change. Rationale: the primary install path (`npx degit`) creates unrelated git history.
 

@@ -127,7 +127,7 @@ If the project already has code or important files, drop basecamp's files in wit
 cd ~/path/to/your-existing-project
 
 git clone --depth 1 https://github.com/gusfeliciano/basecamp.git /tmp/basecamp
-rsync -av --ignore-existing /tmp/basecamp/memory-bank /tmp/basecamp/.agents /tmp/basecamp/.claude /tmp/basecamp/.rules /tmp/basecamp/AGENTS.md /tmp/basecamp/CLAUDE.md /tmp/basecamp/hooks .
+rsync -av --ignore-existing /tmp/basecamp/memory-bank /tmp/basecamp/.agents /tmp/basecamp/.claude /tmp/basecamp/.rules /tmp/basecamp/AGENTS.md /tmp/basecamp/CLAUDE.md /tmp/basecamp/hooks /tmp/basecamp/docs .
 rm -rf /tmp/basecamp
 ```
 
