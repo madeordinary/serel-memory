@@ -17,15 +17,15 @@
 
 ## Gotchas
 
-<!-- Non-obvious things that bit us. The "I lost an hour to this" entries. -->
-
--
+- `codex exec` with inline prompt args can hang on stdin; pipe the prompt via echo instead
+- Codex reviews read *every* file it can find — a thorough 200k-token review takes ~3 minutes
 
 ## Workflow
 
 - Commit directly to main for framework iteration; use PRs for larger changes
 - Run Codex review (`/ask-codex`) on non-trivial changes before committing
 - When renaming across many files, do a final sweep with `rg` to catch stale references — they hide in README, hooks docs, and cross-skill references
+- After updating skills/commands, run a Codex final-state review to catch inconsistencies between docs and actual files
 
 ## Things we've tried and rejected
 

@@ -9,6 +9,7 @@
 
 ## What works
 
+- Mandatory cross-agent review during planning (AGENTS.md ground rule + breakdown workflow)
 - Memory bank template files (7 core files + `.rules`)
 - 17 Codex skills with matching slash commands (full parity, bare names)
 - 17 Claude Code slash commands
@@ -31,6 +32,7 @@
 
 ## Recent milestones
 
+- Mandatory cross-agent planning review in AGENTS.md and breakdown workflows (2026-05-25)
 - Full Codex skill parity — all 17 workflows have both slash commands and skills (2026-05-25)
 - Dropped `basecamp-` prefix from all Codex skills (2026-05-25)
 - Added sync-upstream command with fork/template mode detection (2026-05-25)
