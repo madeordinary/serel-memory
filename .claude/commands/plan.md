@@ -14,9 +14,26 @@ The plan must contain, in this order:
 4. **Risks & unknowns** — what could go wrong, what you'd need to verify first, what assumptions you're making.
 5. **Out of scope** — things you'll deliberately NOT do, in case the user wants them too.
 
-After producing the plan, end with: **"Want me to proceed, or change something first?"**
+After producing the plan, get a Codex second opinion before presenting to the user:
 
-Then wait. Do not start executing until the user confirms.
+1. Build a concise prompt containing the plan and relevant context.
+2. Run Codex in read-only mode:
+
+   ```bash
+   codex exec --cd "$PWD" --sandbox read-only "<prompt>"
+   ```
+
+   If `codex` is unavailable, perform a local self-critique instead — but say so.
+
+3. Append a **Codex Review** section to the plan output with:
+   - Agreements
+   - Disagreements or gaps
+   - Suggested changes worth adopting
+   - Questions to resolve before proceeding
+
+Then end with: **"Want me to proceed, or change something first?"**
+
+Wait. Do not start executing until the user confirms.
 
 Rules:
 

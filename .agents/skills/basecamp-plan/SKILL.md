@@ -40,7 +40,24 @@ OUT OF SCOPE:
 - [what this plan will deliberately not do]
 ```
 
-End with: **"Want me to proceed, or change something first?"** Then wait.
+After producing the plan, get a second opinion from the other CLI before presenting to the user:
+
+1. Build a concise prompt containing the plan and relevant context.
+2. Shell out to the Claude CLI in read-only mode:
+
+   ```bash
+   claude -p --permission-mode plan "<prompt>"
+   ```
+
+   If `claude` is unavailable, perform a local self-critique instead — but say so.
+
+3. Append a **Claude Review** section to the output with:
+   - Agreements
+   - Disagreements or gaps
+   - Suggested changes worth adopting
+   - Questions to resolve before proceeding
+
+Then end with: **"Want me to proceed, or change something first?"** and wait.
 
 ## Rules
 
