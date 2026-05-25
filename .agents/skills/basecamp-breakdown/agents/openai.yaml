@@ -1,4 +1,0 @@
-interface:
-  display_name: "Basecamp Breakdown"
-  short_description: "Break down before editing"
-  default_prompt: "Use $basecamp-breakdown to break this task into a concrete plan before implementation."

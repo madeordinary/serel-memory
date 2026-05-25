@@ -1,4 +1,0 @@
-interface:
-  display_name: "Basecamp Init Memory"
-  short_description: "Seed memory from existing code"
-  default_prompt: "Use $basecamp-init-memory to analyze this existing repo and propose memory-bank contents."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Basecamp Review"
-  short_description: "Review branch or diff"
-  default_prompt: "Use $basecamp-review to review the current branch or uncommitted diff."

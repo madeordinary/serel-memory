@@ -36,20 +36,21 @@ Refresh every file in `memory-bank/`. Focus especially on `activeContext.md`, `p
 
 The `.claude/commands/` directory contains Claude Code slash commands, and `.agents/skills/` contains Codex-native skills for core basecamp workflows:
 
-- `/start` / `$basecamp-start` — read the bank, summarize state, ask where to pick up
-- `/discover` / `$basecamp-discover` — help the user define a project from a rough idea; produces initial memory bank (use when starting fresh with no code yet)
-- `/from-prd` / `$basecamp-from-prd` — seed the memory bank from an existing PRD, product brief, spec, or requirements doc
-- `/init-memory` / `$basecamp-init-memory` — analyze the codebase and propose initial memory bank contents (use when bank is empty but code already exists)
-- `/breakdown` / `$basecamp-breakdown` — break a task into steps before executing
-- `/review` / `$basecamp-review` — code review the current branch or diff
-- `/update-memory` / `$basecamp-update-memory` — refresh the memory bank from this session's work
+- `/start` / `$start` — read the bank, summarize state, ask where to pick up
+- `/discover` / `$discover` — help the user define a project from a rough idea; produces initial memory bank (use when starting fresh with no code yet)
+- `/from-prd` / `$from-prd` — seed the memory bank from an existing PRD, product brief, spec, or requirements doc
+- `/init-memory` / `$init-memory` — analyze the codebase and propose initial memory bank contents (use when bank is empty but code already exists)
+- `/breakdown` / `$breakdown` — break a task into steps before executing
+- `/review` / `$review` — code review the current branch or diff
+- `/update-memory` / `$update-memory` — refresh the memory bank from this session's work
 - `/weekly-update` — stakeholder-ready weekly update from the bank and recent activity
 - `/retro` — sprint or weekly retrospective drawing from progress and git log
-- `/risk-review` / `$basecamp-risk-review` — surface risks not yet documented in the bank
-- `/decision-log` / `$basecamp-decision-log` — record an architectural decision in ADR format
-- `/handoff` / `$basecamp-handoff` — generate a handoff doc for someone picking up the project cold
-- `/ask-codex` / `$basecamp-ask-claude` — ask the other CLI for an optional second opinion on plans, risks, and decisions
-- `/ship` / `$basecamp-ship` — pre-merge checklist
+- `/risk-review` / `$risk-review` — surface risks not yet documented in the bank
+- `/decision-log` / `$decision-log` — record an architectural decision in ADR format
+- `/handoff` / `$handoff` — generate a handoff doc for someone picking up the project cold
+- `/ask-codex` / `$ask-claude` — ask the other CLI for an optional second opinion on plans, risks, and decisions
+- `/ship` / `$ship` — pre-merge checklist
+- `/sync-upstream` / `$sync-upstream` — check the upstream basecamp repo for framework updates and selectively pull changes
 - `/runbook` — generate or update an operational runbook
 - `/security-check` — OWASP + STRIDE pass on the current change
 

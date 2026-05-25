@@ -27,18 +27,19 @@ your-project/
 │   └── progress.md         # what works, what's left
 ├── .agents/
 │   └── skills/             # Codex-native workflow skills
-│       ├── basecamp-start/
-│       ├── basecamp-discover/
-│       ├── basecamp-from-prd/
-│       ├── basecamp-init-memory/
-│       ├── basecamp-breakdown/
-│       ├── basecamp-review/
-│       ├── basecamp-update-memory/
-│       ├── basecamp-risk-review/
-│       ├── basecamp-decision-log/
-│       ├── basecamp-handoff/
-│       ├── basecamp-ship/
-│       └── basecamp-ask-claude/
+│       ├── start/
+│       ├── discover/
+│       ├── from-prd/
+│       ├── init-memory/
+│       ├── breakdown/
+│       ├── review/
+│       ├── update-memory/
+│       ├── risk-review/
+│       ├── decision-log/
+│       ├── handoff/
+│       ├── ship/
+│       ├── ask-claude/
+│       └── sync-upstream/
 ├── .claude/
 │   └── commands/
 │       ├── start.md          # session opener
@@ -81,11 +82,11 @@ git init
 
 Then open the project in Claude Code or Codex. There are three paths from here depending on how formed your idea is:
 
-- **If you have a clear idea already** (a paragraph or short brief): paste it into `memory-bank/projectbrief.md`, then run `/start` in Claude Code or invoke `$basecamp-start` in Codex. The agent reads the bank and asks where to pick up.
-- **If you already have a PRD or brief**: put it in the repo, usually under `docs/`, then run `/from-prd docs/prd.md` in Claude Code or invoke `$basecamp-from-prd docs/prd.md` in Codex. The agent reads the document, asks only for important gaps, then proposes memory bank contents.
-- **If your idea is still rough** ("I want to build something that does X..."): run `/discover` in Claude Code or invoke `$basecamp-discover` in Codex. The agent walks you through targeted questions about the user, problem, scope, and constraints, then proposes memory bank contents based on the dialogue. Good for projects you haven't fully articulated yet.
+- **If you have a clear idea already** (a paragraph or short brief): paste it into `memory-bank/projectbrief.md`, then run `/start` in Claude Code or invoke `$start` in Codex. The agent reads the bank and asks where to pick up.
+- **If you already have a PRD or brief**: put it in the repo, usually under `docs/`, then run `/from-prd docs/prd.md` in Claude Code or invoke `$from-prd docs/prd.md` in Codex. The agent reads the document, asks only for important gaps, then proposes memory bank contents.
+- **If your idea is still rough** ("I want to build something that does X..."): run `/discover` in Claude Code or invoke `$discover` in Codex. The agent walks you through targeted questions about the user, problem, scope, and constraints, then proposes memory bank contents based on the dialogue. Good for projects you haven't fully articulated yet.
 
-Codex also discovers the checked-in skills from `.agents/skills/`; use `/skills` or type `$basecamp-...` to invoke one explicitly.
+Codex also discovers the checked-in skills from `.agents/skills/`; use `/skills` or type `$...` to invoke one explicitly.
 
 If Codex shows "Select settings to import" and offers to migrate `.claude/commands` into `.agents/skills`, choose **Not now**. basecamp already includes native Codex skills, so importing the Claude commands is unnecessary and may create duplicate workflows.
 
@@ -108,7 +109,7 @@ Then run:
 /from-prd docs/prd.md
 
 # Codex
-$basecamp-from-prd docs/prd.md
+$from-prd docs/prd.md
 ```
 
 `degit gusfeliciano/basecamp` uses GitHub shorthand for `https://github.com/gusfeliciano/basecamp` and downloads the current repo contents without the `.git` history. It is a starter-copy step, not a future `git pull` relationship.
@@ -129,9 +130,9 @@ The `rsync` command is intentionally one line so shell line-continuation mistake
 
 Do not run `degit` directly into an existing git repo with files unless you have already reviewed what it will overwrite. The `rsync --ignore-existing` path above is safer because it skips files that already exist. That also means existing `AGENTS.md`, `.rules`, `.claude/`, or `.agents/` files may need a manual merge to pick up basecamp's instructions and workflows.
 
-Then — and this is the part most people miss — *don't fill the memory bank by hand.* Open Claude Code and run `/init-memory`, or open Codex and invoke `$basecamp-init-memory`. The agent reads your codebase, your README, and your dependencies, then proposes contents for each memory bank file. Review the drafts, edit anything that's off, approve, and the agent writes them. This is faster than filling templates from blank and catches things you'd forget to write down.
+Then — and this is the part most people miss — *don't fill the memory bank by hand.* Open Claude Code and run `/init-memory`, or open Codex and invoke `$init-memory`. The agent reads your codebase, your README, and your dependencies, then proposes contents for each memory bank file. Review the drafts, edit anything that's off, approve, and the agent writes them. This is faster than filling templates from blank and catches things you'd forget to write down.
 
-After that, run `/start` or invoke `$basecamp-start` to verify the bootstrap works.
+After that, run `/start` or invoke `$start` to verify the bootstrap works.
 
 ## A 5-minute tour
 
@@ -139,7 +140,7 @@ After that, run `/start` or invoke `$basecamp-start` to verify the bootstrap wor
 
 **While working:** the agent keeps `activeContext.md` honest as the focus shifts. When it discovers a non-obvious pattern or preference, it appends to `.rules`.
 
-**When decisions matter:** run `/decision-log` or invoke `$basecamp-decision-log`. The agent drafts an ADR in `docs/decisions/` and adds a short entry to `memory-bank/decisionLog.md`, so future sessions can see both the decision and the rationale.
+**When decisions matter:** run `/decision-log` or invoke `$decision-log`. The agent drafts an ADR in `docs/decisions/` and adds a short entry to `memory-bank/decisionLog.md`, so future sessions can see both the decision and the rationale.
 
 **Before merging:** run `/ship`. It walks a checklist — tests pass, docs updated, env vars documented, `progress.md` reflects the change — and tells you ship or don't ship.
 
@@ -151,9 +152,9 @@ Claude slash commands and Codex skills are just markdown files. Read them. Chang
 
 When a chat is getting long or the agent is losing the thread:
 
-1. Run `/update-memory` in Claude Code or invoke `$basecamp-update-memory` in Codex.
+1. Run `/update-memory` in Claude Code or invoke `$update-memory` in Codex.
 2. Start a fresh conversation or session.
-3. Run `/start` or invoke `$basecamp-start`.
+3. Run `/start` or invoke `$start`.
 
 Plain English works too: say "update memory bank", then "start from the memory bank."
 
@@ -197,25 +198,26 @@ The trick is that `AGENTS.md` is the canonical bootstrap and `CLAUDE.md` is a on
 The adapters are native to each tool:
 
 - Claude Code uses `.claude/commands/<name>.md` slash commands.
-- Codex uses `.agents/skills/basecamp-*/SKILL.md` skills.
+- Codex uses `.agents/skills/*/SKILL.md` skills.
 - Optional hooks can auto-load context for either tool, but the memory bank still works without hooks.
 
 The highest-use workflows have native adapters on both sides:
 
 | Workflow | Claude Code | Codex |
 |----------|-------------|-------|
-| Start/resume | `/start` | `$basecamp-start` |
-| Discover from rough idea | `/discover` | `$basecamp-discover` |
-| Seed from PRD | `/from-prd` | `$basecamp-from-prd` |
-| Initialize from code | `/init-memory` | `$basecamp-init-memory` |
-| Breakdown | `/breakdown` | `$basecamp-breakdown` |
-| Review | `/review` | `$basecamp-review` |
-| Update memory | `/update-memory` | `$basecamp-update-memory` |
-| Risk review | `/risk-review` | `$basecamp-risk-review` |
-| Decision log | `/decision-log` | `$basecamp-decision-log` |
-| Handoff | `/handoff` | `$basecamp-handoff` |
-| Ship check | `/ship` | `$basecamp-ship` |
-| Ask other agent | `/ask-codex` | `$basecamp-ask-claude` |
+| Start/resume | `/start` | `$start` |
+| Discover from rough idea | `/discover` | `$discover` |
+| Seed from PRD | `/from-prd` | `$from-prd` |
+| Initialize from code | `/init-memory` | `$init-memory` |
+| Breakdown | `/breakdown` | `$breakdown` |
+| Review | `/review` | `$review` |
+| Update memory | `/update-memory` | `$update-memory` |
+| Risk review | `/risk-review` | `$risk-review` |
+| Decision log | `/decision-log` | `$decision-log` |
+| Handoff | `/handoff` | `$handoff` |
+| Ship check | `/ship` | `$ship` |
+| Ask other agent | `/ask-codex` | `$ask-claude` |
+| Sync upstream | `/sync-upstream` | `$sync-upstream` |
 
 Other Claude commands remain available as compatibility workflows. If a Codex skill does not exist for one of them yet, Codex should read the matching `.claude/commands/<name>.md` file as guidance.
 
@@ -268,7 +270,7 @@ These are optional. Agents should read them only when the current task touches t
 If you use both Claude Code and Codex, basecamp includes an advanced second-opinion workflow:
 
 - In Claude Code, run `/ask-codex` to ask Codex CLI to review a plan, architecture decision, PRD interpretation, or risk assessment.
-- In Codex, invoke `$basecamp-ask-claude` to ask Claude Code CLI for the same kind of review.
+- In Codex, invoke `$ask-claude` to ask Claude Code CLI for the same kind of review.
 
 These workflows shell out to the other CLI; they do not require MCP. They assume the other CLI is installed and authenticated. The default mode is a single read-only review. A bounded loop is available only when you explicitly ask for it, capped at 2 rounds by default, and should end with a synthesis rather than autonomous edits.
 

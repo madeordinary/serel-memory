@@ -66,7 +66,7 @@ The scripts read `$CLAUDE_PROJECT_DIR` when Claude Code sets it. If it's not set
 
 ## Codex CLI
 
-Codex uses its own hook system. `enable-codex-hooks.sh` registers only `SessionStart`, because Codex does not have Claude Code's `PreCompact` event. For memory refreshes, use the `$basecamp-update-memory` skill manually before ending long sessions.
+Codex uses its own hook system. `enable-codex-hooks.sh` registers only `SessionStart`, because Codex does not have Claude Code's `PreCompact` event. For memory refreshes, use the `$update-memory` skill manually before ending long sessions.
 
 ## Customizing
 
