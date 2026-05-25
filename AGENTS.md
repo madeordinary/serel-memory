@@ -56,9 +56,23 @@ The `.claude/commands/` directory contains Claude Code slash commands, and `.age
 
 If a workflow does not yet have a Codex skill, read the corresponding `.claude/commands/<name>.md` file as guidance for the action.
 
+## Cross-agent planning
+
+Before implementing any non-trivial plan (3+ steps or touching multiple files), get a second opinion from the other agent CLI:
+
+- **In Claude Code**: shell out to `codex exec --cd "$PWD" --sandbox read-only "<prompt>"` for a read-only Codex review.
+- **In Codex**: shell out to `claude -p --permission-mode plan "<prompt>"` for a read-only Claude review.
+
+The `/breakdown` and `$breakdown` workflows do this automatically. For ad-hoc plans outside of breakdown, follow the same pattern: build the plan, get the second opinion, present both to the user.
+
+If the other CLI is unavailable, perform a local self-critique instead — but say so. Never skip the review and never pretend the other agent reviewed it.
+
+See `docs/cross-agent-review.md` for the output contract, loop policy, and CLI preflight.
+
 ## Ground rules
 
 - Don't assume project context that isn't supported by the memory bank. Ask.
 - Don't overwrite memory bank files silently. Show diffs first.
 - Don't bloat the bank — it's signal, not journal. One-offs don't belong.
 - Code is the source of truth for what currently works. The bank is the source of truth for what we *meant* to build.
+- Before implementing significant work, get a cross-agent second opinion on the plan (see above).

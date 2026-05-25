@@ -40,22 +40,25 @@ OUT OF SCOPE:
 - [what this plan will deliberately not do]
 ```
 
-After producing the plan, get a second opinion from the other CLI before presenting to the user:
+## Cross-agent review (mandatory)
 
-1. Build a concise prompt containing the plan and relevant context.
-2. Shell out to the Claude CLI in read-only mode:
+After producing the plan, get a Claude second opinion before presenting to the user. Do not skip this step.
+
+1. Verify Claude is available: `claude --version`
+2. Build a concise prompt with the plan, the goal, and enough project context for a meaningful review.
+3. Shell out to Claude in read-only mode:
 
    ```bash
    claude -p --permission-mode plan "<prompt>"
    ```
 
-   If `claude` is unavailable, perform a local self-critique instead — but say so.
-
-3. Append a **Claude Review** section to the output with:
+4. Append a **Second Opinion (Claude)** section to the output:
    - Agreements
    - Disagreements or gaps
    - Suggested changes worth adopting
    - Questions to resolve before proceeding
+
+If `claude` is not installed or not authenticated, say so and perform a local self-critique instead. Label it **Self-Critique (Claude unavailable)** so the user knows no independent review happened.
 
 Then end with: **"Want me to proceed, or change something first?"** and wait.
 
