@@ -40,7 +40,7 @@ The `.claude/commands/` directory contains Claude Code slash commands, and `.age
 - `/discover` / `$basecamp-discover` — help the user define a project from a rough idea; produces initial memory bank (use when starting fresh with no code yet)
 - `/from-prd` / `$basecamp-from-prd` — seed the memory bank from an existing PRD, product brief, spec, or requirements doc
 - `/init-memory` / `$basecamp-init-memory` — analyze the codebase and propose initial memory bank contents (use when bank is empty but code already exists)
-- `/plan` / `$basecamp-plan` — break a task into steps before executing
+- `/breakdown` / `$basecamp-breakdown` — break a task into steps before executing
 - `/review` / `$basecamp-review` — code review the current branch or diff
 - `/update-memory` / `$basecamp-update-memory` — refresh the memory bank from this session's work
 - `/weekly-update` — stakeholder-ready weekly update from the bank and recent activity

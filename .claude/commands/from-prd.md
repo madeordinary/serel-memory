@@ -85,4 +85,4 @@ After all proposals, stop and wait. Do not write anything until the user approve
 
 When approved files are written, end with:
 
-> "Memory bank seeded from the PRD. Run `/start` to verify the bootstrap, or `/plan` to break the first implementation chunk into steps."
+> "Memory bank seeded from the PRD. Run `/start` to verify the bootstrap, or `/breakdown` to break the first implementation chunk into steps."

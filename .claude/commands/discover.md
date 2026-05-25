@@ -8,7 +8,7 @@ Use this at the start of a brand-new project, when the user has an idea but hasn
 
 This is the inverse of `/init-memory`. That command analyzes existing code. This one helps shape a project that doesn't exist yet.
 
-First, check whether the project already has substantive memory bank content. If `memory-bank/projectbrief.md` has real content beyond the template placeholders, this is the wrong command — point the user toward `/plan` or `/start` instead. Otherwise, proceed.
+First, check whether the project already has substantive memory bank content. If `memory-bank/projectbrief.md` has real content beyond the template placeholders, this is the wrong command — point the user toward `/breakdown` or `/start` instead. Otherwise, proceed.
 
 ## Phase 1 — Open prompt
 
@@ -71,4 +71,4 @@ Show proposals **one file at a time**. After each, wait for the user to approve,
 
 When the files are approved and written, end with:
 
-> "Memory bank seeded. Run `/start` to verify the bootstrap, or `/plan` if you want to break the first chunk of work into steps."
+> "Memory bank seeded. Run `/start` to verify the bootstrap, or `/breakdown` if you want to break the first chunk of work into steps."

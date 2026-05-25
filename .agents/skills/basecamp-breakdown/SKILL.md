@@ -1,9 +1,9 @@
 ---
-name: basecamp-plan
-description: "Plan a basecamp task before implementation in Codex. Use when the user asks to plan, break down work, assess scope, or decide how to proceed before editing."
+name: basecamp-breakdown
+description: "Break down a basecamp task before implementation in Codex. Use when the user asks to plan, break down work, assess scope, or decide how to proceed before editing."
 ---
 
-# Basecamp Plan
+# Basecamp Breakdown
 
 Use this skill when the user wants a plan before execution. Do not edit files while planning.
 

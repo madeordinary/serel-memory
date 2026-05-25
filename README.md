@@ -31,7 +31,7 @@ your-project/
 │       ├── basecamp-discover/
 │       ├── basecamp-from-prd/
 │       ├── basecamp-init-memory/
-│       ├── basecamp-plan/
+│       ├── basecamp-breakdown/
 │       ├── basecamp-review/
 │       ├── basecamp-update-memory/
 │       ├── basecamp-risk-review/
@@ -45,7 +45,7 @@ your-project/
 │       ├── discover.md       # define a project from a rough idea (no code yet)
 │       ├── from-prd.md       # seed memory bank from a PRD or brief
 │       ├── init-memory.md    # analyze codebase, propose memory bank contents
-│       ├── plan.md           # plan before executing
+│       ├── breakdown.md      # break down before executing
 │       ├── review.md         # code review the current branch
 │       ├── update-memory.md  # refresh the bank
 │       ├── weekly-update.md  # stakeholder-ready weekly update
@@ -208,7 +208,7 @@ The highest-use workflows have native adapters on both sides:
 | Discover from rough idea | `/discover` | `$basecamp-discover` |
 | Seed from PRD | `/from-prd` | `$basecamp-from-prd` |
 | Initialize from code | `/init-memory` | `$basecamp-init-memory` |
-| Plan | `/plan` | `$basecamp-plan` |
+| Breakdown | `/breakdown` | `$basecamp-breakdown` |
 | Review | `/review` | `$basecamp-review` |
 | Update memory | `/update-memory` | `$basecamp-update-memory` |
 | Risk review | `/risk-review` | `$basecamp-risk-review` |

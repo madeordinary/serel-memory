@@ -78,4 +78,4 @@ After all proposals, stop and wait. Do not write anything until the user approve
 
 ## Handoff
 
-When approved files are written, end with: **"Memory bank seeded from the PRD. Use `$basecamp-start` to verify the bootstrap, or ask me to plan the first implementation chunk."**
+When approved files are written, end with: **"Memory bank seeded from the PRD. Use `$basecamp-start` to verify the bootstrap, or use `$basecamp-breakdown` to break the first implementation chunk into steps."**

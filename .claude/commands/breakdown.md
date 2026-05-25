@@ -2,7 +2,7 @@
 description: Break a task into steps before executing
 ---
 
-# /plan
+# /breakdown
 
 For the task the user just described, do NOT take any action yet. Produce a plan first.
 
