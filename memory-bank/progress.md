@@ -10,7 +10,7 @@
 ## What works
 
 - Memory bank template files (7 core files + `.rules`)
-- 13 Codex skills with matching slash commands (bare names, no prefix)
+- 17 Codex skills with matching slash commands (full parity, bare names)
 - 17 Claude Code slash commands
 - Cross-agent review workflow (Claude ↔ Codex)
 - Optional hooks (session-start, pre-compact) for both tools
@@ -18,7 +18,7 @@
 
 ## In progress
 
-- Codex skill parity — 4 slash commands still lack Codex skills (`/retro`, `/weekly-update`, `/runbook`, `/security-check`)
+- (none currently)
 
 ## What's left to build
 
@@ -31,6 +31,7 @@
 
 ## Recent milestones
 
+- Full Codex skill parity — all 17 workflows have both slash commands and skills (2025-05-25)
 - Dropped `basecamp-` prefix from all Codex skills (2025-05-25)
 - Added sync-upstream command with fork/template mode detection (2025-05-25)
 - Added cross-agent second opinion workflow (2025-05-21)

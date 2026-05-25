@@ -39,7 +39,11 @@ your-project/
 │       ├── handoff/
 │       ├── ship/
 │       ├── ask-claude/
-│       └── sync-upstream/
+│       ├── sync-upstream/
+│       ├── retro/
+│       ├── weekly-update/
+│       ├── runbook/
+│       └── security-check/
 ├── .claude/
 │   └── commands/
 │       ├── start.md          # session opener
@@ -56,6 +60,7 @@ your-project/
 │       ├── handoff.md        # generate a handoff doc for the next person
 │       ├── ask-codex.md      # ask Codex CLI for a second opinion
 │       ├── ship.md           # pre-merge checklist
+│       ├── sync-upstream.md  # pull framework updates from upstream
 │       ├── runbook.md        # generate/update an operational runbook
 │       └── security-check.md # OWASP + STRIDE pass
 ├── hooks/                    # optional auto-fire (off by default)
@@ -201,7 +206,7 @@ The adapters are native to each tool:
 - Codex uses `.agents/skills/*/SKILL.md` skills.
 - Optional hooks can auto-load context for either tool, but the memory bank still works without hooks.
 
-The highest-use workflows have native adapters on both sides:
+Every workflow has native adapters on both sides:
 
 | Workflow | Claude Code | Codex |
 |----------|-------------|-------|
@@ -212,14 +217,16 @@ The highest-use workflows have native adapters on both sides:
 | Breakdown | `/breakdown` | `$breakdown` |
 | Review | `/review` | `$review` |
 | Update memory | `/update-memory` | `$update-memory` |
+| Weekly update | `/weekly-update` | `$weekly-update` |
+| Retro | `/retro` | `$retro` |
 | Risk review | `/risk-review` | `$risk-review` |
 | Decision log | `/decision-log` | `$decision-log` |
 | Handoff | `/handoff` | `$handoff` |
 | Ship check | `/ship` | `$ship` |
 | Ask other agent | `/ask-codex` | `$ask-claude` |
 | Sync upstream | `/sync-upstream` | `$sync-upstream` |
-
-Other Claude commands remain available as compatibility workflows. If a Codex skill does not exist for one of them yet, Codex should read the matching `.claude/commands/<name>.md` file as guidance.
+| Runbook | `/runbook` | `$runbook` |
+| Security check | `/security-check` | `$security-check` |
 
 You can also use plain English when that is more natural:
 

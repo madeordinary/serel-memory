@@ -43,16 +43,16 @@ The `.claude/commands/` directory contains Claude Code slash commands, and `.age
 - `/breakdown` / `$breakdown` — break a task into steps before executing
 - `/review` / `$review` — code review the current branch or diff
 - `/update-memory` / `$update-memory` — refresh the memory bank from this session's work
-- `/weekly-update` — stakeholder-ready weekly update from the bank and recent activity
-- `/retro` — sprint or weekly retrospective drawing from progress and git log
+- `/weekly-update` / `$weekly-update` — stakeholder-ready weekly update from the bank and recent activity
+- `/retro` / `$retro` — sprint or weekly retrospective drawing from progress and git log
 - `/risk-review` / `$risk-review` — surface risks not yet documented in the bank
 - `/decision-log` / `$decision-log` — record an architectural decision in ADR format
 - `/handoff` / `$handoff` — generate a handoff doc for someone picking up the project cold
 - `/ask-codex` / `$ask-claude` — ask the other CLI for an optional second opinion on plans, risks, and decisions
 - `/ship` / `$ship` — pre-merge checklist
 - `/sync-upstream` / `$sync-upstream` — check the upstream basecamp repo for framework updates and selectively pull changes
-- `/runbook` — generate or update an operational runbook
-- `/security-check` — OWASP + STRIDE pass on the current change
+- `/runbook` / `$runbook` — generate or update an operational runbook
+- `/security-check` / `$security-check` — OWASP + STRIDE pass on the current change
 
 If a workflow does not yet have a Codex skill, read the corresponding `.claude/commands/<name>.md` file as guidance for the action.
 
