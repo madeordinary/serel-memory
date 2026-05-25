@@ -5,36 +5,33 @@
 
 ## Status
 
-<!-- One of: prototyping / building / shipping / maintaining -->
-
-**Phase:** 
+**Phase:** building
 
 ## What works
 
-<!-- Features or components that are done and reliable. -->
-
-- 
+- Memory bank template files (7 core files + `.rules`)
+- 13 Codex skills with matching slash commands (bare names, no prefix)
+- 17 Claude Code slash commands
+- Cross-agent review workflow (Claude ↔ Codex)
+- Optional hooks (session-start, pre-compact) for both tools
+- `/sync-upstream` for pulling framework updates into downstream projects
 
 ## In progress
 
-<!-- Things being actively worked on but not done. -->
-
-- 
+- Codex skill parity — 4 slash commands still lack Codex skills (`/retro`, `/weekly-update`, `/runbook`, `/security-check`)
 
 ## What's left to build
 
-<!-- Backlog at a high level. Not a full task list — the major pieces. -->
-
-- 
+- Test sync-upstream on a real downstream project
+- Consider `docs/basecamp/` reorganization for cleaner framework/project separation
 
 ## Known issues
 
-<!-- Bugs, limitations, technical debt the team is aware of. -->
-
-- 
+- `codex exec` with long prompts can hang on stdin; piping works as a workaround
 
 ## Recent milestones
 
-<!-- The last few "done" moments worth remembering. -->
-
-- 
+- Dropped `basecamp-` prefix from all Codex skills (2025-05-25)
+- Added sync-upstream command with fork/template mode detection (2025-05-25)
+- Added cross-agent second opinion workflow (2025-05-21)
+- Added `/from-prd` with clarification checkpoint (2025-05-21)

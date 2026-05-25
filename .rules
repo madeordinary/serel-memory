@@ -23,15 +23,14 @@
 
 ## Workflow
 
-<!-- How we work together that matters. Branch naming, commit style, when to PR vs. push to main, etc. -->
-
--
+- Commit directly to main for framework iteration; use PRs for larger changes
+- Run Codex review (`/ask-codex`) on non-trivial changes before committing
+- When renaming across many files, do a final sweep with `rg` to catch stale references — they hide in README, hooks docs, and cross-skill references
 
 ## Things we've tried and rejected
 
-<!-- Saves the next agent (and the next human) from re-litigating decisions. -->
-
--
+- Cherry-pick by commit in sync-upstream — rejected because upstream commits can touch both framework and project files
+- Blanket `docs/` in the sync allowlist — rejected because users put PRDs and ADRs there
 
 ## Style and tone
 
