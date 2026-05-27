@@ -36,7 +36,7 @@ Refresh every file in `memory-bank/`. Focus especially on `activeContext.md`, `p
 
 The `.claude/commands/` directory contains Claude Code slash commands, and `.agents/skills/` contains Codex-native skills for core basecamp workflows:
 
-- `/start` / `$start` — read the bank, summarize state, ask where to pick up
+- `/start` / `$start` — read the bank, summarize state, ask where to pick up (compact; use `/start full` for rich onboarding dashboard)
 - `/discover` / `$discover` — help the user define a project from a rough idea; produces initial memory bank (use when starting fresh with no code yet)
 - `/from-prd` / `$from-prd` — seed the memory bank from an existing PRD, product brief, spec, or requirements doc
 - `/init-memory` / `$init-memory` — analyze the codebase and propose initial memory bank contents (use when bank is empty but code already exists)
