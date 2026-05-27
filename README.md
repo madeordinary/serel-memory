@@ -141,7 +141,7 @@ After that, run `/start` or invoke `$start` to verify the bootstrap works.
 
 ## A 5-minute tour
 
-**At session start:** the agent reads every file in `memory-bank/` in order, then `.rules`, then the recent git log. It tells you in five lines what the project is, what you were last doing, and asks where to pick up.
+**At session start:** the agent reads every file in `memory-bank/` in order, then `.rules`, then the recent git log. By default (`/start` or `$start`), it tells you in five lines what the project is, what you were last doing, and asks where to pick up. Use `/start full` or `$start full` for a rich onboarding dashboard with recent progress, current state analysis, prioritized next steps, and direction options — useful when you're returning after a break or onboarding a collaborator.
 
 **While working:** the agent keeps `activeContext.md` honest as the focus shifts. When it discovers a non-obvious pattern or preference, it appends to `.rules`.
 
@@ -210,7 +210,8 @@ Every workflow has native adapters on both sides:
 
 | Workflow | Claude Code | Codex |
 |----------|-------------|-------|
-| Start/resume | `/start` | `$start` |
+| Start/resume (compact) | `/start` | `$start` |
+| Start/resume (full dashboard) | `/start full` | `$start full` |
 | Discover from rough idea | `/discover` | `$discover` |
 | Seed from PRD | `/from-prd` | `$from-prd` |
 | Initialize from code | `/init-memory` | `$init-memory` |
@@ -232,7 +233,8 @@ You can also use plain English when that is more natural:
 
 | What you want | Plain English |
 |---------------|---------------|
-| Start | "start from the memory bank" |
+| Start (compact) | "start from the memory bank" |
+| Start (full dashboard) | "start full" or "give me the full onboarding" |
 | Initialize from code | "initialize memory from this repo" |
 | Seed from PRD | "seed memory from this PRD" |
 | Update memory | "update memory bank" |
