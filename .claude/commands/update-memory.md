@@ -16,9 +16,9 @@ Steps:
 4. Touch other files only if they need it:
    - `systemPatterns.md` — only if a real architectural decision was made
    - `techContext.md` — only if dependencies, env vars, or runtime changed
-   - `decisionLog.md` — only if a durable architectural, product, workflow, or operational decision was made
+   - `decisionLog.md` — only if a durable architectural, product, workflow, or operational decision was made. If a past decision changed, **supersede, don't delete**: append "SUPERSEDED by … (date)" and move it to the Superseded section.
    - `productContext.md` / `projectbrief.md` — only if the goal or user model actually shifted
-5. Append to `.rules` any non-obvious thing learned this session: a user preference, a gotcha, a rejected approach worth remembering.
+5. Append to `.rules` any non-obvious thing learned this session: a user preference, a gotcha, a rejected approach worth remembering. Then **prune `.rules`**: if it's over ~40 lines or holds stale/obsolete lines, drop what's no longer true and promote stabilized conventions into `systemPatterns.md`. Keep it high-signal, not append-forever.
 
 For each proposed change, show:
 

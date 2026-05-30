@@ -17,9 +17,9 @@ Use this skill to update the memory bank from the current session. Always show p
 4. Touch other files only if needed:
    - `systemPatterns.md` for real architectural decisions
    - `techContext.md` for dependencies, environment variables, runtime, or operational constraints
-   - `decisionLog.md` for durable architectural, product, workflow, or operational decisions
+   - `decisionLog.md` for durable architectural, product, workflow, or operational decisions. If a past decision changed, **supersede, don't delete**: append "SUPERSEDED by … (date)" and move it to the Superseded section.
    - `productContext.md` or `projectbrief.md` only if product intent changed
-5. Append to `.rules` only for non-obvious reusable learnings.
+5. Append to `.rules` only for non-obvious reusable learnings, then **prune** it: if it's over ~40 lines or holds stale lines, drop what's no longer true and promote stabilized conventions into `systemPatterns.md`.
 
 For each proposed change, show:
 

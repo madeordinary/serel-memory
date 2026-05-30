@@ -58,14 +58,14 @@ If a workflow does not yet have a Codex skill, read the corresponding `.claude/c
 
 ## Cross-agent planning
 
-Before implementing any non-trivial plan (3+ steps or touching multiple files), get a second opinion from the other agent CLI:
+For **high-impact or hard-to-reverse plans** — architecture changes, security or auth, data migrations, public API or schema changes, dependency choices — a second opinion from the other agent CLI is recommended before you implement:
 
 - **In Claude Code**: shell out to `codex exec --cd "$PWD" --sandbox read-only "<prompt>"` for a read-only Codex review.
 - **In Codex**: shell out to `claude -p --permission-mode plan "<prompt>"` for a read-only Claude review.
 
-The `/breakdown` and `$breakdown` workflows do this automatically. For ad-hoc plans outside of breakdown, follow the same pattern: build the plan, get the second opinion, present both to the user.
+First check whether the other CLI is installed (`codex --version` / `claude --version`). If it is, get the review and present both the plan and the second opinion to the user. If it isn't, don't block — do a local self-critique instead and label it clearly (e.g. "Self-Critique — Codex unavailable") so the user knows no independent review happened. Never pretend the other agent reviewed it.
 
-If the other CLI is unavailable, perform a local self-critique instead — but say so. Never skip the review and never pretend the other agent reviewed it.
+For routine multi-file changes the review is optional — use judgment; it's a tool, not a tax. The `/breakdown` and `$breakdown` workflows offer it automatically.
 
 See `docs/cross-agent-review.md` for the output contract, loop policy, and CLI preflight.
 
@@ -75,4 +75,4 @@ See `docs/cross-agent-review.md` for the output contract, loop policy, and CLI p
 - Don't overwrite memory bank files silently. Show diffs first.
 - Don't bloat the bank — it's signal, not journal. One-offs don't belong.
 - Code is the source of truth for what currently works. The bank is the source of truth for what we *meant* to build.
-- Before implementing significant work, get a cross-agent second opinion on the plan (see above).
+- For high-impact or hard-to-reverse work, consider a cross-agent second opinion on the plan (see above).

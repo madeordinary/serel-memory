@@ -62,7 +62,7 @@ This workflow shells out to the Codex CLI. It does not require MCP.
    - Gaps or disagreements
    - Plan changes worth adopting
    - Questions to ask before proceeding
-5. Stop and wait for the user.
+6. Stop and wait for the user.
 
 ## Advanced: Bounded Loop
 

@@ -5,6 +5,8 @@ their CLIs. This is intentionally a thin workflow, not a full orchestrator.
 
 ## Policy
 
+- Reach for a review on high-impact or hard-to-reverse plans (architecture, security/auth, data migrations, public API or schema, dependency choices). For routine changes it's optional — it's a tool, not a tax.
+- Check the other CLI exists first; if it doesn't, do a labeled local self-critique rather than blocking.
 - Default to one read-only review.
 - Use a loop only when the user explicitly asks for debate, back-and-forth, or a loop.
 - Cap loops at 2 rounds by default.

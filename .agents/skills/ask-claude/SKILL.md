@@ -61,7 +61,7 @@ Use this skill when the user wants an independent Claude Code review while worki
    - Gaps or disagreements
    - Plan changes worth adopting
    - Questions to ask before proceeding
-5. Stop and wait for the user.
+6. Stop and wait for the user.
 
 ## Advanced: Bounded Loop
 

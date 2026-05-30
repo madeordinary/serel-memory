@@ -40,25 +40,24 @@ OUT OF SCOPE:
 - [what this plan will deliberately not do]
 ```
 
-## Cross-agent review (mandatory)
+## Cross-agent review (recommended for high-impact plans)
 
-After producing the plan, get a Claude second opinion before presenting to the user. Do not skip this step.
+For high-impact or hard-to-reverse plans (architecture, security/auth, data migrations, public API or schema, dependency choices), get a Claude second opinion before presenting to the user. For routine changes it's optional — use judgment.
 
-1. Verify Claude is available: `claude --version`
-2. Build a concise prompt with the plan, the goal, and enough project context for a meaningful review.
-3. Shell out to Claude in read-only mode:
+1. Check whether Claude is available: `claude --version`
+2. If it is, build a concise prompt with the plan, the goal, and enough project context for a meaningful review, then shell out to Claude in read-only mode:
 
    ```bash
    claude -p --permission-mode plan "<prompt>"
    ```
 
-4. Append a **Second Opinion (Claude)** section to the output:
+3. Append a **Second Opinion (Claude)** section to the output:
    - Agreements
    - Disagreements or gaps
    - Suggested changes worth adopting
    - Questions to resolve before proceeding
 
-If `claude` is not installed or not authenticated, say so and perform a local self-critique instead. Label it **Self-Critique (Claude unavailable)** so the user knows no independent review happened.
+If `claude` is not installed or not authenticated, don't block — perform a local self-critique instead and label it **Self-Critique (Claude unavailable)** so the user knows no independent review happened. Never pretend Claude reviewed it.
 
 Then end with: **"Want me to proceed, or change something first?"** and wait.
 

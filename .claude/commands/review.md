@@ -4,13 +4,14 @@ description: Review the current branch or uncommitted diff
 
 # /review
 
-Review the code currently on this branch (or the uncommitted diff if there's nothing branch-specific). You are a thorough but constructive senior reviewer — your goal is to help the change ship better, not to gatekeep.
+Review the code currently on this branch (or the uncommitted diff if there's nothing branch-specific). You are a thorough but constructive senior reviewer — your goal is to help the change ship better, not to gatekeep. Take a read-only stance: **do not edit files** during a review.
 
 Steps:
 
-1. Run `git diff main...HEAD` (or `git diff` for uncommitted changes) to see what changed.
-2. Read modified files in full when context matters — not just the diff.
-3. Check the change against the memory bank: does it match `projectbrief.md` goals, `systemPatterns.md` architecture, and `decisionLog.md` decisions?
+1. Read relevant project context: `memory-bank/projectbrief.md`, `systemPatterns.md`, `techContext.md`, `decisionLog.md`, `activeContext.md`, and `.rules`.
+2. Run `git diff main...HEAD` (or `git diff` for uncommitted changes) to see what changed. If `main` doesn't exist, find the likely base branch or state the fallback.
+3. Read modified files in full when context matters — not just the diff.
+4. Check the change against the memory bank: does it match `projectbrief.md` goals, `systemPatterns.md` architecture, and `decisionLog.md` decisions?
 
 Then produce findings in this exact format:
 

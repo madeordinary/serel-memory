@@ -7,6 +7,11 @@ description: "Check the upstream basecamp repo for framework updates (skills, co
 
 Check the upstream basecamp repo for new framework updates and help the user decide what to pull.
 
+## Preconditions
+
+- Git must be available.
+- The repo must have been originally cloned or forked from the basecamp template.
+
 ## Framework vs Project Files
 
 Only sync framework files. Never auto-merge project-specific files.
@@ -83,3 +88,11 @@ Use this exact list in all git commands:
 9. **Execute** using `git restore --source=upstream/main -- <path>` for safe files. For conflicting files, show the diff and let the user decide per-file.
 
 10. **After syncing**, suggest running `$update-memory` if significant framework changes were pulled.
+
+## If no upstream changes
+
+Report that the project is up to date and note when the last sync check was done (from the upstream fetch timestamp).
+
+## Fallback
+
+If `upstream` points to a repo that doesn't exist or can't be reached, report the error clearly and suggest the user verify the upstream URL with `git remote -v`.
