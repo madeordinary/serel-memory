@@ -4,16 +4,9 @@ All notable changes to basecamp are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project aims to
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reaches 1.0.
 
-## [0.1.0] — unreleased
+## [0.1.0] — 2026-05-30
 
-First tagged release. Cut it once CI is green on `main`:
-
-```bash
-git tag -a v0.1.0 -m "basecamp 0.1.0"
-git push origin v0.1.0
-```
-
-Downstream projects can then pin to it: `npx degit gusfeliciano/basecamp#v0.1.0`.
+First tagged release. Pin to it with `npx degit gusfeliciano/basecamp#v0.1.0`.
 
 ### Added
 
@@ -51,3 +44,5 @@ Downstream projects can then pin to it: `npx degit gusfeliciano/basecamp#v0.1.0`
 - Brought the Claude/Codex `review`, `breakdown`, and `sync-upstream` adapters back
   to parity; fixed a duplicate step number in the `ask-codex`/`ask-claude` workflows.
 - Fixed the broken file-tree rendering and tightened install instructions in the README.
+
+[0.1.0]: https://github.com/gusfeliciano/basecamp/releases/tag/v0.1.0
