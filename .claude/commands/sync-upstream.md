@@ -9,7 +9,7 @@ Check the upstream basecamp repo for new framework updates (skills, commands, ag
 ## Preconditions
 
 - Git must be available.
-- The repo must have been originally cloned or forked from the basecamp template.
+- The repo must have started from basecamp — copied in via `degit`, cloned, or forked. (Template mode in step 4 handles the `degit` case, where there's no shared git history.)
 
 ## Framework vs Project Files
 
@@ -129,7 +129,7 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
 
    Do not offer cherry-pick by commit — upstream commits may touch both framework and project files.
 
-9. **Execute the chosen strategy.**
+9. **Execute the chosen strategy.** Restore **individual files** from the upstream-changed list — never a whole allowlisted directory (e.g. `git restore --source=upstream/main -- .claude/commands/`), which would also delete any custom commands or skills the downstream project added. The directory allowlist is for diff *discovery*, not for restore.
 
    For safe files, use restore from upstream:
    ```bash

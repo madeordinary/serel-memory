@@ -6,10 +6,11 @@ Thanks for wanting to improve basecamp. It's a small, opinionated kit, so contri
 
 ## The shape of the repo
 
-basecamp has two kinds of files:
+basecamp has three kinds of files:
 
-- **Framework files** — the memory-bank templates, the workflows, the hooks, and the framework docs. These are what `sync-upstream` keeps in step with the upstream repo. The exact allowlist lives in `.claude/commands/sync-upstream.md`.
-- **Project/starter content** — everything a downstream project owns after install: their `memory-bank/` content, `.rules`, `docs/decisions/`, and the OSS metadata above.
+- **Synced framework files** — the workflows (Claude commands + Codex skills), the hooks, and the framework docs. `sync-upstream` keeps these in step with the upstream repo. The exact allowlist lives in `.claude/commands/sync-upstream.md`.
+- **Shipped-once content** — the `memory-bank/` templates and `.rules`. Copied in at install, then **owned by the downstream project** and never synced — so a sync can't overwrite a user's context.
+- **Project metadata** — `docs/decisions/` and the OSS files above (`CONTRIBUTING`, `SECURITY`, `.github/`, …). The downstream project's to keep or delete.
 
 When you add or change something, know which kind it is.
 
@@ -32,7 +33,7 @@ The one intentional exception is the cross-agent helper, which names the *other*
 1. Follow `docs/workflow-contract.md`: state the trigger, required reads, allowed writes, output shape, and stop conditions.
 2. Write the Claude command and the Codex skill so they produce the **same** output contract. Diff a sibling pair (e.g. `start`) to match structure.
 3. Add the `agents/openai.yaml` manifest (copy a sibling's and edit `display_name`, `short_description`, `default_prompt`).
-4. If it's a new workflow, add it to the tables in `README.md` and `AGENTS.md`.
+4. If it's a new workflow, add it to the workflow table in `README.md` and the workflow list in `AGENTS.md`.
 5. Run the checks below.
 
 ## Invariants (please don't break these)

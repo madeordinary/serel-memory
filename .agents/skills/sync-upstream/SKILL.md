@@ -10,7 +10,7 @@ Check the upstream basecamp repo for new framework updates and help the user dec
 ## Preconditions
 
 - Git must be available.
-- The repo must have been originally cloned or forked from the basecamp template.
+- The repo must have started from basecamp — copied in via `degit`, cloned, or forked. (Template mode in step 4 handles the `degit` case, where there's no shared git history.)
 
 ## Framework vs Project Files
 
@@ -85,7 +85,7 @@ Use this exact list in all git commands:
 
    Do not offer cherry-pick by commit — upstream commits may touch both framework and project files.
 
-9. **Execute** using `git restore --source=upstream/main -- <path>` for safe files. For conflicting files, show the diff and let the user decide per-file.
+9. **Execute** using `git restore --source=upstream/main -- <path>` for safe files, **one file at a time** from the upstream-changed list — never a whole allowlisted directory, which would delete any custom commands/skills the project added. The directory allowlist is for diff discovery, not restore. For conflicting files, show the diff and let the user decide per-file.
 
 10. **After syncing**, suggest running `$update-memory` if significant framework changes were pulled.
 

@@ -25,7 +25,7 @@ Downstream projects can then pin to it: `npx degit gusfeliciano/basecamp#v0.1.0`
   `risk-review`, `decision-log`, `handoff`, `ship`, `ask-codex`/`ask-claude`,
   `sync-upstream`, `runbook`, `security-check`).
 - Optional, off-by-default hooks: `session-start` (auto-load the bank) and
-  `pre-compact` (refresh the bank before Claude Code compacts).
+  `pre-compact` (remind the agent to refresh the bank before Claude Code compacts).
 - Cross-agent review: shell out to the other CLI for a read-only second opinion.
 - `sync-upstream` for pulling framework updates into downstream projects.
 - Framework-integrity tests (`tests/check-parity.sh`, `tests/check-allowlist.sh`,

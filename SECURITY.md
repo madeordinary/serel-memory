@@ -1,6 +1,6 @@
 # Security Policy
 
-basecamp is a kit of markdown files plus a few optional bash hooks. It has no server, no network calls of its own, and no runtime dependencies — so its attack surface is small. The two things worth being careful about:
+basecamp is a kit of markdown files plus a few optional bash hooks. It has no server and no runtime dependencies, and the only network access it triggers is the git operations you explicitly run (e.g. `sync-upstream`'s `git fetch upstream`) — so its attack surface is small. The two things worth being careful about:
 
 ## What to watch
 
@@ -11,8 +11,8 @@ basecamp is a kit of markdown files plus a few optional bash hooks. It has no se
 
 If you find a security issue in the framework (e.g. a hook that could be coerced into running untrusted input), please report it privately rather than opening a public issue:
 
-- Use GitHub's **private vulnerability reporting** (Security → "Report a vulnerability") on the repository, or
-- Open a minimal public issue that says only "security report — please enable private reporting" without details.
+- Use GitHub's **private vulnerability reporting** (Security → "Report a vulnerability") if it's enabled on the repository, or
+- Open a minimal public issue that says only "security report — please enable private reporting" without details, and the maintainer will follow up privately.
 
 <!-- Maintainer: add a contact email here if you prefer one over GitHub private reporting. -->
 

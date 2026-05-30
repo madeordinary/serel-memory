@@ -11,7 +11,7 @@
 ## Checklist
 
 - [ ] If I added/changed a workflow, I updated **both** adapters (`.claude/commands/<name>.md` and `.agents/skills/<name>/SKILL.md` + `agents/openai.yaml`)
-- [ ] I updated the workflow tables in `README.md` and `AGENTS.md` if I added a workflow
+- [ ] I updated the workflow table in `README.md` and the workflow list in `AGENTS.md` if I added a workflow
 - [ ] `tests/check-parity.sh`, `tests/check-allowlist.sh`, and `tests/smoke-degit.sh` pass
 - [ ] `shellcheck hooks/*.sh tests/*.sh` is clean (if I touched shell)
 - [ ] The change keeps basecamp small — no build step, no runtime dependency, no namespace creep

@@ -9,7 +9,7 @@ Use this skill when the user wants an independent Claude Code review while worki
 
 ## Preconditions
 
-- `claude` must be installed and authenticated.
+- `claude` should be installed and authenticated. If it isn't, don't block — use the Fallback at the end.
 - The user must approve shell execution when required by the environment.
 - Do not pass secrets, credentials, private production data, or sensitive customer data into the prompt.
 - Follow `docs/cross-agent-review.md` when present.

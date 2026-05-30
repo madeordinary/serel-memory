@@ -14,7 +14,8 @@ fail=0
 for f in .claude/commands/sync-upstream.md .agents/skills/sync-upstream/SKILL.md; do
   # Every line that carries the allowlist signature (the fenced list and any git
   # command that inlines it). Anchored on the first two framework paths.
-  matches="$(grep -nE '\.agents/skills/ \.claude/commands/' "$f" || true)"
+  # No `-n`: a line-number prefix would defeat the start-of-line `.rules` match.
+  matches="$(grep -E '\.agents/skills/ \.claude/commands/' "$f" || true)"
   if [ -z "$matches" ]; then
     echo "ALLOWLIST NOT FOUND in $f"; fail=1; continue
   fi

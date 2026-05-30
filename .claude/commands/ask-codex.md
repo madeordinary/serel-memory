@@ -10,7 +10,7 @@ This workflow shells out to the Codex CLI. It does not require MCP.
 
 ## Preconditions
 
-- `codex` must be installed and authenticated.
+- `codex` should be installed and authenticated. If it isn't, don't block — use the Fallback at the end.
 - The user must approve any shell execution required by their environment.
 - Do not pass secrets, credentials, private production data, or sensitive customer data into the prompt.
 - Follow `docs/cross-agent-review.md` when present.

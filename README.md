@@ -90,7 +90,7 @@ your-project/
 │       └── security-check.md # OWASP + STRIDE pass
 ├── hooks/                    # optional auto-fire (off by default)
 │   ├── session-start.sh      # auto-load memory bank at session start
-│   ├── pre-compact.sh        # auto-update memory bank before context loss
+│   ├── pre-compact.sh        # remind agent to update bank before context loss
 │   ├── enable-hooks.sh       # register Claude Code hooks
 │   └── enable-codex-hooks.sh # register Codex hooks
 └── docs/
@@ -98,7 +98,7 @@ your-project/
     └── cross-agent-review.md # second-opinion loop policy
 ```
 
-That's all of it. Markdown files in folders. The agent does the work.
+That's the framework — markdown files in folders, and the agent does the work. (A `degit` copy also brings basecamp's own project metadata — `CONTRIBUTING.md`, `SECURITY.md`, `.github/`, `tests/`, and so on — which isn't part of the framework; delete it after install. See [Install](#install).)
 
 ## When *not* to use basecamp
 
@@ -320,7 +320,7 @@ If you use both Claude Code and Codex, basecamp includes an advanced second-opin
 - In Claude Code, run `/ask-codex` to ask Codex CLI to review a plan, architecture decision, PRD interpretation, or risk assessment.
 - In Codex, invoke `$ask-claude` to ask Claude Code CLI for the same kind of review.
 
-These workflows shell out to the other CLI; they do not require MCP. They assume the other CLI is installed and authenticated. The default mode is a single read-only review. A bounded loop is available only when you explicitly ask for it, capped at 2 rounds by default, and should end with a synthesis rather than autonomous edits.
+These workflows shell out to the other CLI; they do not require MCP. They use the other CLI when it's installed and authenticated, and fall back to a clearly labeled self-critique when it isn't. The default mode is a single read-only review. A bounded loop is available only when you explicitly ask for it, capped at 2 rounds by default, and should end with a synthesis rather than autonomous edits.
 
 See `docs/cross-agent-review.md` for the CLI preflight, loop policy, and output contract.
 
