@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    # These are basecamp's OWN framework-integrity checks. They are meaningless in
+    # a downstream project created via `npx degit` (which has its own workflows and
+    # memory bank), so the job self-disables outside the canonical repo. Downstream
+    # users can safely delete .github/ after install.
+    if: github.repository == 'gusfeliciano/basecamp'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: chmod +x tests/*.sh hooks/*.sh
+
+      - name: ShellCheck hooks and tests
+        run: shellcheck hooks/*.sh tests/*.sh
+
+      - name: Adapter parity (Claude commands <-> Codex skills)
+        run: tests/check-parity.sh
+
+      - name: Sync allowlist never includes user memory
+        run: tests/check-allowlist.sh
+
+      - name: degit export ships clean templates
+        run: tests/smoke-degit.sh
