@@ -33,9 +33,10 @@
 
 - `VAR_NAME` — what it does
 
-## Constraints
+## Constraints (technical)
 
-<!-- Anything binding choices: compliance, latency budgets, cost limits, runtime versions. -->
+<!-- Technical bindings: runtime versions, latency budgets, cost limits, platform limits.
+Business/product constraints (deadlines, budget, compliance scope) live in projectbrief.md. -->
 
 - 
 

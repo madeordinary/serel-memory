@@ -1,11 +1,15 @@
 # Project Rules & Learnings
 
 > The learning journal. Append non-obvious patterns, preferences, and gotchas as they're discovered.
-> This file grows. Don't delete things unless they're wrong — strike them through or note "no longer true" instead.
+>
+> **Keep it high-signal, not append-forever.** Soft cap ~40 lines. When the file grows
+> past that, prune: delete things that are no longer true, and promote stabilized
+> conventions into `systemPatterns.md` (architecture) or the relevant memory-bank file.
+> A line earns its place by helping the next session make a better decision.
 
 ## User preferences
 
-<!-- How the human you're working with wants things done. Tone, formatting, levels of detail, when to ask vs. just do, etc. -->
+<!-- How the human you're working with wants things done. Tone, formatting, level of detail, when to ask vs. just do. -->
 
 -
 
@@ -17,20 +21,21 @@
 
 ## Gotchas
 
-- `codex exec` with inline prompt args can hang on stdin; pipe the prompt via echo instead
-- Codex reviews read *every* file it can find — a thorough 200k-token review takes ~3 minutes
+<!-- Non-obvious traps. The thing you wish you'd known before you hit it. -->
+
+-
 
 ## Workflow
 
-- Commit directly to main for framework iteration; use PRs for larger changes
-- Run Codex review (`/ask-codex`) on non-trivial changes before committing
-- When renaming across many files, do a final sweep with `rg` to catch stale references — they hide in README, hooks docs, and cross-skill references
-- After updating skills/commands, run a Codex final-state review to catch inconsistencies between docs and actual files
+<!-- How work gets done here: branching, commits, review, release. -->
+
+-
 
 ## Things we've tried and rejected
 
-- Cherry-pick by commit in sync-upstream — rejected because upstream commits can touch both framework and project files
-- Blanket `docs/` in the sync allowlist — rejected because users put PRDs and ADRs there
+<!-- Approaches that didn't work, so they don't get re-attempted. Include the why. -->
+
+-
 
 ## Style and tone
 

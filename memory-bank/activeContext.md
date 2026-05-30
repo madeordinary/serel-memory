@@ -5,27 +5,28 @@
 
 ## Current focus
 
-Basecamp framework is at full skill parity (17/17) with mandatory cross-agent planning review.
+<!-- What are you working on right now? One or two sentences. -->
 
 ## Recent changes
 
-- Made cross-agent review mandatory in AGENTS.md and breakdown workflows
-- Fixed Codex review findings (stale context, wrong dates, description wording, rsync missing docs/)
-- Added Codex skills for retro, weekly-update, runbook, and security-check — full 17/17 parity
-- Dropped `basecamp-` prefix from all Codex skills to match slash command naming
-- Added `/sync-upstream` command and `$sync-upstream` Codex skill for framework updates
+<!-- The last few meaningful moves, newest first. Keep this short — it's not a changelog. -->
+
+-
 
 ## Next steps
 
-1. Consider reorganizing `docs/` so framework docs live under a dedicated path (Codex raised this)
-2. Test `/sync-upstream` on a real downstream fork
+<!-- The concrete next 1–3 things. Specific enough to act on without re-deriving. -->
+
+1.
 
 ## Open questions
 
-- Should `AGENTS.md` and `CLAUDE.md` always require manual diff review during sync? (users are expected to customize these)
-- Should `README.md`, `.gitignore`, and `LICENSE` be sync-upstream framework files, or project-owned after installation?
+<!-- Anything unresolved that's blocking or shaping the work. -->
+
+-
 
 ## Notes for next session
 
-- Cross-agent planning review is now a ground rule in AGENTS.md, not just in `/breakdown`. Any non-trivial plan should go through the other CLI.
-- Codex did two full repo reviews this session. The second one was clean except for memory bank staleness (now fixed).
+<!-- Context that would otherwise be lost between sessions. -->
+
+-

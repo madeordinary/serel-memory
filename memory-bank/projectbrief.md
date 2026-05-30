@@ -2,6 +2,9 @@
 
 > The foundation. Defines what we're building and why. Source of truth for project scope.
 > Update only when the actual goals or scope of the project change.
+>
+> Scope boundary: *what & why* live here; the *user's job-to-be-done and UX* live in
+> `productContext.md`. If you're describing a person's workflow, it belongs there, not here.
 
 ## What
 
@@ -25,8 +28,18 @@
 
 - 
 
-## Constraints
+## Principles
 
-<!-- Non-negotiables: deadline, budget, compliance, tech we have to use, etc. -->
+<!-- A short, rarely-changing list of inviolable rules for this project — the
+"constitution." Things every decision must respect. Keep it to a handful.
+Examples: "human-legible artifacts only", "code is the source of truth", "no new
+dependency without a logged decision". -->
+
+-
+
+## Constraints (business / product)
+
+<!-- Non-negotiables on the product side: deadline, budget, compliance, market.
+Technical constraints (runtime versions, latency budgets) live in techContext.md. -->
 
 - 

@@ -5,36 +5,34 @@
 
 ## Status
 
-**Phase:** building
+**Phase:** <!-- e.g. discovery / building / stabilizing / shipped -->
 
 ## What works
 
-- Mandatory cross-agent review during planning (AGENTS.md ground rule + breakdown workflow)
-- Memory bank template files (7 core files + `.rules`)
-- 17 Codex skills with matching slash commands (full parity, bare names)
-- 17 Claude Code slash commands
-- Cross-agent review workflow (Claude ↔ Codex)
-- Optional hooks (session-start, pre-compact) for both tools
-- `/sync-upstream` for pulling framework updates into downstream projects
+<!-- Capabilities that are done and verified. Each line is something a user can rely on. -->
+
+-
 
 ## In progress
 
-- (none currently)
+<!-- Started but not done. Cross-reference activeContext.md current focus. -->
+
+-
 
 ## What's left to build
 
-- Test sync-upstream on a real downstream project
-- Consider `docs/basecamp/` reorganization for cleaner framework/project separation
+<!-- Known remaining work. Not a backlog dump — the things that matter. -->
+
+-
 
 ## Known issues
 
-- `codex exec` with long prompts can hang on stdin; piping works as a workaround
+<!-- Bugs, gaps, and rough edges that are real today. Be honest. -->
+
+-
 
 ## Recent milestones
 
-- Mandatory cross-agent planning review in AGENTS.md and breakdown workflows (2026-05-25)
-- Full Codex skill parity — all 17 workflows have both slash commands and skills (2026-05-25)
-- Dropped `basecamp-` prefix from all Codex skills (2026-05-25)
-- Added sync-upstream command with fork/template mode detection (2026-05-25)
-- Added cross-agent second opinion workflow (2026-05-21)
-- Added `/from-prd` with clarification checkpoint (2026-05-21)
+<!-- Dated, completed milestones, newest first. -->
+
+-

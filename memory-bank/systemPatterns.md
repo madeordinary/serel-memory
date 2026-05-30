@@ -2,6 +2,9 @@
 
 > Architecture and design decisions. The "how" at the structural level.
 > Update when an architectural decision is made or revised.
+>
+> This file holds the patterns *currently in force*. The dated record of *how* and
+> *why* a decision was reached — with alternatives — lives in `decisionLog.md`.
 
 ## Architecture
 
