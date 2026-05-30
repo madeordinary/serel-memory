@@ -1,6 +1,31 @@
 # basecamp
 
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) ![Works with Claude Code + Codex](https://img.shields.io/badge/works%20with-Claude%20Code%20%2B%20Codex-5436DA) ![No dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
+
 A portable memory bank and workflow kit for AI coding agents. Works with Claude Code and Codex out of the box.
+
+Your project's memory lives in version-controlled markdown you can read, diff, and review — not a proprietary store that gets deprecated, stays on one machine, or locks you to a single IDE.
+
+## Quickstart
+
+```bash
+npx degit gusfeliciano/basecamp my-project
+cd my-project
+git init
+```
+
+Open the project in Claude Code or Codex, then seed the memory bank based on what you have:
+
+| You have… | Run (Claude / Codex) |
+|-----------|----------------------|
+| Existing code | `/init-memory` / `$init-memory` |
+| A PRD or brief | `/from-prd docs/prd.md` / `$from-prd docs/prd.md` |
+| Just a rough idea | `/discover` / `$discover` |
+| A clear idea in your head | paste it into `memory-bank/projectbrief.md` |
+
+Then run `/start` (or `$start`) — the agent reads the bank and asks where to pick up. That's the loop: seed once, `/start` every session, `/update-memory` before you stop.
+
+> New here? Read [The problem](#the-problem) and [The shape](#the-shape) below. Already sold? The [full install options](#install) (existing projects, PRDs, pinning) are further down.
 
 ## The problem
 
@@ -64,16 +89,26 @@ your-project/
 │       ├── runbook.md        # generate/update an operational runbook
 │       └── security-check.md # OWASP + STRIDE pass
 ├── hooks/                    # optional auto-fire (off by default)
-    ├── session-start.sh      # auto-load memory bank at session start
-    ├── pre-compact.sh        # auto-update memory bank before context loss
-    ├── enable-hooks.sh       # register Claude Code hooks
-    └── enable-codex-hooks.sh # register Codex hooks
+│   ├── session-start.sh      # auto-load memory bank at session start
+│   ├── pre-compact.sh        # auto-update memory bank before context loss
+│   ├── enable-hooks.sh       # register Claude Code hooks
+│   └── enable-codex-hooks.sh # register Codex hooks
 └── docs/
     ├── workflow-contract.md  # how workflows should be shaped
     └── cross-agent-review.md # second-opinion loop policy
 ```
 
 That's all of it. Markdown files in folders. The agent does the work.
+
+## When *not* to use basecamp
+
+basecamp is overhead you won't recoup on:
+
+- **Throwaway scripts and one-session tasks** — if you'll never come back to it, there's no memory to preserve.
+- **Quick exploratory hacking** where you don't want the agent pausing to read or update a bank.
+- **Projects already standardized on another context system** you're happy with (Cursor rules, a bespoke `AGENTS.md`, etc.) — basecamp can complement these, but don't adopt it just to have two.
+
+It pays off when you return to a project across many sessions and want continuity that doesn't depend on your memory.
 
 ## Install
 
@@ -117,7 +152,9 @@ Then run:
 $from-prd docs/prd.md
 ```
 
-`degit gusfeliciano/basecamp` uses GitHub shorthand for `https://github.com/gusfeliciano/basecamp` and downloads the current repo contents without the `.git` history. It is a starter-copy step, not a future `git pull` relationship.
+`degit gusfeliciano/basecamp` uses GitHub shorthand for `https://github.com/gusfeliciano/basecamp` and downloads the current repo contents without the `.git` history. It is a starter-copy step, not a future `git pull` relationship. To pin to a specific release once one is tagged, append the tag: `npx degit gusfeliciano/basecamp#v0.1.0`.
+
+A `degit` copy also brings along basecamp's own project metadata — `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, `.github/`, and `tests/`. These describe *basecamp the project*, not your project, and they aren't part of the framework. Delete them whenever you like; `sync-upstream` never touches them.
 
 ### On an existing project
 
@@ -127,7 +164,7 @@ If the project already has code or important files, drop basecamp's files in wit
 cd ~/path/to/your-existing-project
 
 git clone --depth 1 https://github.com/gusfeliciano/basecamp.git /tmp/basecamp
-rsync -av --ignore-existing /tmp/basecamp/memory-bank /tmp/basecamp/.agents /tmp/basecamp/.claude /tmp/basecamp/.rules /tmp/basecamp/AGENTS.md /tmp/basecamp/CLAUDE.md /tmp/basecamp/hooks /tmp/basecamp/docs .
+rsync -av --ignore-existing --exclude 'settings.local.json' /tmp/basecamp/memory-bank /tmp/basecamp/.agents /tmp/basecamp/.claude /tmp/basecamp/.rules /tmp/basecamp/AGENTS.md /tmp/basecamp/CLAUDE.md /tmp/basecamp/hooks /tmp/basecamp/docs .
 rm -rf /tmp/basecamp
 ```
 
@@ -166,6 +203,8 @@ Plain English works too: say "update memory bank", then "start from the memory b
 ## Hooks (optional)
 
 Manual workflows depend on you remembering to run them. Hooks make session-start memory loading happen automatically, and Claude Code hooks also remind you to update memory before compaction. They're **off by default** — opt in per project.
+
+> Prerequisites: the enable scripts are `bash` and use `jq` to edit the JSON settings (if `jq` is missing they print the block for you to paste). On Windows, run them under WSL or Git Bash. The memory bank itself needs none of this — it's just markdown.
 
 To enable Claude Code hooks on a project:
 
