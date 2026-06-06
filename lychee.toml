@@ -1,0 +1,27 @@
+# Link-checker config (lychee) — strict about rot, tolerant of rate limiting.
+# Run in CI via lycheeverse/lychee-action; locally: `lychee --config lychee.toml '**/*.md'`
+
+max_retries = 3
+timeout = 20
+max_concurrency = 8
+
+# 429 = rate-limited, not broken. Don't fail CI over politeness throttles.
+accept = ["200..=204", "206", "301", "302", "304", "429"]
+
+exclude = [
+  # Placeholders used in docs/examples
+  "^https?://example\\.com",
+  "^https?://localhost",
+  # Sites that block bot user-agents and would flake CI
+  "^https?://(www\\.)?medium\\.com",
+  "^https?://twitter\\.com",
+  "^https?://x\\.com",
+]
+
+exclude_path = [
+  # Archival research snapshots — citations recorded at a point in time;
+  # external link rot there is expected and shouldn't break CI.
+  "docs/research",
+  # Maintainer-local working bank (gitignored anyway)
+  "memory-bank.local",
+]

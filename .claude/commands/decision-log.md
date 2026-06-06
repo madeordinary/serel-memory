@@ -15,7 +15,7 @@ Steps:
 
 Use this structure:
 
-~~~
+~~~markdown
 # [NNN]. [Short imperative title — e.g., "Use Postgres for state, not SQLite"]
 
 ## Status

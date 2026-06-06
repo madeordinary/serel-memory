@@ -55,6 +55,7 @@ Draft a weekly update suitable for stakeholders, pulling from the memory bank an
 - This is for stakeholders, not engineers. Skip technical detail unless they need it.
 
 After generating, ask:
+
 - Is the headline right for this audience?
 - Tighter, longer, or about right?
 - Format for a specific channel (Slack, email, Confluence) or keep generic?

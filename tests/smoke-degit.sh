@@ -23,6 +23,12 @@ if [ -e "$tmp/docs/research" ]; then
   echo "LEAK: docs/research/ is present in the degit export (export-ignore broken)"; fail=1
 fi
 
+# 1c. The provenance anchor is per-project state written AT INSTALL (see README).
+# Shipping a pre-made one would stamp every downstream project with false provenance.
+if [ -e "$tmp/.basecamp.json" ]; then
+  echo "LEAK: .basecamp.json is present in the degit export (anchor must be install-written)"; fail=1
+fi
+
 # 2. No basecamp-specific live dev content in the shipped bank or .rules.
 if grep -rniE '17/17|skill parity|basecamp framework is at|cherry-pick by commit in sync' \
      "$tmp/memory-bank" "$tmp/.rules" 2>/dev/null; then

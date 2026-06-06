@@ -9,10 +9,15 @@ Your project's memory lives in version-controlled markdown you can read, diff, a
 ## Quickstart
 
 ```bash
-npx degit gusfeliciano/basecamp my-project
+npx degit gusfeliciano/basecamp#v0.1.0 my-project
 cd my-project
 git init
+printf '{ "upstream": "gusfeliciano/basecamp", "ref": "v0.1.0", "linked": false }\n' > .basecamp.json
 ```
+
+(The last line records which basecamp version you started from — `sync-upstream` uses
+it later to show you exactly what changed upstream since. Skip it and `sync-upstream`
+will offer to reconstruct it.)
 
 Open the project in Claude Code or Codex, then seed the memory bank based on what you have:
 
@@ -35,12 +40,22 @@ The usual fix is to dump a paragraph of context into every prompt. That works un
 
 basecamp is the other fix: a small, opinionated directory of markdown files the agent reads at the start of every session, so context doesn't depend on your memory.
 
+## What makes it different
+
+Memory banks aren't new — basecamp's own is adapted from [Cline's](https://github.com/nickbaumann98/cline_docs), and says so. What you can't get elsewhere is the engineering around the bank:
+
+- **Dual-CLI parity that's enforced, not promised.** Every workflow has a native Claude Code command *and* a native Codex skill — 17 of each, and CI fails if either side of a pair goes missing. Not a Claude tool with a Codex shim bolted on.
+- **Cross-agent second opinions.** Claude can shell out to Codex to review a plan, and vice versa — with a documented loop policy, and an honestly-labeled self-critique fallback when the other CLI isn't installed.
+- **Framework updates that can't touch your memory.** `sync-upstream` pulls updates through an explicit allowlist; `memory-bank/`, `.rules`, and your ADRs are structurally outside it — and a test enforces that the allowlist never grows to include them.
+- **Tested like software, because it is.** Parity, sync-allowlist, and degit-export smoke tests run in CI. The export test guarantees a fresh install ships clean templates — never someone else's project context.
+
 ## The shape
 
-```
+```text
 your-project/
 ├── AGENTS.md               # bootstrap — tells the agent how to read the bank
 ├── CLAUDE.md               # @AGENTS.md import for Claude Code
+├── .basecamp.json          # provenance anchor — which upstream version you started from
 ├── .rules                  # learning journal — patterns & preferences
 ├── memory-bank/
 │   ├── projectbrief.md     # what & why; rarely changes
@@ -115,9 +130,10 @@ It pays off when you return to a project across many sessions and want continuit
 ### On a new project
 
 ```bash
-npx degit gusfeliciano/basecamp my-new-project
+npx degit gusfeliciano/basecamp#v0.1.0 my-new-project
 cd my-new-project
 git init
+printf '{ "upstream": "gusfeliciano/basecamp", "ref": "v0.1.0", "linked": false }\n' > .basecamp.json
 ```
 
 Then open the project in Claude Code or Codex. There are three paths from here depending on how formed your idea is:
@@ -135,11 +151,12 @@ If Codex shows "Select settings to import" and offers to migrate `.claude/comman
 If all you have is a PRD, make basecamp the starting repo and bring the PRD into it:
 
 ```bash
-npx degit gusfeliciano/basecamp my-new-project
+npx degit gusfeliciano/basecamp#v0.1.0 my-new-project
 cd my-new-project
 mkdir -p docs
 cp /path/to/prd.md docs/prd.md
 git init
+printf '{ "upstream": "gusfeliciano/basecamp", "ref": "v0.1.0", "linked": false }\n' > .basecamp.json
 ```
 
 Then run:
@@ -152,7 +169,7 @@ Then run:
 $from-prd docs/prd.md
 ```
 
-`degit gusfeliciano/basecamp` uses GitHub shorthand for `https://github.com/gusfeliciano/basecamp` and downloads the current repo contents without the `.git` history. It is a starter-copy step, not a future `git pull` relationship. To pin to a specific release once one is tagged, append the tag: `npx degit gusfeliciano/basecamp#v0.1.0`.
+`degit gusfeliciano/basecamp#v0.1.0` uses GitHub shorthand for `https://github.com/gusfeliciano/basecamp` pinned to the `v0.1.0` tag, and downloads that release's contents without the `.git` history. It is a starter-copy step, not a future `git pull` relationship — which is why the install writes `.basecamp.json`: it records which upstream version you started from, so `sync-upstream` can later show you precisely what changed upstream since, instead of guessing. Pin to the latest tag on the [releases page](https://github.com/gusfeliciano/basecamp/releases) and put that same tag in the `ref` field. (Unpinned `npx degit gusfeliciano/basecamp` works too, but then the anchor's `ref` is your best guess — if you skip the anchor entirely, `sync-upstream` will offer to reconstruct one marked `"linked": true`, meaning "exact starting version unknown".)
 
 A `degit` copy also brings along basecamp's own project metadata — `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, `.github/`, and `tests/`. These describe *basecamp the project*, not your project, and they aren't part of the framework. Delete them whenever you like; `sync-upstream` never touches them.
 
@@ -163,9 +180,10 @@ If the project already has code or important files, drop basecamp's files in wit
 ```bash
 cd ~/path/to/your-existing-project
 
-git clone --depth 1 https://github.com/gusfeliciano/basecamp.git /tmp/basecamp
+git clone --depth 1 --branch v0.1.0 https://github.com/gusfeliciano/basecamp.git /tmp/basecamp
 rsync -av --ignore-existing --exclude 'settings.local.json' /tmp/basecamp/memory-bank /tmp/basecamp/.agents /tmp/basecamp/.claude /tmp/basecamp/.rules /tmp/basecamp/AGENTS.md /tmp/basecamp/CLAUDE.md /tmp/basecamp/hooks /tmp/basecamp/docs .
 rm -rf /tmp/basecamp
+[ -e .basecamp.json ] || printf '{ "upstream": "gusfeliciano/basecamp", "ref": "v0.1.0", "linked": false }\n' > .basecamp.json
 ```
 
 The `rsync` command is intentionally one line so shell line-continuation mistakes cannot drop the source/destination arguments. Existing files and folders, including something like `docs/prd.md`, are preserved because `--ignore-existing` skips paths that are already present.

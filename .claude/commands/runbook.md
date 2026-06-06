@@ -15,7 +15,7 @@ Read relevant code, deploy config, and `memory-bank/techContext.md` for stack/ho
 
 Produce a runbook in this structure:
 
-~~~
+~~~markdown
 # Runbook: [service name]
 
 ## What this is

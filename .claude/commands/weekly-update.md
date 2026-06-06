@@ -17,7 +17,7 @@ Steps:
 
 Then produce an update in this structure:
 
-~~~
+~~~markdown
 # [Project name] — Week of [Mon DD, YYYY]
 
 ## Headline

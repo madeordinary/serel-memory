@@ -17,7 +17,7 @@ Steps:
 
 Then produce a handoff doc in this structure:
 
-~~~
+~~~markdown
 # [Project name] — Handoff
 
 > Generated [DATE]. If you're reading this, someone is handing this project to you. This document is your starting point.

@@ -26,7 +26,7 @@ Then propose contents for each memory bank file, in this order:
 
 For each file, present your proposal in this format:
 
-```
+```text
 FILE: memory-bank/<name>.md
 PROPOSAL:
 <the proposed contents, including the template's heading structure>

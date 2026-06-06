@@ -5,17 +5,17 @@
 
 ## Stack
 
-- **Language**: 
-- **Runtime / framework**: 
-- **Database**: 
-- **Hosting / deploy target**: 
-- **Package manager**: 
+- **Language**:
+- **Runtime / framework**:
+- **Database**:
+- **Hosting / deploy target**:
+- **Package manager**:
 
 ## Notable dependencies
 
 <!-- Anything load-bearing. Why this dep, not the alternatives? -->
 
-- 
+-
 
 ## Development setup
 
@@ -38,7 +38,7 @@
 <!-- Technical bindings: runtime versions, latency budgets, cost limits, platform limits.
 Business/product constraints (deadlines, budget, compliance scope) live in projectbrief.md. -->
 
-- 
+-
 
 ## Known limitations
 

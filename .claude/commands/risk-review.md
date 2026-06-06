@@ -29,7 +29,7 @@ Then identify risks across these categories:
 
 For each risk, produce:
 
-~~~
+~~~markdown
 ## [Short name]
 - **Category**: [from above]
 - **What could go wrong**: [specific failure mode]

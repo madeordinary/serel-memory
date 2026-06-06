@@ -15,7 +15,7 @@ Steps:
 
 Then produce findings in this exact format:
 
-```
+```text
 SUMMARY: [one sentence — what this change does and your overall take]
 
 HIGH (must fix before merge):

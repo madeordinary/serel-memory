@@ -16,7 +16,7 @@ Steps:
 
 Produce a retro in this structure:
 
-~~~
+~~~markdown
 # Retro — [timeframe]
 
 ## What we shipped

@@ -20,7 +20,7 @@
 
 <!-- Conventions the codebase follows that aren't enforced by tooling. -->
 
-- 
+-
 
 ## Component relationships
 

@@ -40,7 +40,7 @@ The one intentional exception is the cross-agent helper, which names the *other*
 
 These are load-bearing decisions. Change them only with a clear reason in the PR:
 
-- **The sync allowlist never includes `memory-bank/` or `.rules`.** Syncing user memory would clobber a downstream project's context. `tests/check-allowlist.sh` enforces it.
+- **The sync allowlist never includes `memory-bank/`, `.rules`, or `.basecamp.json`.** Syncing user memory or the project's provenance anchor would clobber a downstream project's context. `tests/check-allowlist.sh` enforces it.
 - **The shipped `memory-bank/` is clean templates**, not basecamp's own bank. basecamp's real working bank lives in a gitignored `memory-bank.local/` (maintainer-only). `tests/smoke-degit.sh` asserts the export stays clean.
 - **Bare workflow names** (`/start`, not `/basecamp:start`). These are core workflows, not a namespaced plugin.
 - **No runtime dependencies, no build step.** Markdown, plus optional bash hooks. If a change needs a package manager, it probably belongs in a fork.
@@ -48,13 +48,14 @@ These are load-bearing decisions. Change them only with a clear reason in the PR
 ## Running the checks
 
 ```bash
-tests/check-parity.sh      # adapters paired
-tests/check-allowlist.sh   # sync scope safe
-tests/smoke-degit.sh       # export ships clean templates
+tests/check-parity.sh                    # adapters paired
+tests/check-allowlist.sh                 # sync scope safe
+tests/smoke-degit.sh                     # export ships clean templates
 shellcheck hooks/*.sh tests/*.sh
+npx --yes markdownlint-cli2 "**/*.md"    # markdown hygiene (config: .markdownlint-cli2.jsonc)
 ```
 
-CI runs the same set (and only on `gusfeliciano/basecamp` — it self-disables in forks/copies).
+CI runs the same set plus a link check (`lychee`, config in `lychee.toml`) — and only on `gusfeliciano/basecamp`; it self-disables in forks/copies.
 
 ## Style
 

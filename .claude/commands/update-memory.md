@@ -22,7 +22,7 @@ Steps:
 
 For each proposed change, show:
 
-```
+```text
 FILE: [path]
 CHANGE: [add / update / remove]
 DIFF:

@@ -8,6 +8,7 @@ description: "Start or resume a memory-bank project in Codex. Use: $start (quick
 Use this skill to orient a Codex session around the basecamp memory bank.
 
 **Mode:** Check the arguments passed to this skill.
+
 - If empty, `quick`, or `brief` → use **Quick mode** (compact summary, saves tokens).
 - If `full`, `onboard`, or `dashboard` → use **Full mode** (rich onboarding dashboard).
 
@@ -59,6 +60,7 @@ Produce the full context audit (same as quick mode), then continue with all sect
 #### Recent Progress (last 2-3 sessions)
 
 Extract from `progress.md` recent milestones and `activeContext.md` recent changes:
+
 - Session achievements with dates
 - Key technical discoveries or architectural changes
 - Milestones reached
@@ -66,16 +68,20 @@ Extract from `progress.md` recent milestones and `activeContext.md` recent chang
 #### Current State Analysis
 
 **What Works**
+
 - Pull from `progress.md` "What works" section - list each capability
 
 **In Progress**
+
 - Pull from `progress.md` "In progress" section
 - Cross-reference with `activeContext.md` current focus
 
 **Known Issues**
+
 - Pull from `progress.md` "Known issues" section
 
 **What's Left to Build**
+
 - Pull from `progress.md` "What's left to build" section
 - Include estimates where you can reasonably infer them
 
@@ -104,6 +110,7 @@ For each, include: clear action item, rough time estimate, expected outcome.
 #### Direction Options
 
 Present 3-4 options clearly:
+
 - **Option A:** Continue recent momentum — [describe based on activeContext]
 - **Option B:** Address top priority — [from what's left to build]
 - **Option C:** Start next feature/initiative — [from what's left or open questions]

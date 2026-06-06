@@ -21,12 +21,15 @@ specific about what's actually true today.]
 ## Consequences
 
 **Positive**
+
 - [what this enables or makes easier]
 
 **Negative**
+
 - [what this costs or makes harder]
 
 **Neutral**
+
 - [side effects worth knowing]
 
 ## References

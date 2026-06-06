@@ -16,6 +16,7 @@ labels: bug
 2.
 
 **Environment**
+
 - Tool & version (Claude Code / Codex):
 - OS:
 - Installed via (degit / rsync / clone):

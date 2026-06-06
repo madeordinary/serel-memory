@@ -20,7 +20,7 @@ Checklist:
 
 Output format:
 
-```
+```text
 SHIP READINESS: [READY / NOT READY / READY WITH CAVEATS]
 
 CHECKLIST:

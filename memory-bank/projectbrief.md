@@ -18,15 +18,15 @@
 
 <!-- Concrete outcomes that mean this worked. Keep to 3–5. -->
 
-- [ ] 
-- [ ] 
-- [ ] 
+- [ ]
+- [ ]
+- [ ]
 
 ## Out of scope
 
 <!-- Things we are explicitly NOT doing. As important as what we are doing. -->
 
-- 
+-
 
 ## Principles
 
@@ -42,4 +42,4 @@ dependency without a logged decision". -->
 <!-- Non-negotiables on the product side: deadline, budget, compliance, market.
 Technical constraints (runtime versions, latency budgets) live in techContext.md. -->
 
-- 
+-

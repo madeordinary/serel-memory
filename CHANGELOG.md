@@ -4,6 +4,19 @@ All notable changes to basecamp are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project aims to
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reaches 1.0.
 
+## [Unreleased]
+
+### Added
+
+- `.basecamp.json` provenance anchor: installs are now pinned and record the upstream
+  version they started from; `sync-upstream` reads the anchor for precise
+  what-changed-upstream reports, reconstructs a `"linked": true` anchor when missing,
+  and advances it after a sync. The allowlist test now also guarantees the anchor is
+  never in sync scope.
+- "What makes it different" section in the README.
+- Markdown lint (`markdownlint-cli2`) and link check (`lychee`) in CI; repo-wide
+  markdown cleanup to zero lint errors.
+
 ## [0.1.0] — 2026-05-30
 
 First tagged release. Pin to it with `npx degit gusfeliciano/basecamp#v0.1.0`.

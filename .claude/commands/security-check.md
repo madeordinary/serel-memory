@@ -38,7 +38,7 @@ For each, note: present / not applicable / concern.
 
 ## Output
 
-```
+```text
 SECURITY SUMMARY: [one line — overall risk read]
 
 HIGH RISK (block merge):
