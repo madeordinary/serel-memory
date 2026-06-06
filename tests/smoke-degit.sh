@@ -17,6 +17,12 @@ if [ -e "$tmp/memory-bank.local" ]; then
   echo "LEAK: memory-bank.local/ is present in the degit export"; fail=1
 fi
 
+# 1b. Maintainer-only research/roadmap docs are export-ignored (.gitattributes)
+# and must not ship into downstream projects' docs/ folder.
+if [ -e "$tmp/docs/research" ]; then
+  echo "LEAK: docs/research/ is present in the degit export (export-ignore broken)"; fail=1
+fi
+
 # 2. No basecamp-specific live dev content in the shipped bank or .rules.
 if grep -rniE '17/17|skill parity|basecamp framework is at|cherry-pick by commit in sync' \
      "$tmp/memory-bank" "$tmp/.rules" 2>/dev/null; then
