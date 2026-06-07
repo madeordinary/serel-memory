@@ -50,10 +50,17 @@ Use this skill when the user wants an independent Claude Code review while worki
    claude --version
    ```
 
-4. Run Claude in print/plan mode:
+4. Run Claude in print/plan mode. Write the prompt to a temp file and pipe it
+   via stdin — long inline prompts are unreliable as CLI arguments — in a
+   single shell invocation (shell state doesn't survive across tool calls):
 
    ```bash
-   claude -p --permission-mode plan "<prompt>"
+   PROMPT_FILE="$(mktemp)"
+   cat > "$PROMPT_FILE" <<'EOF'
+   ...the full prompt...
+   EOF
+   claude -p --permission-mode plan < "$PROMPT_FILE"
+   rm -f "$PROMPT_FILE"
    ```
 
 5. Summarize Claude's response for the user:

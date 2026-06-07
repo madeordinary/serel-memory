@@ -10,8 +10,43 @@ Review the current change for security issues. Be thorough but pragmatic — foc
 ## Workflow
 
 1. Run `git diff main...HEAD` (or `git diff` for uncommitted) to see what changed.
-2. Read modified files in full where context matters.
-3. Check against OWASP Top 10 + STRIDE.
+2. Launch the cross-agent pass in the background if it qualifies (see below) — before forming any findings of your own.
+3. Read modified files in full where context matters.
+4. Check against OWASP Top 10 + STRIDE.
+
+## Cross-agent pass (opportunistic)
+
+Security is exactly the category where a second model pays for itself — and
+the diff is often authored by the model now checking it. If `claude --version`
+succeeds and the diff is non-trivial (≥ 20 changed lines):
+
+1. Right after computing the diff (step 1), write a prompt file containing:
+   - the diff range
+   - the full OWASP + STRIDE checklist below
+   - the findings format — without the provenance tags or the dual/single-model
+     label line; you add those at merge
+   - a read-only instruction: do not edit files or run write operations
+
+   **Not your own findings** — Claude must check blind, or it will anchor on
+   your framing. Launch it in the background, capturing output to a file
+   (`docs/cross-agent-review.md` has the canonical background form; prefer
+   your harness's background facility over bare `&` if it has one):
+
+   ```bash
+   claude -p --permission-mode plan < "$PROMPT_FILE" > "$OUT_FILE" 2>&1 &
+   ```
+
+2. Do your own full pass and **draft your own findings before reading Claude's
+   output**.
+3. After your draft is done, wait up to ~90 seconds for Claude; if it hasn't
+   returned, proceed single-model and say so.
+4. Merge with provenance: tag every finding `[both]`, `[codex]`, or
+   `[claude]`. Verify `[claude]`-only findings against the actual code before
+   including them. Findings tagged `[both]` deserve extra weight — two models
+   independently agreeing is the strongest signal this workflow produces.
+
+This pass never blocks the check: if Claude is missing or slow, complete
+single-model and say so in the SECURITY SUMMARY.
 
 ## OWASP Top 10 pass
 
@@ -41,18 +76,21 @@ For each, note: present / not applicable / concern.
 
 ```text
 SECURITY SUMMARY: [one line — overall risk read]
+[dual-model check (Codex + Claude) | single-model check (reason)]
 
 HIGH RISK (block merge):
-- [file:line] [issue] → [fix]
+- [both|codex|claude] [file:line] [issue] → [fix]
 
 MEDIUM RISK (fix before prod):
-- [file:line] [issue] → [fix]
+- [both|codex|claude] [file:line] [issue] → [fix]
 
 LOW / NIT (track for later):
-- [file:line] [issue] → [fix]
+- [both|codex|claude] [file:line] [issue] → [fix]
 
 CHECKED & CLEAN: [list of categories checked and clean — to show coverage]
 ```
+
+Omit the provenance tags when the check was single-model.
 
 ## Rules
 

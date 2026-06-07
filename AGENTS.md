@@ -60,8 +60,9 @@ If a workflow does not yet have a Codex skill, read the corresponding `.claude/c
 
 For **high-impact or hard-to-reverse plans** — architecture changes, security or auth, data migrations, public API or schema changes, dependency choices — a second opinion from the other agent CLI is recommended before you implement:
 
-- **In Claude Code**: shell out to `codex exec --cd "$PWD" --sandbox read-only "<prompt>"` for a read-only Codex review.
-- **In Codex**: shell out to `claude -p --permission-mode plan "<prompt>"` for a read-only Claude review.
+- **In Claude Code**: shell out to `codex exec --cd "$PWD" --sandbox read-only - < prompt-file` for a read-only Codex review.
+- **In Codex**: shell out to `claude -p --permission-mode plan < prompt-file` for a read-only Claude review.
+- Write the prompt to a temp file first and pipe it via stdin — long inline prompts can hang `codex exec`.
 
 First check whether the other CLI is installed (`codex --version` / `claude --version`). If it is, get the review and present both the plan and the second opinion to the user. If it isn't, don't block — do a local self-critique instead and label it clearly (e.g. "Self-Critique — Codex unavailable") so the user knows no independent review happened. Never pretend the other agent reviewed it.
 
