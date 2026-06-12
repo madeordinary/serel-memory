@@ -34,6 +34,12 @@ jobs:
       - name: degit export ships clean templates
         run: tests/smoke-degit.sh
 
+      - name: Session read list agrees across AGENTS.md, /start, $start, hook
+        run: tests/check-readlist.sh
+
+      - name: sync-upstream template-mode procedure works end to end
+        run: tests/smoke-sync.sh
+
   docs:
     # Markdown hygiene for the prompt files themselves. Same repo guard as above —
     # downstream projects own their docs and shouldn't inherit these checks.
