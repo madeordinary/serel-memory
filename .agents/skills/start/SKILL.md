@@ -9,10 +9,12 @@ Use this skill to orient a Codex session around the basecamp memory bank.
 
 **Mode:** Check the arguments passed to this skill.
 
-- If empty, `quick`, or `brief` → use **Quick mode** (compact summary, saves tokens).
+- If empty, `quick`, or `brief` → use **Quick mode** (compact output; both modes read the same inputs).
 - If `full`, `onboard`, or `dashboard` → use **Full mode** (rich onboarding dashboard).
 
 ## Step 1 — Read the memory bank (both modes)
+
+**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), it is the working bank — read its files and its `.rules` instead of the tracked ones, skip files it doesn't contain (intent lives in `README.md`/`docs/`), and don't report the blank tracked templates as uninitialized. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
 1. Read every file in `memory-bank/` in this order:
    - `projectbrief.md`

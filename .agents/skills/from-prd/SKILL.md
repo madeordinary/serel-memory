@@ -7,6 +7,8 @@ description: "Seed memory-bank files from an existing PRD, product brief, spec, 
 
 Use this skill when a project has a PRD, product brief, strategy doc, or similar source document, but little or no code yet. This sits between `$discover` for rough ideas and `$init-memory` for existing codebases.
 
+**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), it is the working bank — the substantive-content check and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+
 ## Workflow
 
 1. Determine the PRD path.

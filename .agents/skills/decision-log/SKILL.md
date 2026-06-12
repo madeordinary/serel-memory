@@ -7,6 +7,8 @@ description: "Record an architectural, product, workflow, or operational decisio
 
 Use this skill to record a durable decision. Significant decisions should get an ADR in `docs/decisions/` and a short index entry in `memory-bank/decisionLog.md`.
 
+**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), all memory-bank reads and writes below target it instead of the tracked templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+
 ## Workflow
 
 1. If the decision is not clear, ask: **"What's the decision you want to record?"**

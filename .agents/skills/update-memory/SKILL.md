@@ -7,6 +7,8 @@ description: "Refresh memory-bank files after a work session. Use when the user 
 
 Use this skill to update the memory bank from the current session. Always show proposed diffs before writing.
 
+**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), all reads and writes below target it and its `.rules` — never the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+
 ## Workflow
 
 1. Read every file in `memory-bank/` and `.rules`.

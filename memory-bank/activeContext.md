@@ -19,6 +19,11 @@
 
 1.
 
+## Checkpoint
+
+<!-- Only while work spans sessions: ONE resumable state — branch, what's done,
+     the exact next step. Overwrite it, don't append. Clear it when the work ships. -->
+
 ## Open questions
 
 <!-- Anything unresolved that's blocking or shaping the work. -->

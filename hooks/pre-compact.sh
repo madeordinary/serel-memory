@@ -28,10 +28,17 @@ Context is about to be compacted. Earlier conversation history will be summarize
 and details may be lost. Before that happens, refresh the memory bank so this
 session's work is preserved:
 
+Note: if `memory-bank.local/` exists (upstream basecamp development), it is the
+effective bank — apply all of the updates below to `memory-bank.local/` and its
+`.rules`, never to the tracked starter templates.
+
 1. Update `memory-bank/activeContext.md` to reflect:
    - Current focus
    - Recent changes (top of the list, most recent first)
    - Next steps
+   - If multi-session work is underway, the `## Checkpoint` section — one
+     resumable state (branch, what's done, exact next step), overwritten
+     in place
    - Any new open questions
 
 2. Update `memory-bank/progress.md`:

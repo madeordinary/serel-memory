@@ -19,8 +19,25 @@ fi
 ROOT="${CLAUDE_PROJECT_DIR:-$PWD}"
 
 # Bail quietly if there's no memory bank — basecamp isn't installed here
-if [ ! -d "$ROOT/memory-bank" ]; then
+if [ ! -d "$ROOT/memory-bank" ] && [ ! -d "$ROOT/memory-bank.local" ]; then
   exit 0
+fi
+
+# Maintainer overlay: upstream basecamp development keeps its real working
+# bank in gitignored memory-bank.local/ (the tracked memory-bank/ ships as
+# blank starter templates). When the overlay exists, it IS the effective bank.
+# Downstream projects never have this directory.
+BANK_DIR="$ROOT/memory-bank"
+BANK_LABEL="memory-bank"
+RULES_FILE="$ROOT/.rules"
+RULES_LABEL=".rules"
+if [ -d "$ROOT/memory-bank.local" ]; then
+  BANK_DIR="$ROOT/memory-bank.local"
+  BANK_LABEL="memory-bank.local"
+  if [ -f "$ROOT/memory-bank.local/.rules" ]; then
+    RULES_FILE="$ROOT/memory-bank.local/.rules"
+    RULES_LABEL="memory-bank.local/.rules"
+  fi
 fi
 
 cat <<'HEADER'
@@ -34,9 +51,9 @@ code, the code is correct and the bank needs updating — flag this to the user.
 HEADER
 
 for f in projectbrief productContext systemPatterns techContext decisionLog activeContext progress; do
-  file="$ROOT/memory-bank/$f.md"
+  file="$BANK_DIR/$f.md"
   if [ -f "$file" ]; then
-    echo "### memory-bank/$f.md"
+    echo "### $BANK_LABEL/$f.md"
     echo ""
     cat "$file"
     echo ""
@@ -44,10 +61,10 @@ for f in projectbrief productContext systemPatterns techContext decisionLog acti
   fi
 done
 
-if [ -f "$ROOT/.rules" ]; then
-  echo "### .rules"
+if [ -f "$RULES_FILE" ]; then
+  echo "### $RULES_LABEL"
   echo ""
-  cat "$ROOT/.rules"
+  cat "$RULES_FILE"
   echo ""
 fi
 

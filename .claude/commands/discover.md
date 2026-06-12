@@ -10,6 +10,8 @@ This is the inverse of `/init-memory`. That command analyzes existing code. This
 
 First, check whether the project already has substantive memory bank content. If `memory-bank/projectbrief.md` has real content beyond the template placeholders, this is the wrong command — point the user toward `/breakdown` or `/start` instead. Otherwise, proceed.
 
+**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), it is the working bank — the check above and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+
 ## Phase 1 — Open prompt
 
 Start with this, more or less verbatim:

@@ -19,11 +19,24 @@ Then read the last 5–10 git commits for recent context.
 
 If the task clearly touches a specific feature, integration, deployment path, testing strategy, or API, look for relevant optional docs under `memory-bank/` and read only the ones that apply.
 
-If any memory bank file is missing, empty, or still only template placeholders, note it and ask the user before proceeding.
+If any memory bank file is missing, empty, or still only template placeholders, note it and ask the user before proceeding. On a fresh install the bank *starts* blank by design — seed it with `/discover` (no code yet), `/init-memory` (code exists), or `/from-prd` (a spec exists) before relying on it.
+
+Tip: `bash hooks/enable-hooks.sh` registers an optional SessionStart hook that auto-loads the bank so you don't need `/start` every session (see `hooks/README.md`).
+
+### Maintainer overlay (upstream basecamp development only)
+
+If a `memory-bank.local/` directory exists, you are working on the upstream basecamp repo itself. That directory is the real working bank (gitignored, never shipped), and it **is** the effective bank:
+
+- Read files from `memory-bank.local/` instead of `memory-bank/`, and `memory-bank.local/.rules` instead of root `.rules`.
+- The overlay is partial by design. For core files it doesn't contain (projectbrief, productContext, systemPatterns, techContext), `README.md` and `docs/` carry project intent — do not flag the blank tracked templates as uninitialized.
+- Write session state (activeContext, progress, decisionLog, rules) only to the overlay. The tracked `memory-bank/` and `.rules` are clean starter templates shipped downstream and are guarded by tests — never write maintainer state to them.
+
+Downstream projects never have this directory; everything else in this file refers to the effective bank.
 
 ## While working
 
 - Keep `activeContext.md` honest as the focus shifts during the session.
+- For work that spans sessions, keep a `## Checkpoint` section in `activeContext.md` current: one resumable state (branch, what's done, the exact next step). Overwrite it, don't append; clear it when the work ships.
 - When you discover a non-obvious pattern or user preference, append it to `.rules`.
 - Before significant work, propose a plan and wait for confirmation.
 - The memory bank is the source of truth for intent. If it conflicts with the actual code, the code is correct and the bank needs updating — flag this so the user can decide.

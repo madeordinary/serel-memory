@@ -7,6 +7,8 @@ description: "Initialize memory-bank files by analyzing an existing codebase. Us
 
 Use this skill when basecamp has been dropped into an existing project and the memory bank is still uninitialized.
 
+**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), it is the working bank — the uninitialized check and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+
 ## Workflow
 
 1. Map the repo structure with fast shell tools. Skip `node_modules/`, `.git/`, `dist/`, and `build/`.

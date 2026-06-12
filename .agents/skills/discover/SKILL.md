@@ -9,6 +9,8 @@ Use this skill at the start of a new project when the user has an idea but has n
 
 First check whether `memory-bank/projectbrief.md` already has substantive content beyond template placeholders. If it does, point the user toward `$start` or planning instead.
 
+**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), it is the working bank — the check above and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+
 ## Phase 1 - Open Prompt
 
 Ask:

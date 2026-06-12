@@ -7,6 +7,8 @@ description: "Run a sprint or weekly retrospective from the memory bank and git 
 
 Run a retrospective pulling from the memory bank and git activity so the conversation starts from facts, not vibes.
 
+**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), all memory-bank and `.rules` reads and writes below target it instead of the tracked templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+
 ## Workflow
 
 1. Ask the user for the timeframe if not obvious: "Retro on the last week, the last sprint, since the last retro? Default: last 7 days."

@@ -6,6 +6,8 @@ description: Initialize the memory bank by analyzing the existing codebase
 
 Use this when basecamp has just been dropped into an existing project and the memory bank files are still empty or template-only. You'll read the codebase and propose what each file should contain — the user reviews and edits before anything gets written.
 
+**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), it is the working bank — the empty/template-only check and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+
 Steps:
 
 1. Read the repo structure. Use `ls` and `find` to map the top-level layout. Skip `node_modules/`, `.git/`, `dist/`, `build/`.

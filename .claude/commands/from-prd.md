@@ -12,6 +12,8 @@ This sits between `/discover` and `/init-memory`:
 - `/from-prd` is for a project with a PRD or brief but no meaningful code yet.
 - `/init-memory` is for an existing codebase.
 
+**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), it is the working bank — the substantive-content check and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+
 ## Steps
 
 1. Determine the PRD path.
