@@ -15,7 +15,7 @@ Then produce a plan that contains, in this order:
 
 1. **Goal** — one sentence; what success looks like.
 2. **Scope** — which files, components, or areas you'll touch. Be specific (paths, function names).
-3. **Steps** — 3–7 concrete steps, each a single verb (add, refactor, test, document, deploy).
+3. **Steps** — 3–7 concrete steps, each starting with a verb (add, refactor, test, document, deploy) and ending with `→ verify: [how you'll know it worked]`. Reframe imperative steps as verifiable goals — "add validation" becomes "write tests for invalid inputs, then make them pass".
 4. **Risks & unknowns** — what could go wrong, what you'd need to verify first, what assumptions you're making.
 5. **Out of scope** — things you'll deliberately NOT do, in case the user wants them too.
 
@@ -51,4 +51,5 @@ Rules:
 
 - If the plan is longer than 7 steps, the task is too big — recommend splitting it.
 - If you have to assume something material, say so explicitly. Don't bury assumptions inside step descriptions.
+- If the request has more than one reasonable interpretation, lay them out and ask which one — don't silently pick.
 - If the memory bank, including `decisionLog.md`, doesn't have enough context for the plan, say what's missing and ask before guessing.

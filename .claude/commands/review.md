@@ -76,6 +76,8 @@ At minimum, check for:
 - **Naming & clarity** — are names accurate; could a new reader follow this?
 - **Error handling** — are failure paths handled or documented?
 - **Side effects** — unintended changes, leftover `console.log` / debug prints?
+- **Scope discipline** — does every changed line trace to the task? Any drive-by refactors, reformatting, or deletion of code the change didn't require?
+- **Simplicity** — overcomplication, speculative abstractions, unrequested config/flexibility, or error handling for impossible cases? Could it be substantially smaller?
 - **Security** — input validation, secrets in code, auth bypasses?
 - **Performance** — obvious O(n²), N+1, or unbounded growth?
 

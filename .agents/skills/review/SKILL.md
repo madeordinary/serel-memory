@@ -28,6 +28,8 @@ Use this skill to review code or a proposed change. Take a code-review stance: f
    - Naming and clarity
    - Error handling
    - Side effects and leftover debug code
+   - Scope discipline — does every changed line trace to the task; any drive-by refactors or unrequested deletions
+   - Simplicity — overcomplication, speculative abstractions, or config that was not requested
    - Security and secret leakage
    - Performance pitfalls
    - Alignment with memory-bank intent and decisions

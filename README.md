@@ -53,7 +53,7 @@ Memory banks aren't new — basecamp's own is adapted from [Cline's](https://git
 
 ```text
 your-project/
-├── AGENTS.md               # bootstrap — tells the agent how to read the bank
+├── AGENTS.md               # bootstrap — how to read the bank + make changes
 ├── CLAUDE.md               # @AGENTS.md import for Claude Code
 ├── .basecamp.json          # provenance anchor — which upstream version you started from
 ├── .rules                  # learning journal — patterns & preferences

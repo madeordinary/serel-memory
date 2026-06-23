@@ -29,9 +29,9 @@ SCOPE:
 [specific files, components, or areas likely to change]
 
 STEPS:
-1. [verb + concrete action]
-2. [verb + concrete action]
-3. [verb + concrete action]
+1. [verb + concrete action] -> verify: [how you'll know it worked]
+2. [verb + concrete action] -> verify: [how you'll know it worked]
+3. [verb + concrete action] -> verify: [how you'll know it worked]
 
 RISKS & UNKNOWNS:
 - [risk, assumption, or validation gap]
@@ -69,6 +69,8 @@ Then end with: **"Want me to proceed, or change something first?"** and wait.
 ## Rules
 
 - Keep plans to 3-7 steps. If the work is larger, recommend splitting it.
+- Each step ends with `-> verify: [check]`. Reframe imperative steps as verifiable goals ("add validation" -> "write tests for invalid inputs, then make them pass").
 - Say material assumptions explicitly.
+- If the request has more than one reasonable interpretation, lay them out and ask which one — don't silently pick.
 - If the memory bank is blank, stale, or contradictory, say what is missing before guessing.
 - Do not start implementation until the user confirms.
