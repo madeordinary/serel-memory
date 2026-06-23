@@ -16,6 +16,17 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 - "What makes it different" section in the README.
 - Markdown lint (`markdownlint-cli2`) and link check (`lychee`) in CI; repo-wide
   markdown cleanup to zero lint errors.
+- "Making changes" guidance in `AGENTS.md`: four execution-discipline principles
+  (think before coding, simplicity first, surgical changes, goal-driven execution)
+  read every session by both CLIs — distilled from Andrej Karpathy's observations
+  on LLM coding pitfalls and `multica-ai/andrej-karpathy-skills` (MIT).
+
+### Changed
+
+- `breakdown` now attaches a `verify:` check to each step, reframes imperative
+  steps as verifiable goals, and surfaces multiple interpretations instead of
+  silently picking one. `review` gains explicit simplicity and scope-discipline
+  checks. Both updates apply to the Claude command and the Codex skill.
 
 ## [0.1.0] — 2026-05-30
 
