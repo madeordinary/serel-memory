@@ -20,6 +20,15 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
   (think before coding, simplicity first, surgical changes, goal-driven execution)
   read every session by both CLIs — distilled from Andrej Karpathy's observations
   on LLM coding pitfalls and `multica-ai/andrej-karpathy-skills` (MIT).
+- Cross-agent review upgrades, validated by real downstream usage: anchored plan
+  reviews now end with a greppable `VERDICT: APPROVE | REVISE | RETHINK` line
+  (requested by the `ask-codex`/`ask-claude` prompts and defined in the contract
+  doc); the diff-native `codex review` subcommand is documented
+  (`--uncommitted`/`--base`/`--commit`, including its no-staged-only caveat);
+  `--output-last-message` is noted as a lighter output-capture aid; a
+  no-model-pinning policy bullet keeps prompts and docs from going stale; and an
+  opt-in **mandatory review gate** preset is documented for teams that want a
+  hard gate — the shipped "recommended" default is unchanged.
 
 ### Changed
 
@@ -27,6 +36,12 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
   steps as verifiable goals, and surfaces multiple interpretations instead of
   silently picking one. `review` gains explicit simplicity and scope-discipline
   checks. Both updates apply to the Claude command and the Codex skill.
+- The `AGENTS.md` working agreement is refined from downstream field use:
+  plan-level approval now comes with lane-level autonomy (no per-file
+  re-asking inside an approved scope); surgical changes gain a bounded
+  "fix the class, not just the instance" sibling-sweep exception; and
+  goal-driven execution adds "judge gates by exit code, never by grepping
+  output for success strings".
 
 ## [0.1.0] — 2026-05-30
 

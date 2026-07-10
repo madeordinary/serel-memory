@@ -41,6 +41,7 @@ This workflow shells out to the Codex CLI. It does not require MCP.
    RISKS:
    SUGGESTED CHANGES:
    QUESTIONS:
+   VERDICT: APPROVE | REVISE | RETHINK
 
    <plan/artifact/context>
    ```

@@ -38,7 +38,7 @@ Downstream projects never have this directory; everything else in this file refe
 - Keep `activeContext.md` honest as the focus shifts during the session.
 - For work that spans sessions, keep a `## Checkpoint` section in `activeContext.md` current: one resumable state (branch, what's done, the exact next step). Overwrite it, don't append; clear it when the work ships.
 - When you discover a non-obvious pattern or user preference, append it to `.rules`.
-- Before significant work, propose a plan and wait for confirmation.
+- Before significant work, propose a plan and wait for confirmation. Once a plan or scope is approved, work autonomously inside that lane — no per-file re-asking; still stop for destructive actions, scope changes, and outward-facing actions.
 - The memory bank is the source of truth for intent. If it conflicts with the actual code, the code is correct and the bank needs updating — flag this so the user can decide.
 
 ## Making changes
@@ -47,8 +47,8 @@ How code gets written in a session, not just how the bank is kept. For non-trivi
 
 - **Think before coding.** Don't assume — surface assumptions; if a request has more than one reasonable interpretation, present them instead of silently picking; push back when a simpler path exists; stop and ask when something is unclear.
 - **Simplicity first.** Write the minimum that solves the problem — no speculative features, abstractions for single-use code, unrequested config, or error handling for impossible cases. Test: would a senior engineer call this overcomplicated?
-- **Surgical changes.** Touch only what the task needs; don't refactor or reformat adjacent code; match existing style even if you'd do it differently; mention unrelated dead code rather than deleting it. Test: every changed line traces to the request.
-- **Goal-driven execution.** Turn the task into a verifiable goal and loop until it's met — e.g. "fix the bug" → "write a failing test, then make it pass." Strong success criteria let you work independently; weak ones ("make it work") force constant clarification.
+- **Surgical changes.** Touch only what the task needs; don't refactor or reformat adjacent code; match existing style even if you'd do it differently; mention unrelated dead code rather than deleting it. Test: every changed line traces to the request. One exception — fix the class, not just the instance: when your fix repairs one occurrence of a defect that repeats at sibling sites, sweep for the siblings and fix or explicitly rule out each, bounded to the same demonstrated root cause and the same safe fix; anything broader is a scope change to surface first.
+- **Goal-driven execution.** Turn the task into a verifiable goal and loop until it's met — e.g. "fix the bug" → "write a failing test, then make it pass." Strong success criteria let you work independently; weak ones ("make it work") force constant clarification. Judge gates (tests, typecheck, lint, build) by exit code, not by scanning their output for success strings — grepping can pass a failing check.
 
 ## When the user says "update memory bank"
 

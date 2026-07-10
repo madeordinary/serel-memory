@@ -40,6 +40,7 @@ Use this skill when the user wants an independent Claude Code review while worki
    RISKS:
    SUGGESTED CHANGES:
    QUESTIONS:
+   VERDICT: APPROVE | REVISE | RETHINK
 
    <plan/artifact/context>
    ```

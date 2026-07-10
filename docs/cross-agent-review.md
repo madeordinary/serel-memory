@@ -8,6 +8,7 @@ their CLIs. This is intentionally a thin workflow, not a full orchestrator.
 - Reach for a review on high-impact or hard-to-reverse plans (architecture, security/auth, data migrations, public API or schema, dependency choices). For routine changes it's optional — it's a tool, not a tax.
 - Check the other CLI exists first; if it doesn't, do a labeled local self-critique rather than blocking.
 - Default to one read-only review.
+- Don't pin the secondary CLI's model or effort flags, and don't hardcode model names in prompts or docs — inherit that CLI's own defaults so upgrades flow through without leaving stale claims behind.
 - Use a loop only when the user explicitly asks for debate, back-and-forth, or a loop.
 - Cap loops at 2 rounds by default.
 - Cap at 3 rounds only when the user explicitly asks.
@@ -27,7 +28,12 @@ DISAGREEMENTS:
 RISKS:
 SUGGESTED CHANGES:
 QUESTIONS:
+VERDICT: APPROVE | REVISE | RETHINK
 ```
+
+The one-line verdict makes review outcomes greppable and comparable across
+rounds. It describes this review round only — it is not a plan lifecycle
+status, and it never overrides the user's decision.
 
 Blind generative touchpoints (a parallel code review, security pass, or bank
 audit) return the calling workflow's own findings format instead — there is
@@ -110,8 +116,34 @@ prefer it over bare `&` — it tracks completion for you. At merge time read
 single-model and kill the straggler (`kill "$XAGENT_PID"`). Clean up
 `$OUT_FILE` after the merge.
 
+For a lighter capture, `codex exec` also accepts
+`--output-last-message <file>`, which writes only the final message. The
+stdout redirect above remains the canonical capture — it preserves the run's
+diagnostics for the case where the review fails or comes back empty.
+
 The prompt file lives in the shared temp dir until cleanup — never write
 secrets, credentials, or private data into it.
+
+## Diff reviews: `codex review`
+
+For reviewing a git diff (as opposed to a plan or prompt), Codex ships a
+diff-native subcommand that needs no prompt file:
+
+```bash
+codex review --uncommitted   # working tree: staged + unstaged + untracked
+codex review --base main     # everything on the branch vs a base branch
+codex review --commit <sha>  # a single commit
+```
+
+- `--uncommitted` reviews staged, unstaged, **and** untracked changes
+  together — there is no staged-only mode. A workflow that must review
+  exactly what is staged still composes its own prompt over an explicit
+  `git diff --staged` instead.
+- Preflight with `codex review --help`, the same way `codex exec` is
+  preflighted.
+- There is no `claude review` equivalent; diff reviews in the reverse
+  direction keep using `claude -p --permission-mode plan < prompt-file`
+  with the diff included in the prompt file.
 
 ## Touchpoint patterns
 
@@ -138,3 +170,29 @@ secondary-CLI touchpoint, follow these rules:
   where a second model earns its cost.
 - **Never block, never pretend.** If the secondary CLI is missing, slow, or
   unauthenticated, complete single-model and label the output accordingly.
+
+## Optional preset: mandatory review gate
+
+The shipped default stays "recommended for high-impact plans" — review is a
+tool, not a tax. Teams that want a hard gate instead can adopt this policy as
+a working agreement for their agents (it is prose policy, not a git hook):
+
+```text
+Cross-agent review is a mandatory gate: every plan and every non-trivial
+code diff gets a second-CLI review before commit.
+- Exemptions: typo/comment-only edits and memory-bank docs commits.
+- Every finding is folded in or explicitly disposed of before committing.
+  A fix for a failed check is still a diff, so it gets reviewed too — "it's
+  only a CI fix" is not an exemption.
+- If the secondary CLI is missing or errors, the gate does not silently
+  pass: do a labeled self-critique, ask the user for an explicit waiver,
+  and record the waiver in the commit body.
+- The gate blocks the commit, not the work: launch the review in the
+  background and keep working while it runs.
+```
+
+Where to put it: pasting it into the project's `AGENTS.md`/`CLAUDE.md` works,
+but those files are in the sync-upstream allowlist, so the addition will
+surface as a local modification to review on every future sync. The effective
+`.rules` file (never synced) is the drift-free home. Adopting the preset does
+not change basecamp's shipped default.
