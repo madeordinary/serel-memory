@@ -179,6 +179,14 @@ secondary-CLI touchpoint, follow these rules:
   where a second model earns its cost.
 - **Never block, never pretend.** If the secondary CLI is missing, slow, or
   unauthenticated, complete single-model and label the output accordingly.
+- **Patience scales with intent.** The bounded-timeout-and-kill rule above is
+  for opportunistic background passes. When the user explicitly asked for the
+  review, a long run is usually thoroughness, not a hang — high-effort
+  configurations legitimately take minutes, and web search runs server-side,
+  unaffected by the local sandbox. Before killing a requested review, check
+  the captured output file: if it is still growing, let it finish. Don't
+  lower the secondary CLI's reasoning effort to make reviews faster — that
+  trades away the judgment the review exists to provide.
 
 ## Optional preset: mandatory review gate
 

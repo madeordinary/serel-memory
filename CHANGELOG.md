@@ -29,6 +29,10 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
   no-model-pinning policy bullet keeps prompts and docs from going stale; and an
   opt-in **mandatory review gate** preset is documented for teams that want a
   hard gate — the shipped "recommended" default is unchanged.
+- Cross-agent doc: "patience scales with intent" — user-requested reviews get
+  time to finish (check the captured output file for growth before killing a
+  long run; web search runs server-side, so sandboxing doesn't stall it); the
+  hard timeout applies to opportunistic background passes only.
 
 ### Changed
 
