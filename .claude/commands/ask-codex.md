@@ -66,6 +66,7 @@ This workflow shells out to the Codex CLI. It does not require MCP.
    ```
 
 5. Summarize Codex's response for the user:
+   - Verdict (APPROVE / REVISE / RETHINK)
    - Agreements
    - Gaps or disagreements
    - Plan changes worth adopting

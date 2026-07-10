@@ -31,9 +31,12 @@ QUESTIONS:
 VERDICT: APPROVE | REVISE | RETHINK
 ```
 
-The one-line verdict makes review outcomes greppable and comparable across
-rounds. It describes this review round only — it is not a plan lifecycle
-status, and it never overrides the user's decision.
+Pick exactly one. APPROVE means the plan is sound to proceed as written;
+REVISE means there are fixable issues to address before proceeding; RETHINK
+means the approach itself is wrong. The one-line verdict makes review
+outcomes greppable and comparable across rounds. It describes this review
+round only — it is not a plan lifecycle status, and it never overrides the
+user's decision.
 
 Blind generative touchpoints (a parallel code review, security pass, or bank
 audit) return the calling workflow's own findings format instead — there is
@@ -141,9 +144,15 @@ codex review --commit <sha>  # a single commit
   `git diff --staged` instead.
 - Preflight with `codex review --help`, the same way `codex exec` is
   preflighted.
-- There is no `claude review` equivalent; diff reviews in the reverse
-  direction keep using `claude -p --permission-mode plan < prompt-file`
-  with the diff included in the prompt file.
+- basecamp's own `review` and `security-check` workflows keep the
+  prompt-file form — they need a custom checklist, a blind independent
+  pass, and their own output contract. `codex review` is the direct path
+  for ad-hoc diff reviews outside those workflows.
+- There is no local `claude review` twin (`claude ultrareview` exists but
+  is a cloud-hosted multi-agent review, not a quick local gate); diff
+  reviews in the reverse direction keep using
+  `claude -p --permission-mode plan < prompt-file` with the diff included
+  in the prompt file.
 
 ## Touchpoint patterns
 
@@ -184,15 +193,20 @@ code diff gets a second-CLI review before commit.
 - Every finding is folded in or explicitly disposed of before committing.
   A fix for a failed check is still a diff, so it gets reviewed too — "it's
   only a CI fix" is not an exemption.
+- Re-review converges like a loop: after two rounds on the same change,
+  stop and escalate the remaining disagreement to the user instead of
+  iterating.
 - If the secondary CLI is missing or errors, the gate does not silently
   pass: do a labeled self-critique, ask the user for an explicit waiver,
   and record the waiver in the commit body.
-- The gate blocks the commit, not the work: launch the review in the
-  background and keep working while it runs.
+- Plan reviews come before implementation; diff reviews come before
+  commit. The diff gate blocks the commit, not the work: launch the
+  review in the background and keep working while it runs.
 ```
 
-Where to put it: pasting it into the project's `AGENTS.md`/`CLAUDE.md` works,
-but those files are in the sync-upstream allowlist, so the addition will
-surface as a local modification to review on every future sync. The effective
-`.rules` file (never synced) is the drift-free home. Adopting the preset does
-not change basecamp's shipped default.
+Where to put it: the effective `.rules` file is the drift-free home — it is
+never in sync scope. `AGENTS.md` also works (both CLIs read it), but it is
+in the sync-upstream allowlist: template-mode syncs will list your addition
+as a local difference to review on each run, and fork-mode syncs can
+conflict when upstream changes the same file. Adopting the preset does not
+change basecamp's shipped default.

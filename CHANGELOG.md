@@ -22,8 +22,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
   on LLM coding pitfalls and `multica-ai/andrej-karpathy-skills` (MIT).
 - Cross-agent review upgrades, validated by real downstream usage: anchored plan
   reviews now end with a greppable `VERDICT: APPROVE | REVISE | RETHINK` line
-  (requested by the `ask-codex`/`ask-claude` prompts and defined in the contract
-  doc); the diff-native `codex review` subcommand is documented
+  (defined in the contract doc; requested by the `ask-codex`/`ask-claude` and
+  `breakdown` cross-agent prompts and enforced by the parity test); the diff-native `codex review` subcommand is documented
   (`--uncommitted`/`--base`/`--commit`, including its no-staged-only caveat);
   `--output-last-message` is noted as a lighter output-capture aid; a
   no-model-pinning policy bullet keeps prompts and docs from going stale; and an

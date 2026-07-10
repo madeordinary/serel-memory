@@ -65,6 +65,7 @@ Use this skill when the user wants an independent Claude Code review while worki
    ```
 
 5. Summarize Claude's response for the user:
+   - Verdict (APPROVE / REVISE / RETHINK)
    - Agreements
    - Gaps or disagreements
    - Plan changes worth adopting

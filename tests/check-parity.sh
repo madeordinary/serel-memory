@@ -85,6 +85,17 @@ if grep -rnE '(codex exec|claude -p).*"<' .claude/commands .agents/skills AGENTS
   echo "INLINE PROMPT: cross-agent invocation passes the prompt inline (lines above) — use the temp-file stdin form"; fail=1
 fi
 
+# Anchored-review verdict contract: any file that inlines the anchored output
+# contract, plus both breakdown plan-review adapters, must carry the exact
+# verdict line — otherwise the verdict vocabulary silently forks per adapter.
+VERDICT_LINE='VERDICT: APPROVE | REVISE | RETHINK'
+for f in $(grep -rl 'SUGGESTED CHANGES:' .claude/commands .agents/skills docs/cross-agent-review.md) \
+         .claude/commands/breakdown.md .agents/skills/breakdown/SKILL.md; do
+  if ! grep -qF "$VERDICT_LINE" "$f"; then
+    echo "CONTRACT DRIFT: $f is missing the exact '$VERDICT_LINE' line"; fail=1
+  fi
+done
+
 if [ "$fail" -eq 0 ]; then
   echo "parity OK: $cmd_count commands <-> $skill_count skills (all paired, manifests present, $xagent_pairs cross-agent pairs symmetric, invocations read-only + file-piped)"
 fi

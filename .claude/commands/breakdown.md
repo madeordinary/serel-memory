@@ -24,7 +24,7 @@ Then produce a plan that contains, in this order:
 For high-impact or hard-to-reverse plans (architecture, security/auth, data migrations, public API or schema, dependency choices), get a Codex second opinion before presenting to the user. For routine changes it's optional — use judgment.
 
 1. Check whether Codex is available: `codex --version`
-2. If it is, build a concise prompt with the plan, the goal, and enough project context for a meaningful review, then run Codex in read-only mode. Write the prompt to a temp file and pipe it — long inline prompts can hang `codex exec` — in a single shell invocation (shell state doesn't survive across tool calls):
+2. If it is, build a concise prompt with the plan, the goal, and enough project context for a meaningful review, asking it to end with a one-line verdict (`VERDICT: APPROVE | REVISE | RETHINK`, pick exactly one), then run Codex in read-only mode. Write the prompt to a temp file and pipe it — long inline prompts can hang `codex exec` — in a single shell invocation (shell state doesn't survive across tool calls):
 
    ```bash
    PROMPT_FILE="$(mktemp)"
@@ -36,6 +36,7 @@ For high-impact or hard-to-reverse plans (architecture, security/auth, data migr
    ```
 
 3. Append a **Second Opinion (Codex)** section to the plan output:
+   - Verdict (APPROVE / REVISE / RETHINK)
    - Agreements
    - Disagreements or gaps
    - Suggested changes worth adopting
