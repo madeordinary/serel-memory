@@ -1,6 +1,6 @@
 # Cross-Agent Review
 
-Basecamp supports optional second opinions between Claude Code and Codex through
+Serel Memory supports optional second opinions between Claude Code and Codex through
 their CLIs. This is intentionally a thin workflow, not a full orchestrator.
 
 ## Policy
@@ -69,6 +69,57 @@ critique instead. Do not pretend another model reviewed the work.
 - Codex review from Claude: prefer `codex exec --cd "$PWD" --sandbox read-only -` (prompt via stdin — see Canonical invocation below).
 - Treat sandboxing and plan mode as defense in depth. The prompt still must say
   not to edit files or run write operations.
+
+## Claude Code Web branch fallback
+
+When the local Claude invocation is unavailable, an owner-authorized Claude
+Code Web session can perform the independent review if organizational policy
+permits cloud sessions and the repository is already authorized through
+GitHub. This is an explicit fallback, not a way to route around a tenant or
+data-handling restriction.
+
+Web sessions start from a fresh clone, so they can see committed and pushed
+repository state, not a local working tree. The safe review flow is:
+
+1. Put the exact review state on a dedicated branch and push it.
+2. Record the branch name, expected HEAD SHA, and exact diff base or range.
+3. Start a **fresh** Claude Code Web session and select that repository and
+   branch. Fresh context preserves the independence of the review.
+4. Tell Claude to run `git rev-parse HEAD` first and stop if it does not match
+   the expected SHA.
+5. Make the boundary explicit: read-only review; no edits, commits, pushes,
+   PRs, deployments, secrets, environment files, production data, or customer
+   data. Give it the relevant artifact paths and the expected output contract.
+6. Bring the result back to the primary agent. Verify every proposed finding
+   against the repository before folding it in.
+7. If the reviewed state changes, push the new SHA and review that final state;
+   a verdict for an older SHA does not cover the new diff.
+
+A compact starting prompt is:
+
+```text
+Perform a fresh, independent, read-only review.
+
+Repository: <owner/repo>
+Branch: <review-branch>
+Expected HEAD: <full-sha>
+Review range: <base>..<head>
+
+First confirm git rev-parse HEAD matches Expected HEAD. Stop on a mismatch.
+Do not edit files, commit, push, open a PR, deploy, or access secrets,
+environment files, production systems, logs, or customer data.
+
+Independently verify the artifact against repository source. Treat prior
+reviews as claims, not evidence. Return the workflow's normal findings format
+and verdict, then state explicitly that you made no edits, commits, or pushes.
+```
+
+This fallback changes what must be remote, not what counts as approved. A
+review-only commit is not authorization to merge or release. If a project's
+policy literally requires review before *any* commit, the owner must explicitly
+allow a review-only branch commit or use the local CLI path instead. Anthropic's
+[Claude Code Web documentation](https://code.claude.com/docs/en/claude-code-on-the-web)
+describes the fresh-clone and pushed-branch behavior.
 
 ## Canonical invocation
 
@@ -144,7 +195,7 @@ codex review --commit <sha>  # a single commit
   `git diff --staged` instead.
 - Preflight with `codex review --help`, the same way `codex exec` is
   preflighted.
-- basecamp's own `review` and `security-check` workflows keep the
+- Serel Memory's own `review` and `security-check` workflows keep the
   prompt-file form — they need a custom checklist, a blind independent
   pass, and their own output contract. `codex review` is the direct path
   for ad-hoc diff reviews outside those workflows.
@@ -217,4 +268,4 @@ never in sync scope. `AGENTS.md` also works (both CLIs read it), but it is
 in the sync-upstream allowlist: template-mode syncs will list your addition
 as a local difference to review on each run, and fork-mode syncs can
 conflict when upstream changes the same file. Adopting the preset does not
-change basecamp's shipped default.
+change Serel Memory's shipped default.

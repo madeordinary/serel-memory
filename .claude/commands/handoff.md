@@ -10,7 +10,7 @@ Steps:
 
 1. Read every file in `memory-bank/` for full project context.
 2. Read `.rules` for non-obvious patterns and preferences.
-3. Read the project's `README.md` (the user-facing one, not basecamp's).
+3. Read the project's `README.md` (the user-facing one, not Serel Memory's).
 4. Scan `docs/` if it exists, especially `docs/decisions/` and `docs/runbooks/`.
 5. Run `git log --oneline -30` for recent history.
 6. Note any open TODOs, FIXMEs, or in-progress branches.

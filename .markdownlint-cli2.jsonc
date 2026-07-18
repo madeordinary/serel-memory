@@ -1,5 +1,5 @@
 {
-  // basecamp is a prose-heavy prompt framework — lint for correctness (broken
+  // Serel Memory is a prose-heavy prompt framework — lint for correctness (broken
   // structure, malformed lists/fences), not style nits that fight readable prompts.
   "config": {
     "default": true,

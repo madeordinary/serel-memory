@@ -1,6 +1,6 @@
-# basecamp hooks
+# Serel Memory hooks
 
-These hooks automate part of basecamp's memory workflow. They're **off by default** — you opt in per project.
+These hooks automate part of Serel Memory's workflow. They're **off by default** — you opt in per project.
 
 ## What's here
 
@@ -34,12 +34,19 @@ This writes `.codex/hooks.json` with a `SessionStart` hook that runs `hooks/sess
 **Temporarily** (current shell only):
 
 ```bash
+export SEREL_MEMORY_HOOKS=off
+```
+
+The Basecamp-era spelling also remains supported for every v0.x release:
+
+```bash
 export BASECAMP_HOOKS=off
 ```
 
-Both scripts check this env var and exit early. Useful when you want to hack quickly without the bank getting touched.
+Both scripts exit early if either variable is `off`. A deliberate disable wins
+even when the other variable has a different value.
 
-**Permanently**: remove the basecamp entries from `.claude/settings.json` or `.codex/hooks.json`. Or delete the whole `hooks` object if you don't use any other hooks.
+**Permanently**: remove the Serel Memory entries from `.claude/settings.json` or `.codex/hooks.json`. Or delete the whole `hooks` object if you don't use any other hooks.
 
 ## When to enable
 
@@ -70,4 +77,4 @@ Codex uses its own hook system. `enable-codex-hooks.sh` registers only `SessionS
 
 ## Customizing
 
-These are bash scripts. Open them, change them. Add your own hooks. If you write a hook that's useful enough that it belongs in basecamp, send a PR.
+These are bash scripts. Open them, change them. Add your own hooks. If you write a hook that's useful enough that it belongs in Serel Memory, send a PR.

@@ -15,7 +15,7 @@ You are starting a new session on this project. Your memory has reset; the memor
 
 ## Step 1 — Read the memory bank (both modes)
 
-**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), it is the working bank — read its files and its `.rules` instead of the tracked ones, skip files it doesn't contain (intent lives in `README.md`/`docs/`), and don't report the blank tracked templates as uninitialized. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+**Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), it is the working bank — read its files and its `.rules` instead of the tracked ones, skip files it doesn't contain (intent lives in `README.md`/`docs/`), and don't report the blank tracked templates as uninitialized. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
 Do these in order, before anything else:
 

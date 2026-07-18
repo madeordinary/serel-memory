@@ -5,7 +5,7 @@ description: "Start or resume a memory-bank project in Codex. Use: $start (quick
 
 # Start
 
-Use this skill to orient a Codex session around the basecamp memory bank.
+Use this skill to orient a Codex session around the Serel Memory bank.
 
 **Mode:** Check the arguments passed to this skill.
 
@@ -14,7 +14,7 @@ Use this skill to orient a Codex session around the basecamp memory bank.
 
 ## Step 1 — Read the memory bank (both modes)
 
-**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), it is the working bank — read its files and its `.rules` instead of the tracked ones, skip files it doesn't contain (intent lives in `README.md`/`docs/`), and don't report the blank tracked templates as uninitialized. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+**Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), it is the working bank — read its files and its `.rules` instead of the tracked ones, skip files it doesn't contain (intent lives in `README.md`/`docs/`), and don't report the blank tracked templates as uninitialized. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
 1. Read every file in `memory-bank/` in this order:
    - `projectbrief.md`

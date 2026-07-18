@@ -10,11 +10,12 @@ permissions:
 
 jobs:
   checks:
-    # These are basecamp's OWN framework-integrity checks. They are meaningless in
+    # These are Serel Memory's own framework-integrity checks. They are meaningless in
     # a downstream project created via `npx degit` (which has its own workflows and
     # memory bank), so the job self-disables outside the canonical repo. Downstream
     # users can safely delete .github/ after install.
-    if: github.repository == 'gusfeliciano/basecamp'
+    # Keep the legacy slug until the post-rename verification checklist is green.
+    if: github.repository == 'madeordinary/serel-memory' || github.repository == 'gusfeliciano/basecamp'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -33,6 +34,9 @@ jobs:
       - name: Sync allowlist never includes user memory
         run: tests/check-allowlist.sh
 
+      - name: Rename compatibility contract
+        run: tests/check-compatibility.sh
+
       - name: degit export ships clean templates
         run: tests/smoke-degit.sh
 
@@ -45,7 +49,7 @@ jobs:
   docs:
     # Markdown hygiene for the prompt files themselves. Same repo guard as above —
     # downstream projects own their docs and shouldn't inherit these checks.
-    if: github.repository == 'gusfeliciano/basecamp'
+    if: github.repository == 'madeordinary/serel-memory' || github.repository == 'gusfeliciano/basecamp'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

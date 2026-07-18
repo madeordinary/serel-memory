@@ -1,23 +1,28 @@
-# basecamp
+# Serel Memory
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) ![Works with Claude Code + Codex](https://img.shields.io/badge/works%20with-Claude%20Code%20%2B%20Codex-5436DA) ![No dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
 
-A portable memory bank and workflow kit for AI coding agents. Works with Claude Code and Codex out of the box.
+A portable memory bank and workflow kit for AI coding agents. Works with Claude Code and Codex out of the box. Formerly known as **Basecamp**.
 
 Your project's memory lives in version-controlled markdown you can read, diff, and review — not a proprietary store that gets deprecated, stays on one machine, or locks you to a single IDE.
 
 ## Quickstart
 
 ```bash
-npx degit gusfeliciano/basecamp#v0.1.0 my-project
+npx degit madeordinary/serel-memory#v0.1.0 my-project
 cd my-project
 git init
-printf '{ "upstream": "gusfeliciano/basecamp", "ref": "v0.1.0", "linked": false }\n' > .basecamp.json
+printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.1.0", "linked": false }\n' > .basecamp.json
 ```
 
-(The last line records which basecamp version you started from — `sync-upstream` uses
+(The last line records which Serel Memory version you started from — `sync-upstream` uses
 it later to show you exactly what changed upstream since. Skip it and `sync-upstream`
 will offer to reconstruct it.)
+
+> **Renamed from Basecamp:** `.basecamp.json` and `BASECAMP_HOOKS=off`
+> remain supported for every v0.x release. New installs use the canonical
+> `madeordinary/serel-memory` upstream. See the
+> [compatibility guide](docs/basecamp-compatibility.md).
 
 Open the project in Claude Code or Codex, then seed the memory bank based on what you have:
 
@@ -38,11 +43,11 @@ AI coding agents lose their memory between sessions. Every new conversation star
 
 The usual fix is to dump a paragraph of context into every prompt. That works until you forget something, or the context grows beyond what fits, or you switch tools and have to do it all again.
 
-basecamp is the other fix: a small, opinionated directory of markdown files the agent reads at the start of every session, so context doesn't depend on your memory.
+Serel Memory is the other fix: a small, opinionated directory of markdown files the agent reads at the start of every session, so context doesn't depend on your memory.
 
 ## What makes it different
 
-Memory banks aren't new — basecamp's own is adapted from [Cline's](https://github.com/nickbaumann98/cline_docs), and says so. What you can't get elsewhere is the engineering around the bank:
+Memory banks aren't new — Serel Memory's own is adapted from [Cline's](https://github.com/nickbaumann98/cline_docs), and says so. What you can't get elsewhere is the engineering around the bank:
 
 - **Dual-CLI parity that's enforced, not promised.** Every workflow has a native Claude Code command *and* a native Codex skill — 17 of each, and CI fails if either side of a pair goes missing. Not a Claude tool with a Codex shim bolted on.
 - **Cross-agent second opinions.** Claude can shell out to Codex to review a plan, and vice versa — with a documented loop policy, and an honestly-labeled self-critique fallback when the other CLI isn't installed.
@@ -113,15 +118,15 @@ your-project/
     └── cross-agent-review.md # second-opinion loop policy
 ```
 
-That's the framework — markdown files in folders, and the agent does the work. (A `degit` copy also brings basecamp's own project metadata — `CONTRIBUTING.md`, `SECURITY.md`, `.github/`, `tests/`, and so on — which isn't part of the framework; delete it after install. See [Install](#install).)
+That's the framework — markdown files in folders, and the agent does the work. (A `degit` copy also brings Serel Memory's own project metadata — `CONTRIBUTING.md`, `SECURITY.md`, `.github/`, `tests/`, and so on — which isn't part of the framework; delete it after install. See [Install](#install).)
 
-## When *not* to use basecamp
+## When *not* to use Serel Memory
 
-basecamp is overhead you won't recoup on:
+Serel Memory is overhead you won't recoup on:
 
 - **Throwaway scripts and one-session tasks** — if you'll never come back to it, there's no memory to preserve.
 - **Quick exploratory hacking** where you don't want the agent pausing to read or update a bank.
-- **Projects already standardized on another context system** you're happy with (Cursor rules, a bespoke `AGENTS.md`, etc.) — basecamp can complement these, but don't adopt it just to have two.
+- **Projects already standardized on another context system** you're happy with (Cursor rules, a bespoke `AGENTS.md`, etc.) — Serel Memory can complement these, but don't adopt it just to have two.
 
 It pays off when you return to a project across many sessions and want continuity that doesn't depend on your memory.
 
@@ -130,10 +135,10 @@ It pays off when you return to a project across many sessions and want continuit
 ### On a new project
 
 ```bash
-npx degit gusfeliciano/basecamp#v0.1.0 my-new-project
+npx degit madeordinary/serel-memory#v0.1.0 my-new-project
 cd my-new-project
 git init
-printf '{ "upstream": "gusfeliciano/basecamp", "ref": "v0.1.0", "linked": false }\n' > .basecamp.json
+printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.1.0", "linked": false }\n' > .basecamp.json
 ```
 
 Then open the project in Claude Code or Codex. There are three paths from here depending on how formed your idea is:
@@ -144,19 +149,19 @@ Then open the project in Claude Code or Codex. There are three paths from here d
 
 Codex also discovers the checked-in skills from `.agents/skills/`; use `/skills` or type `$...` to invoke one explicitly.
 
-If Codex shows "Select settings to import" and offers to migrate `.claude/commands` into `.agents/skills`, choose **Not now**. basecamp already includes native Codex skills, so importing the Claude commands is unnecessary and may create duplicate workflows.
+If Codex shows "Select settings to import" and offers to migrate `.claude/commands` into `.agents/skills`, choose **Not now**. Serel Memory already includes native Codex skills, so importing the Claude commands is unnecessary and may create duplicate workflows.
 
 ### On a new project with an existing PRD
 
-If all you have is a PRD, make basecamp the starting repo and bring the PRD into it:
+If all you have is a PRD, make Serel Memory the starting repo and bring the PRD into it:
 
 ```bash
-npx degit gusfeliciano/basecamp#v0.1.0 my-new-project
+npx degit madeordinary/serel-memory#v0.1.0 my-new-project
 cd my-new-project
 mkdir -p docs
 cp /path/to/prd.md docs/prd.md
 git init
-printf '{ "upstream": "gusfeliciano/basecamp", "ref": "v0.1.0", "linked": false }\n' > .basecamp.json
+printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.1.0", "linked": false }\n' > .basecamp.json
 ```
 
 Then run:
@@ -169,26 +174,26 @@ Then run:
 $from-prd docs/prd.md
 ```
 
-`degit gusfeliciano/basecamp#v0.1.0` uses GitHub shorthand for `https://github.com/gusfeliciano/basecamp` pinned to the `v0.1.0` tag, and downloads that release's contents without the `.git` history. It is a starter-copy step, not a future `git pull` relationship — which is why the install writes `.basecamp.json`: it records which upstream version you started from, so `sync-upstream` can later show you precisely what changed upstream since, instead of guessing. Pin to the latest tag on the [releases page](https://github.com/gusfeliciano/basecamp/releases) and put that same tag in the `ref` field. (Unpinned `npx degit gusfeliciano/basecamp` works too, but then the anchor's `ref` is your best guess — if you skip the anchor entirely, `sync-upstream` will offer to reconstruct one marked `"linked": true`, meaning "exact starting version unknown".)
+`degit madeordinary/serel-memory#v0.1.0` uses GitHub shorthand for `https://github.com/madeordinary/serel-memory` pinned to the `v0.1.0` tag, and downloads that release's contents without the `.git` history. It is a starter-copy step, not a future `git pull` relationship — which is why the install writes `.basecamp.json`: it records which upstream version you started from, so `sync-upstream` can later show you precisely what changed upstream since, instead of guessing. Pin to the latest tag on the [releases page](https://github.com/madeordinary/serel-memory/releases) and put that same tag in the `ref` field. (Unpinned `npx degit madeordinary/serel-memory` works too, but then the anchor's `ref` is your best guess — if you skip the anchor entirely, `sync-upstream` will offer to reconstruct one marked `"linked": true`, meaning "exact starting version unknown".)
 
-A `degit` copy also brings along basecamp's own project metadata — `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, `.github/`, and `tests/`. These describe *basecamp the project*, not your project, and they aren't part of the framework. Delete them whenever you like; `sync-upstream` never touches them.
+A `degit` copy also brings along Serel Memory's own project metadata — `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, `.github/`, and `tests/`. These describe *Serel Memory the project*, not your project, and they aren't part of the framework. Delete them whenever you like; `sync-upstream` never touches them.
 
 ### On an existing project
 
-If the project already has code or important files, drop basecamp's files in without clobbering anything that's already there:
+If the project already has code or important files, drop Serel Memory's files in without clobbering anything that's already there:
 
 ```bash
 cd ~/path/to/your-existing-project
 
-git clone --depth 1 --branch v0.1.0 https://github.com/gusfeliciano/basecamp.git /tmp/basecamp
-rsync -av --ignore-existing --exclude 'settings.local.json' /tmp/basecamp/memory-bank /tmp/basecamp/.agents /tmp/basecamp/.claude /tmp/basecamp/.rules /tmp/basecamp/AGENTS.md /tmp/basecamp/CLAUDE.md /tmp/basecamp/hooks /tmp/basecamp/docs .
-rm -rf /tmp/basecamp
-[ -e .basecamp.json ] || printf '{ "upstream": "gusfeliciano/basecamp", "ref": "v0.1.0", "linked": false }\n' > .basecamp.json
+git clone --depth 1 --branch v0.1.0 https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
+rsync -av --ignore-existing --exclude 'settings.local.json' /tmp/serel-memory/memory-bank /tmp/serel-memory/.agents /tmp/serel-memory/.claude /tmp/serel-memory/.rules /tmp/serel-memory/AGENTS.md /tmp/serel-memory/CLAUDE.md /tmp/serel-memory/hooks /tmp/serel-memory/docs .
+rm -rf /tmp/serel-memory
+[ -e .basecamp.json ] || printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.1.0", "linked": false }\n' > .basecamp.json
 ```
 
 The `rsync` command is intentionally one line so shell line-continuation mistakes cannot drop the source/destination arguments. Existing files and folders, including something like `docs/prd.md`, are preserved because `--ignore-existing` skips paths that are already present.
 
-Do not run `degit` directly into an existing git repo with files unless you have already reviewed what it will overwrite. The `rsync --ignore-existing` path above is safer because it skips files that already exist. That also means existing `AGENTS.md`, `.rules`, `.claude/`, or `.agents/` files may need a manual merge to pick up basecamp's instructions and workflows.
+Do not run `degit` directly into an existing git repo with files unless you have already reviewed what it will overwrite. The `rsync --ignore-existing` path above is safer because it skips files that already exist. That also means existing `AGENTS.md`, `.rules`, `.claude/`, or `.agents/` files may need a manual merge to pick up Serel Memory's instructions and workflows.
 
 Then — and this is the part most people miss — *don't fill the memory bank by hand.* Open Claude Code and run `/init-memory`, or open Codex and invoke `$init-memory`. The agent reads your codebase, your README, and your dependencies, then proposes contents for each memory bank file. Review the drafts, edit anything that's off, approve, and the agent writes them. This is faster than filling templates from blank and catches things you'd forget to write down.
 
@@ -236,6 +241,12 @@ That adds entries to `.claude/settings.json` registering two hooks:
 - **PreCompact** runs `hooks/pre-compact.sh`, which reminds the agent to update `activeContext.md`, `progress.md`, and `decisionLog.md` before Claude Code compacts context and erases history. No more stale bank.
 
 To disable temporarily for a session:
+
+```bash
+export SEREL_MEMORY_HOOKS=off
+```
+
+The Basecamp-era spelling remains supported throughout v0.x:
 
 ```bash
 export BASECAMP_HOOKS=off
@@ -300,7 +311,7 @@ You can also use plain English when that is more natural:
 
 ## Workflow design
 
-basecamp workflows follow a small contract: define the trigger, required reads, allowed writes, output shape, and stop conditions. See `docs/workflow-contract.md`.
+Serel Memory workflows follow a small contract: define the trigger, required reads, allowed writes, output shape, and stop conditions. See `docs/workflow-contract.md`.
 
 The core memory bank has a hierarchy:
 
@@ -333,12 +344,17 @@ These are optional. Agents should read them only when the current task touches t
 
 ## Optional Second Opinions
 
-If you use both Claude Code and Codex, basecamp includes an advanced second-opinion workflow:
+If you use both Claude Code and Codex, Serel Memory includes an advanced second-opinion workflow:
 
 - In Claude Code, run `/ask-codex` to ask Codex CLI to review a plan, architecture decision, PRD interpretation, or risk assessment.
 - In Codex, invoke `$ask-claude` to ask Claude Code CLI for the same kind of review.
 
 These workflows shell out to the other CLI; they do not require MCP. They use the other CLI when it's installed and authenticated, and fall back to a clearly labeled self-critique when it isn't. The default mode is a single read-only review. A bounded loop is available only when you explicitly ask for it, capped at 2 rounds by default, and should end with a synthesis rather than autonomous edits.
+
+If a local Claude invocation is unavailable but Claude Code Web is authorized,
+the same review can run from a fresh web session against an exact pushed branch
+SHA. The cross-agent guide documents that remote-branch flow and its gate
+boundaries.
 
 See `docs/cross-agent-review.md` for the CLI preflight, loop policy, and output contract.
 
@@ -346,7 +362,7 @@ See `docs/cross-agent-review.md` for the CLI preflight, loop policy, and output 
 
 The memory bank pattern is borrowed from [cline's memory bank](https://github.com/nickbaumann98/cline_docs), which is excellent but Cline-specific. The workflow-command shape is borrowed in spirit from [gstack](https://github.com/garrytan/gstack), which is excellent but broader than most projects need on day one.
 
-basecamp is the smallest thing that delivers both — a tool-agnostic memory bank that works with Claude and Codex, plus a curated set of workflows you'll actually run.
+Serel Memory is the smallest thing that delivers both — a tool-agnostic memory bank that works with Claude and Codex, plus a curated set of workflows you'll actually run.
 
 If you fork it, change everything. The workflows especially. The whole point is that the prompts encode *your* opinions, not anyone else's.
 

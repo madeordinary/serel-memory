@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
-# basecamp SessionStart hook
+# Serel Memory SessionStart hook
 #
 # Auto-loads the memory bank as session context so you don't need to type /start.
 # Registered via hooks/enable-hooks.sh. Off by default.
 #
-# To disable temporarily for one session: export BASECAMP_HOOKS=off
+# To disable temporarily for one session: export SEREL_MEMORY_HOOKS=off
+# BASECAMP_HOOKS=off remains supported throughout v0.x.
 # To disable permanently: remove the entries from .claude/settings.json
 
 set -euo pipefail
 
-# Honor the kill-switch
-if [ "${BASECAMP_HOOKS:-}" = "off" ]; then
+# Honor either kill-switch. A deliberate disable always wins if both are set.
+if [ "${SEREL_MEMORY_HOOKS:-}" = "off" ] || [ "${BASECAMP_HOOKS:-}" = "off" ]; then
   exit 0
 fi
 
@@ -18,12 +19,12 @@ fi
 # Claude Code runs hooks from the project root, but be defensive.
 ROOT="${CLAUDE_PROJECT_DIR:-$PWD}"
 
-# Bail quietly if there's no memory bank — basecamp isn't installed here
+# Bail quietly if there's no memory bank — Serel Memory isn't installed here
 if [ ! -d "$ROOT/memory-bank" ] && [ ! -d "$ROOT/memory-bank.local" ]; then
   exit 0
 fi
 
-# Maintainer overlay: upstream basecamp development keeps its real working
+# Maintainer overlay: upstream Serel Memory development keeps its real working
 # bank in gitignored memory-bank.local/ (the tracked memory-bank/ ships as
 # blank starter templates). When the overlay exists, it IS the effective bank.
 # Downstream projects never have this directory.
@@ -41,9 +42,9 @@ if [ -d "$ROOT/memory-bank.local" ]; then
 fi
 
 cat <<'HEADER'
-## Project context (auto-loaded by basecamp)
+## Project context (auto-loaded by Serel Memory)
 
-You are starting a session on a project using the basecamp memory bank pattern.
+You are starting a session on a project using the Serel Memory bank pattern.
 The contents below were read automatically at session start. Treat the memory
 bank as the source of truth for project intent. If it conflicts with the actual
 code, the code is correct and the bank needs updating — flag this to the user.

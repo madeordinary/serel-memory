@@ -1,6 +1,6 @@
 # Security Policy
 
-basecamp is a kit of markdown files plus a few optional bash hooks. It has no server and no runtime dependencies, and the only network access it triggers is the git operations you explicitly run (e.g. `sync-upstream`'s `git fetch upstream`) — so its attack surface is small. The two things worth being careful about:
+Serel Memory is a kit of markdown files plus a few optional bash hooks. It has no server and no runtime dependencies, and the only network access it triggers is the git operations you explicitly run (e.g. `sync-upstream`'s `git fetch upstream`) — so its attack surface is small. The two things worth being careful about:
 
 ## What to watch
 
@@ -20,4 +20,4 @@ We'll acknowledge within a reasonable window and credit reporters who want it.
 
 ## Supported versions
 
-basecamp is pre-1.0. Security fixes land on `main` and in the next tagged release.
+Serel Memory is pre-1.0. Security fixes land on `main` and in the next tagged release.

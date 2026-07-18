@@ -7,7 +7,7 @@ description: "Surface project risks not yet captured in the memory bank. Use whe
 
 Use this skill to find risks and assumptions that are not already captured in the memory bank. Do not invent risks just to fill categories.
 
-**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), all memory-bank and `.rules` reads and writes below target it instead of the tracked templates; skip files it doesn't contain. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+**Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), all memory-bank and `.rules` reads and writes below target it instead of the tracked templates; skip files it doesn't contain. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
 ## Workflow
 

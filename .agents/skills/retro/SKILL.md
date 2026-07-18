@@ -7,7 +7,7 @@ description: "Run a sprint or weekly retrospective from the memory bank and git 
 
 Run a retrospective pulling from the memory bank and git activity so the conversation starts from facts, not vibes.
 
-**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), all memory-bank and `.rules` reads and writes below target it instead of the tracked templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+**Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), all memory-bank and `.rules` reads and writes below target it instead of the tracked templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
 ## Workflow
 

@@ -1,34 +1,35 @@
 #!/usr/bin/env bash
-# basecamp PreCompact hook
+# Serel Memory PreCompact hook
 #
 # Fires before Claude Code compacts session context. Reminds the agent to
 # update the memory bank so this session's work isn't lost when older context
 # is summarized away.
 #
-# To disable temporarily: export BASECAMP_HOOKS=off
+# To disable temporarily: export SEREL_MEMORY_HOOKS=off
+# BASECAMP_HOOKS=off remains supported throughout v0.x.
 # To disable permanently: remove from .claude/settings.json
 
 set -euo pipefail
 
-if [ "${BASECAMP_HOOKS:-}" = "off" ]; then
+if [ "${SEREL_MEMORY_HOOKS:-}" = "off" ] || [ "${BASECAMP_HOOKS:-}" = "off" ]; then
   exit 0
 fi
 
 ROOT="${CLAUDE_PROJECT_DIR:-$PWD}"
 
-# If basecamp isn't installed here, do nothing
+# If Serel Memory isn't installed here, do nothing
 if [ ! -d "$ROOT/memory-bank" ]; then
   exit 0
 fi
 
 cat <<'EOF'
-## basecamp: pre-compact memory bank refresh
+## Serel Memory: pre-compact memory bank refresh
 
 Context is about to be compacted. Earlier conversation history will be summarized
 and details may be lost. Before that happens, refresh the memory bank so this
 session's work is preserved:
 
-Note: if `memory-bank.local/` exists (upstream basecamp development), it is the
+Note: if `memory-bank.local/` exists (upstream Serel Memory development), it is the
 effective bank — apply all of the updates below to `memory-bank.local/` and its
 `.rules`, never to the tracked starter templates.
 

@@ -3,6 +3,10 @@
 **Date:** 2026-06-06 · **Derived from:** [deep research report](2026-06-06-repo-improvement-research.md)
 (references like “→ C7” point at findings there)
 
+> **Historical naming:** this roadmap predates the Serel Memory rename. References
+> to Basecamp, `/basecamp:*`, `npx basecamp`, and `.basecamp.json` describe
+> the name and compatibility identifiers in use when the research was written.
+
 Priorities at a glance: ship a provenance anchor and reposition the README now; build
 the drift story next with a scoped plugin experiment alongside; converge on SKILL.md
 and a thin installer once there's traction. Items trace to verified findings where
@@ -24,7 +28,7 @@ prototype for solo-maintainer realism, and gate tiered reads behind an ADR.
 Record the upstream repo + commit SHA a downstream project scaffolded from
 (cruft `.cruft.json` / Copier `.copier-answers.yml` pattern → C7). degit runs no
 hooks, so: (a) make the documented install command **pinned**
-(`npx degit gusfeliciano/basecamp#v0.1.0`) followed by a one-liner that writes the
+(`npx degit madeordinary/serel-memory#v0.1.0`) followed by a one-liner that writes the
 anchor for that tag, and (b) have `/sync-upstream` create the anchor retroactively on
 first run (cruft-`link` pattern) — but mark retro-anchors as `"linked": true` rather
 than claiming an exact source SHA that an unpinned copy can't actually know
