@@ -32,10 +32,14 @@ if grep -Eq 'npx degit gusfeliciano/basecamp|git clone .+github\.com/gusfelician
   fail=1
 fi
 
-guard="github.repository == 'madeordinary/serel-memory' || github.repository == 'gusfeliciano/basecamp'"
+guard="github.repository == 'madeordinary/serel-memory'"
 guard_count="$(grep -Fc "$guard" .github/workflows/ci.yml)"
 if [ "$guard_count" -ne 2 ]; then
-  echo "BAD GUARD: expected the canonical + legacy repository guard on both CI jobs"
+  echo "BAD GUARD: expected the canonical repository guard on both CI jobs"
+  fail=1
+fi
+if grep -Fq "github.repository == 'madeordinary/serel-memory' ||" .github/workflows/ci.yml; then
+  echo "STALE GUARD: CI still carries the pre-transfer legacy repository condition"
   fail=1
 fi
 

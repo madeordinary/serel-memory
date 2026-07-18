@@ -45,16 +45,16 @@ name would replace the redirect and strand existing anchors and remotes.
 
 After the repository is transferred and renamed:
 
-1. Confirm the canonical clone and `npx degit madeordinary/serel-memory#v0.1.0`
+1. Confirm the canonical clone and `npx degit madeordinary/serel-memory#v0.2.0`
    both resolve.
 2. Confirm the former clone URL and the former v0.1.0 degit pin still resolve
    through GitHub's redirect.
 3. Confirm the `v0.1.0` tag and release page are present at the canonical URL.
 4. Confirm both CI jobs complete successfully under
    `madeordinary/serel-memory`.
-5. Remove the temporary `madeordinary/serel-memory` exclusion from `lychee.toml`
-   and confirm the real canonical links pass the link check.
-6. After one complete green canonical CI run and successful legacy-URL checks,
-   remove the temporary `gusfeliciano/basecamp` CI guard.
+5. Confirm the real canonical links pass the link check with no transition
+   exclusion in `lychee.toml`.
+6. Confirm CI is guarded only by the canonical repository slug after one complete
+   green canonical run and successful legacy-URL checks.
 
 The historical author attribution and MIT license remain unchanged.
