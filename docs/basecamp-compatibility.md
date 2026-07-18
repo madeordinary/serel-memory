@@ -52,7 +52,9 @@ After the repository is transferred and renamed:
 3. Confirm the `v0.1.0` tag and release page are present at the canonical URL.
 4. Confirm both CI jobs complete successfully under
    `madeordinary/serel-memory`.
-5. After one complete green canonical CI run and successful legacy-URL checks,
+5. Remove the temporary `madeordinary/serel-memory` exclusion from `lychee.toml`
+   and confirm the real canonical links pass the link check.
+6. After one complete green canonical CI run and successful legacy-URL checks,
    remove the temporary `gusfeliciano/basecamp` CI guard.
 
 The historical author attribution and MIT license remain unchanged.
