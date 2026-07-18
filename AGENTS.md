@@ -1,6 +1,6 @@
 # Project Agent Instructions
 
-You are working on a project that uses the basecamp memory bank pattern. Your memory resets between sessions — the memory bank is your only continuity. Treat it as the source of truth for project intent.
+You are working on a project that uses the Serel Memory bank pattern. Your memory resets between sessions — the memory bank is your only continuity. Treat it as the source of truth for project intent.
 
 ## At the start of every session
 
@@ -23,9 +23,9 @@ If any memory bank file is missing, empty, or still only template placeholders, 
 
 Tip: `bash hooks/enable-hooks.sh` registers an optional SessionStart hook that auto-loads the bank so you don't need `/start` every session (see `hooks/README.md`).
 
-### Maintainer overlay (upstream basecamp development only)
+### Maintainer overlay (upstream Serel Memory development only)
 
-If a `memory-bank.local/` directory exists, you are working on the upstream basecamp repo itself. That directory is the real working bank (gitignored, never shipped), and it **is** the effective bank:
+If a `memory-bank.local/` directory exists, you are working on the upstream Serel Memory repo itself. That directory is the real working bank (gitignored, never shipped), and it **is** the effective bank:
 
 - Read files from `memory-bank.local/` instead of `memory-bank/`, and `memory-bank.local/.rules` instead of root `.rules`.
 - The overlay is partial by design. For core files it doesn't contain (projectbrief, productContext, systemPatterns, techContext), `README.md` and `docs/` carry project intent — do not flag the blank tracked templates as uninitialized.
@@ -56,7 +56,7 @@ Refresh every file in `memory-bank/`. Focus especially on `activeContext.md`, `p
 
 ## Available workflows
 
-The `.claude/commands/` directory contains Claude Code slash commands, and `.agents/skills/` contains Codex-native skills for core basecamp workflows:
+The `.claude/commands/` directory contains Claude Code slash commands, and `.agents/skills/` contains Codex-native skills for core Serel Memory workflows:
 
 - `/start` / `$start` — read the bank, summarize state, ask where to pick up (compact; use `/start full` for rich onboarding dashboard)
 - `/discover` / `$discover` — help the user define a project from a rough idea; produces initial memory bank (use when starting fresh with no code yet)
@@ -72,7 +72,7 @@ The `.claude/commands/` directory contains Claude Code slash commands, and `.age
 - `/handoff` / `$handoff` — generate a handoff doc for someone picking up the project cold
 - `/ask-codex` / `$ask-claude` — ask the other CLI for an optional second opinion on plans, risks, and decisions
 - `/ship` / `$ship` — pre-merge checklist
-- `/sync-upstream` / `$sync-upstream` — check the upstream basecamp repo for framework updates and selectively pull changes
+- `/sync-upstream` / `$sync-upstream` — check the upstream Serel Memory repo for framework updates and selectively pull changes
 - `/runbook` / `$runbook` — generate or update an operational runbook
 - `/security-check` / `$security-check` — OWASP + STRIDE pass on the current change
 

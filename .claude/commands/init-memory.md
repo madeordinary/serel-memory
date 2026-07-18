@@ -4,9 +4,9 @@ description: Initialize the memory bank by analyzing the existing codebase
 
 # /init-memory
 
-Use this when basecamp has just been dropped into an existing project and the memory bank files are still empty or template-only. You'll read the codebase and propose what each file should contain — the user reviews and edits before anything gets written.
+Use this when Serel Memory has just been dropped into an existing project and the memory bank files are still empty or template-only. You'll read the codebase and propose what each file should contain — the user reviews and edits before anything gets written.
 
-**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), it is the working bank — the empty/template-only check and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+**Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), it is the working bank — the empty/template-only check and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
 Steps:
 

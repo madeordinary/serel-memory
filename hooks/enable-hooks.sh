@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# basecamp enable-hooks
+# Serel Memory enable-hooks
 #
-# Registers basecamp's SessionStart and PreCompact hooks in .claude/settings.json.
+# Registers Serel Memory's SessionStart and PreCompact hooks in .claude/settings.json.
 # Re-run this any time — it's idempotent (won't double-register).
 #
 # To disable, either:
-#   - export BASECAMP_HOOKS=off  (temporary, current session only)
+#   - export SEREL_MEMORY_HOOKS=off  (temporary, current session only)
+#   - export BASECAMP_HOOKS=off      (legacy spelling, supported through v0.x)
 #   - remove the entries from .claude/settings.json  (permanent)
 
 set -euo pipefail
@@ -42,11 +43,12 @@ if command -v jq >/dev/null 2>&1; then
   # Make hook scripts executable
   chmod +x hooks/session-start.sh hooks/pre-compact.sh 2>/dev/null || true
 
-  echo "✓ basecamp hooks registered in $SETTINGS"
+  echo "✓ Serel Memory hooks registered in $SETTINGS"
   echo "  SessionStart → $SESSION_START_CMD"
   echo "  PreCompact   → $PRE_COMPACT_CMD"
   echo ""
-  echo "  To disable temporarily: export BASECAMP_HOOKS=off"
+  echo "  To disable temporarily: export SEREL_MEMORY_HOOKS=off"
+  echo "  Legacy v0.x spelling: export BASECAMP_HOOKS=off"
   echo "  To disable permanently: remove the entries from $SETTINGS"
 else
   echo "jq is not installed. Either install it (brew install jq) and re-run,"

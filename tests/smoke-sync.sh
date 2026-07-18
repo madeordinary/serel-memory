@@ -41,7 +41,7 @@ git archive --format=tar HEAD | tar -x -C "$tmp/project"
 cd "$tmp/project"
 $GIT init --quiet
 $GIT add -A
-$GIT commit --quiet -m "scaffold from basecamp"
+$GIT commit --quiet -m "scaffold from Serel Memory"
 
 # Install-time anchor (per README: written at install, points at the
 # upstream version the project was scaffolded from).

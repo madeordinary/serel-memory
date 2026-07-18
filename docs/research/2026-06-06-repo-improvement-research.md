@@ -2,6 +2,11 @@
 
 **Date:** 2026-06-06 · **Status:** complete · **Companion:** [improvement roadmap](2026-06-06-improvement-roadmap.md)
 
+> **Historical naming:** this report predates the Serel Memory rename. Basecamp
+> product and plugin names below are preserved as the terminology evaluated on
+> the report date; current repository references use
+> `madeordinary/serel-memory`.
+
 **Question.** What should basecamp improve, adopt, or steal to be a better open-source
 repo — for the maintainer's own use, for people starting new projects from it, and for
 attracting outside users and contributors? Primary sub-question: the distribution

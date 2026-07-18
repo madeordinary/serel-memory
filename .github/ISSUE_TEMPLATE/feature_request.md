@@ -12,8 +12,8 @@ labels: enhancement
 <!-- What you'd add or change. If it's a new workflow, note that it needs both a
 Claude command and a Codex skill (see CONTRIBUTING.md). -->
 
-**Does it keep basecamp small?**
-<!-- basecamp is deliberately minimal. Why does this belong in the core kit rather
+**Does it keep Serel Memory small?**
+<!-- Serel Memory is deliberately minimal. Why does this belong in the core kit rather
 than in a fork or an optional doc? -->
 
 **Alternatives considered**

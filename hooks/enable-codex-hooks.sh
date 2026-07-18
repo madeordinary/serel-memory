@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# basecamp enable-codex-hooks
+# Serel Memory enable-codex-hooks
 #
-# Registers basecamp's Codex SessionStart hook in .codex/hooks.json.
+# Registers Serel Memory's Codex SessionStart hook in .codex/hooks.json.
 # Re-run this any time - it's idempotent.
 #
-# To disable, remove the basecamp entry from .codex/hooks.json.
+# To disable, remove the Serel Memory entry from .codex/hooks.json.
 
 set -euo pipefail
 
@@ -30,7 +30,7 @@ if command -v jq >/dev/null 2>&1; then
           hooks: [{
             type: "command",
             command: $ss_cmd,
-            statusMessage: "Loading basecamp memory bank"
+            statusMessage: "Loading Serel Memory bank"
           }]
         }]
         end
@@ -38,7 +38,7 @@ if command -v jq >/dev/null 2>&1; then
 
   chmod +x hooks/session-start.sh 2>/dev/null || true
 
-  echo "basecamp Codex hook registered in $SETTINGS"
+  echo "Serel Memory Codex hook registered in $SETTINGS"
   echo "  SessionStart -> $SESSION_START_CMD"
   echo ""
   echo "Open /hooks in Codex to review and trust the project hook."
@@ -55,7 +55,7 @@ else
           {
             "type": "command",
             "command": "$SESSION_START_CMD",
-            "statusMessage": "Loading basecamp memory bank"
+            "statusMessage": "Loading Serel Memory bank"
           }
         ]
       }

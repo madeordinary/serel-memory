@@ -6,7 +6,7 @@ description: Surface risks not yet documented in the memory bank
 
 Surface risks and unknowns that aren't already captured in the memory bank. The goal is to find what could derail this project that nobody's named yet.
 
-**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), all memory-bank and `.rules` reads and writes below target it instead of the tracked templates; skip files it doesn't contain. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+**Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), all memory-bank and `.rules` reads and writes below target it instead of the tracked templates; skip files it doesn't contain. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
 Steps:
 

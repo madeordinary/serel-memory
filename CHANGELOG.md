@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to basecamp are recorded here. The format follows
+All notable changes to Serel Memory (formerly Basecamp) are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project aims to
 follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reaches 1.0.
 
@@ -8,6 +8,9 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ### Added
 
+- `SEREL_MEMORY_HOOKS=off` as the preferred hook kill switch. The legacy
+  `BASECAMP_HOOKS=off` spelling remains supported for every v0.x release; either
+  variable disables the hooks.
 - `.basecamp.json` provenance anchor: installs are now pinned and record the upstream
   version they started from; `sync-upstream` reads the anchor for precise
   what-changed-upstream reports, reconstructs a `"linked": true` anchor when missing,
@@ -36,6 +39,15 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ### Changed
 
+- Renamed the project from Basecamp to **Serel Memory** and moved its canonical
+  repository identity to `madeordinary/serel-memory`. Existing history, the
+  `v0.1.0` tag, and MIT attribution are preserved.
+- Kept `.basecamp.json` as the single provenance-anchor filename for v0.x.
+  `sync-upstream` now defaults to the canonical repository while treating
+  `gusfeliciano/basecamp` anchors and remotes as equivalent during the
+  compatibility window. See `docs/basecamp-compatibility.md`.
+- Updated CI to run under the canonical repository slug while temporarily
+  accepting the former slug through the post-transfer verification window.
 - `breakdown` now attaches a `verify:` check to each step, reframes imperative
   steps as verifiable goals, and surfaces multiple interpretations instead of
   silently picking one. `review` gains explicit simplicity and scope-discipline
@@ -49,7 +61,9 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [0.1.0] — 2026-05-30
 
-First tagged release. Pin to it with `npx degit gusfeliciano/basecamp#v0.1.0`.
+First tagged release, originally published as Basecamp. The tag and commit history
+remain intact. Pin it from the canonical home with
+`npx degit madeordinary/serel-memory#v0.1.0`.
 
 ### Added
 
@@ -81,11 +95,11 @@ First tagged release. Pin to it with `npx degit gusfeliciano/basecamp#v0.1.0`.
 ### Fixed
 
 - The shipped `memory-bank/` is now clean starter templates. It previously carried
-  basecamp's own live development state, which every `npx degit` consumer inherited.
-  basecamp's real bank moved to a gitignored `memory-bank.local/`.
+  Basecamp's own live development state, which every `npx degit` consumer inherited.
+  Basecamp's real bank moved to a gitignored `memory-bank.local/`.
 - Resolved the `AGENTS.md` "optional second opinion" vs "never skip" contradiction.
 - Brought the Claude/Codex `review`, `breakdown`, and `sync-upstream` adapters back
   to parity; fixed a duplicate step number in the `ask-codex`/`ask-claude` workflows.
 - Fixed the broken file-tree rendering and tightened install instructions in the README.
 
-[0.1.0]: https://github.com/gusfeliciano/basecamp/releases/tag/v0.1.0
+[0.1.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.1.0

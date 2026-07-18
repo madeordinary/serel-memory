@@ -1,16 +1,16 @@
 ---
 name: sync-upstream
-description: "Check the upstream basecamp repo for framework updates (skills, commands, agent instructions) and selectively pull changes. Use when the user asks to update basecamp, check for upstream changes, sync the framework, or pull latest skills."
+description: "Check the upstream Serel Memory repo for framework updates (skills, commands, agent instructions) and selectively pull changes. Use when the user asks to update Serel Memory, update Basecamp, check for upstream changes, sync the framework, or pull latest skills."
 ---
 
 # Sync Upstream
 
-Check the upstream basecamp repo for new framework updates and help the user decide what to pull.
+Check the upstream Serel Memory repo for new framework updates and help the user decide what to pull.
 
 ## Preconditions
 
 - Git must be available.
-- The repo must have started from basecamp — copied in via `degit`, cloned, or forked. (Template mode in step 4 handles the `degit` case, where there's no shared git history.)
+- The repo must have started from Serel Memory (formerly Basecamp) — copied in via `degit`, cloned, or forked. (Template mode in step 4 handles the `degit` case, where there's no shared git history.)
 
 ## Framework vs Project Files
 
@@ -39,7 +39,7 @@ A small file at the project root recording which upstream version this project w
 scaffolded from or last synced to:
 
 ```json
-{ "upstream": "gusfeliciano/basecamp", "ref": "v0.1.0", "linked": false }
+{ "upstream": "madeordinary/serel-memory", "ref": "v0.1.0", "linked": false }
 ```
 
 - `ref` — the upstream tag or commit this project is anchored to.
@@ -49,6 +49,10 @@ scaffolded from or last synced to:
 
 The anchor makes template-mode reports precise: instead of diffing every file
 blindly, you can show exactly what changed upstream since `ref`.
+
+The Basecamp-era `.basecamp.json` name remains the single provenance-anchor
+filename for every v0.x release. Do not create a second
+`.serel-memory.json`; two mutable anchors could disagree.
 
 ## Framework file allowlist
 
@@ -62,13 +66,20 @@ Use this exact list in all git commands:
 
 1. **Preflight: require a clean worktree** for framework files. If any have uncommitted changes, warn and ask the user to commit or stash first. Also read the anchor (`cat .basecamp.json 2>/dev/null`) — note its `ref` and `linked` values; if missing, offer to reconstruct it in step 5.
 
-2. **Verify upstream remote exists.** If missing, add it using the anchor's `upstream` value (fall back to `gusfeliciano/basecamp` when there's no anchor):
+2. **Verify upstream remote exists.** If missing, add it using the anchor's `upstream` value (fall back to `madeordinary/serel-memory` when there's no anchor):
 
    ```bash
    git remote add upstream "https://github.com/<anchor-upstream>.git"
    ```
 
-   If the remote exists but disagrees with the anchor's `upstream`, surface the mismatch and ask which is correct before proceeding. If the user forked from a different origin, ask for the correct URL.
+   During v0.x, treat `gusfeliciano/basecamp` and
+   `madeordinary/serel-memory` as the same upstream. An old anchor or remote may
+   continue fetching through GitHub's redirect; do not stop on that one known
+   mismatch. After a successful fetch, offer to normalize an old remote with
+   `git remote set-url upstream https://github.com/madeordinary/serel-memory.git`.
+   For every other mismatch, surface it and ask which is correct before
+   proceeding. If the user forked from a different origin, ask for the correct
+   URL.
 
 3. **Fetch upstream without merging:**
 
@@ -100,6 +111,7 @@ Use this exact list in all git commands:
 
    ```bash
    UP="$(git remote get-url upstream | sed -E 's#^(git@github\.com:|https://github\.com/)##; s#\.git$##')"
+   if [ "$UP" = "gusfeliciano/basecamp" ]; then UP="madeordinary/serel-memory"; fi
    printf '{ "upstream": "%s", "ref": "%s", "linked": true }\n' "$UP" "$(git rev-parse upstream/main)" > .basecamp.json
    ```
 
@@ -135,7 +147,13 @@ Use this exact list in all git commands:
     printf '{ "upstream": "%s", "ref": "%s", "linked": false }\n' "$UP" "$(git rev-parse upstream/main)" > .basecamp.json
     ```
 
-    (After a reviewed sync the baseline is known, so `linked` becomes `false`.) If the user skipped some changes, warn before advancing: skipped changes stop appearing in the "new since last sync" report once the anchor moves (they still show in the file-level diff) — let them choose to advance or keep the old anchor. Suggest running `$update-memory` if significant framework changes were pulled.
+    (After a reviewed sync the baseline is known, so `linked` becomes `false`.
+    Normalize the known legacy slug to `madeordinary/serel-memory` before
+    writing, as in step 5.) If the user skipped some changes, warn before
+    advancing: skipped changes stop appearing in the "new since last sync"
+    report once the anchor moves (they still show in the file-level diff) — let
+    them choose to advance or keep the old anchor. Suggest running
+    `$update-memory` if significant framework changes were pulled.
 
 ## If no upstream changes
 
@@ -143,4 +161,6 @@ Report that the project is up to date and note when the last sync check was done
 
 ## Fallback
 
-If `upstream` points to a repo that doesn't exist or can't be reached, report the error clearly and suggest the user verify the upstream URL with `git remote -v`.
+If `upstream` points to a repo that doesn't exist or can't be reached, report the
+error clearly, suggest the user verify it with `git remote -v`, and mention the
+canonical URL `https://github.com/madeordinary/serel-memory.git`.

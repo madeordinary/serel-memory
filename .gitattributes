@@ -1,6 +1,6 @@
 # Maintainer-only material: tracked in the repo (visible on GitHub), but excluded
 # from `git archive` exports — which is what `npx degit` and "Download ZIP" ship.
-# Downstream projects own their docs/ folder; basecamp's own research and roadmap
+# Downstream projects own their docs/ folder; Serel Memory's own research and roadmap
 # belong to the framework repo, not to projects scaffolded from it.
 # Guarded by tests/smoke-degit.sh.
 docs/research/ export-ignore

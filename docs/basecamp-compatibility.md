@@ -1,0 +1,58 @@
+# Basecamp to Serel Memory compatibility
+
+Basecamp has been renamed **Serel Memory** and its canonical GitHub home is now
+`madeordinary/serel-memory`. The repository's commits, `v0.1.0` tag, release,
+and MIT license continue in place.
+
+This is a compatibility migration, not a clean break.
+
+## Existing installs
+
+Existing projects do not need an immediate migration. GitHub redirects the former
+`gusfeliciano/basecamp` repository path after the transfer and rename, so old
+clone URLs, provenance anchors, and `upstream` remotes continue to resolve.
+
+New installs and reconstructed anchors use `madeordinary/serel-memory`. After a
+successful fetch, an existing project may normalize its remote:
+
+```bash
+git remote set-url upstream https://github.com/madeordinary/serel-memory.git
+```
+
+The `sync-upstream` workflow treats the former and current repository slugs as
+the same upstream throughout v0.x.
+
+## Stable v0.x identifiers
+
+Two Basecamp-era identifiers remain supported for every v0.x release:
+
+- `.basecamp.json` remains the single provenance-anchor filename. Do not create
+  a second `.serel-memory.json` file; two mutable anchors could disagree.
+- `BASECAMP_HOOKS=off` continues to disable the optional hooks.
+  `SEREL_MEMORY_HOOKS=off` is the preferred spelling. If either variable is
+  `off`, the hooks stay disabled.
+
+Any removal or anchor-file rename requires a separately documented migration and
+will not happen silently within v0.x.
+
+## Redirect invariant
+
+The old-slug compatibility path depends on GitHub's repository redirect.
+**Never create another repository at `gusfeliciano/basecamp`**: reusing that
+name would replace the redirect and strand existing anchors and remotes.
+
+## Post-transfer verification
+
+After the repository is transferred and renamed:
+
+1. Confirm the canonical clone and `npx degit madeordinary/serel-memory#v0.1.0`
+   both resolve.
+2. Confirm the former clone URL and the former v0.1.0 degit pin still resolve
+   through GitHub's redirect.
+3. Confirm the `v0.1.0` tag and release page are present at the canonical URL.
+4. Confirm both CI jobs complete successfully under
+   `madeordinary/serel-memory`.
+5. After one complete green canonical CI run and successful legacy-URL checks,
+   remove the temporary `gusfeliciano/basecamp` CI guard.
+
+The historical author attribution and MIT license remain unchanged.

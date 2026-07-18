@@ -1,6 +1,6 @@
 # Workflow Contract
 
-Basecamp workflows should be small, explicit, and portable across agents. Use this
+Serel Memory workflows should be small, explicit, and portable across agents. Use this
 contract when adding or revising a Claude command, Codex skill, or future adapter.
 
 ## Required sections
@@ -18,7 +18,7 @@ Every workflow should make these things clear:
 Every reference to "the memory bank" or `.rules` in a workflow means the
 **effective bank**:
 
-- If `memory-bank.local/` exists (upstream basecamp development only — it is
+- If `memory-bank.local/` exists (upstream Serel Memory development only — it is
   gitignored and never ships), it is the effective bank: read and write its
   files instead of the tracked `memory-bank/`, and `memory-bank.local/.rules`
   instead of root `.rules`. It is partial by design; for core files it lacks,

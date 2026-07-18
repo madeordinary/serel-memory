@@ -5,9 +5,9 @@ description: "Initialize memory-bank files by analyzing an existing codebase. Us
 
 # Init Memory
 
-Use this skill when basecamp has been dropped into an existing project and the memory bank is still uninitialized.
+Use this skill when Serel Memory has been dropped into an existing project and the memory bank is still uninitialized.
 
-**Effective bank:** if `memory-bank.local/` exists (upstream basecamp development only), it is the working bank — the uninitialized check and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+**Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), it is the working bank — the uninitialized check and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
 ## Workflow
 

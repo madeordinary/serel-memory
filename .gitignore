@@ -50,7 +50,7 @@ target/
 .tmp/
 tmp/
 
-# basecamp maintainer's own working memory bank (private, uncommitted).
-# Downstream projects never see this; it keeps basecamp's real dev context
+# Serel Memory maintainer's own working memory bank (private, uncommitted).
+# Downstream projects never see this; it keeps Serel Memory's real dev context
 # out of the clean starter templates under memory-bank/. See CONTRIBUTING.md.
 memory-bank.local/
