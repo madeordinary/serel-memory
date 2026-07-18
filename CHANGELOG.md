@@ -8,7 +8,7 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 No changes yet.
 
-## 0.2.0 — 2026-07-18
+## [0.2.0] — 2026-07-18
 
 ### Added
 
@@ -106,4 +106,6 @@ remain intact. Pin it from the canonical home with
   to parity; fixed a duplicate step number in the `ask-codex`/`ask-claude` workflows.
 - Fixed the broken file-tree rendering and tightened install instructions in the README.
 
+[Unreleased]: https://github.com/madeordinary/serel-memory/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.2.0
 [0.1.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.1.0
