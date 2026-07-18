@@ -6,6 +6,10 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [Unreleased]
 
+No changes yet.
+
+## 0.2.0 — 2026-07-18
+
 ### Added
 
 - `SEREL_MEMORY_HOOKS=off` as the preferred hook kill switch. The legacy
@@ -46,8 +50,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
   `sync-upstream` now defaults to the canonical repository while treating
   `gusfeliciano/basecamp` anchors and remotes as equivalent during the
   compatibility window. See `docs/basecamp-compatibility.md`.
-- Updated CI to run under the canonical repository slug while temporarily
-  accepting the former slug through the post-transfer verification window.
+- Updated CI to run under the canonical repository slug. The temporary former-
+  slug guard was removed after the canonical post-transfer run passed.
 - `breakdown` now attaches a `verify:` check to each step, reframes imperative
   steps as verifiable goals, and surfaces multiple interpretations instead of
   silently picking one. `review` gains explicit simplicity and scope-discipline

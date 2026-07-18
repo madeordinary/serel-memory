@@ -14,8 +14,7 @@ jobs:
     # a downstream project created via `npx degit` (which has its own workflows and
     # memory bank), so the job self-disables outside the canonical repo. Downstream
     # users can safely delete .github/ after install.
-    # Keep the legacy slug until the post-rename verification checklist is green.
-    if: github.repository == 'madeordinary/serel-memory' || github.repository == 'gusfeliciano/basecamp'
+    if: github.repository == 'madeordinary/serel-memory'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -49,7 +48,7 @@ jobs:
   docs:
     # Markdown hygiene for the prompt files themselves. Same repo guard as above —
     # downstream projects own their docs and shouldn't inherit these checks.
-    if: github.repository == 'madeordinary/serel-memory' || github.repository == 'gusfeliciano/basecamp'
+    if: github.repository == 'madeordinary/serel-memory'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
