@@ -6,6 +6,11 @@ and MIT license continue in place.
 
 This is a compatibility migration, not a clean break.
 
+> **Verified July 18, 2026:** canonical and legacy Git URLs resolve to the same
+> repository; `v0.1.0` and its historical release remain available; canonical
+> CI and link checks pass; and both the canonical `v0.2.0` install and legacy
+> redirected `v0.1.0` install were exercised successfully.
+
 ## Existing installs
 
 Existing projects do not need an immediate migration. GitHub redirects the former
