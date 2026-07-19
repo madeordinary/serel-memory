@@ -29,18 +29,18 @@ Only framework files should be synced. Never auto-merge project-specific files.
 
 - `memory-bank/` — user's actual project context
 - `.rules` — project-specific patterns
-- `.basecamp.json` — this project's provenance anchor (per-project state, see below)
+- `.serel-memory.json` — this project's provenance anchor (per-project state, see below)
 - `docs/decisions/` — project-specific ADRs
 - `docs/` files not in the framework list above (PRDs, specs, project docs)
 - Any application code, configs, or project-specific docs
 
-## The provenance anchor (`.basecamp.json`)
+## The provenance anchor (`.serel-memory.json`)
 
 A small file at the project root recording which upstream version this project was
 scaffolded from or last synced to:
 
 ```json
-{ "upstream": "madeordinary/serel-memory", "ref": "v0.2.0", "linked": false }
+{ "upstream": "madeordinary/serel-memory", "ref": "v0.3.0", "linked": false }
 ```
 
 - `ref` — the upstream tag or commit this project is anchored to.
@@ -51,9 +51,10 @@ scaffolded from or last synced to:
 The anchor makes template-mode reports precise: instead of diffing every file
 blindly, you can show exactly what changed upstream since `ref`.
 
-The Basecamp-era `.basecamp.json` name remains the single provenance-anchor
-filename for every v0.x release. Do not create a second
-`.serel-memory.json`; two mutable anchors could disagree.
+`.serel-memory.json` is the single provenance-anchor filename as of Serel
+Memory 0.3.0. Never create a second anchor file; two mutable anchors could
+disagree. A legacy `.basecamp.json` left over from a v0.x install is never
+read — it triggers the fail-fast guard in step 1 until the user renames it.
 
 ## Framework file allowlist
 
@@ -69,10 +70,18 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
 
    ```bash
    git status --porcelain -- .agents/skills/ .claude/commands/ AGENTS.md CLAUDE.md docs/workflow-contract.md docs/cross-agent-review.md hooks/
-   cat .basecamp.json 2>/dev/null
+   # Legacy-anchor guard: fail fast, never treat as unanchored, never reconstruct.
+   if [ ! -f .serel-memory.json ] && [ -f .basecamp.json ]; then  # legacy anchor present
+     echo "MIGRATION REQUIRED: this project still has a legacy .basecamp.json anchor."
+     echo "Rename it to .serel-memory.json (same JSON schema) before syncing — Serel Memory 0.3.0 ended the v0.x anchor name."
+     exit 1
+   fi
+   cat .serel-memory.json 2>/dev/null
    ```
 
    If any framework files have uncommitted changes, warn the user and ask them to commit or stash before syncing. `git restore` from upstream would silently overwrite their edits.
+
+   **Fail fast on a legacy-only anchor.** If the guard above fired, STOP: the project is still anchored to a pre-0.3.0 install. Tell the user to migrate by renaming the legacy `.basecamp.json` to `.serel-memory.json` (same schema; advance `ref` on the next successful sync). Never treat the project as unanchored and never reconstruct a baseline while a legacy `.basecamp.json` is present — and never create a second anchor alongside it.
 
    Note the anchor's `ref` and `linked` values if the file exists; if it doesn't, you'll offer to reconstruct it in step 5.
 
@@ -88,14 +97,9 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
    git remote add upstream "https://github.com/<anchor-upstream>.git"
    ```
 
-   During v0.x, treat `gusfeliciano/basecamp` and
-   `madeordinary/serel-memory` as the same upstream. An old anchor or remote may
-   continue fetching through GitHub's redirect; do not stop on that one known
-   mismatch. After a successful fetch, offer to normalize an old remote with
-   `git remote set-url upstream https://github.com/madeordinary/serel-memory.git`.
-   For every other mismatch, surface it and ask the user which is correct before
-   proceeding. If the user forked from a different origin, ask them for the
-   correct URL.
+   If the remote and the anchor disagree about the upstream slug, surface the
+   mismatch and ask the user which is correct before proceeding. If the user
+   forked from a different origin, ask them for the correct URL.
 
 3. **Fetch upstream without merging.**
 
@@ -126,7 +130,7 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
    git diff HEAD upstream/main --stat -- <allowlist>
    ```
 
-   **Template mode with an anchor:** if `.basecamp.json` has a `ref` that resolves in the fetched upstream history (`git rev-parse --verify "<ref>^{commit}"` after the fetch), also show what actually changed upstream since the anchor — this is the precise report:
+   **Template mode with an anchor:** if `.serel-memory.json` has a `ref` that resolves in the fetched upstream history (`git rev-parse --verify "<ref>^{commit}"` after the fetch), also show what actually changed upstream since the anchor — this is the precise report:
 
    ```bash
    git log --oneline "<ref>"..upstream/main -- <allowlist>
@@ -139,8 +143,7 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
 
    ```bash
    UP="$(git remote get-url upstream | sed -E 's#^(git@github\.com:|https://github\.com/)##; s#\.git$##')"
-   if [ "$UP" = "gusfeliciano/basecamp" ]; then UP="madeordinary/serel-memory"; fi
-   printf '{ "upstream": "%s", "ref": "%s", "linked": true }\n' "$UP" "$(git rev-parse upstream/main)" > .basecamp.json
+   printf '{ "upstream": "%s", "ref": "%s", "linked": true }\n' "$UP" "$(git rev-parse upstream/main)" > .serel-memory.json
    ```
 
    Explain what `linked: true` means: the exact version this project started from is unknown, so this anchor only establishes a baseline from today forward.
@@ -200,15 +203,14 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
    git restore --source=upstream/main -- <new-file-path>
    ```
 
-10. **After syncing, update the anchor and summarize.** Advance `.basecamp.json` to the upstream commit you just synced from, so the next sync reports only what's newer (derive `upstream` from the remote as in step 5):
+10. **After syncing, update the anchor and summarize.** Advance `.serel-memory.json` to the upstream commit you just synced from, so the next sync reports only what's newer (derive `upstream` from the remote as in step 5):
 
     ```bash
-    printf '{ "upstream": "%s", "ref": "%s", "linked": false }\n' "$UP" "$(git rev-parse upstream/main)" > .basecamp.json
+    printf '{ "upstream": "%s", "ref": "%s", "linked": false }\n' "$UP" "$(git rev-parse upstream/main)" > .serel-memory.json
     ```
 
     (After a reviewed sync the baseline is now known, so `linked` becomes `false`
-    even if the anchor was originally reconstructed. Normalize the known legacy
-    slug to `madeordinary/serel-memory` before writing, as in step 5.)
+    even if the anchor was originally reconstructed.)
 
     If the user **skipped** some upstream changes, tell them before advancing: once the anchor moves, skipped changes stop appearing in the "new since last sync" report (they still show up in the file-level diff against `upstream/main`). Let them choose: advance the anchor anyway (skip means "no thanks"), or keep the old anchor (skip means "not yet").
 

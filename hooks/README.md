@@ -37,14 +37,7 @@ This writes `.codex/hooks.json` with a `SessionStart` hook that runs `hooks/sess
 export SEREL_MEMORY_HOOKS=off
 ```
 
-The Basecamp-era spelling also remains supported for every v0.x release:
-
-```bash
-export BASECAMP_HOOKS=off
-```
-
-Both scripts exit early if either variable is `off`. A deliberate disable wins
-even when the other variable has a different value.
+Both scripts exit early when `SEREL_MEMORY_HOOKS` is `off`.
 
 **Permanently**: remove the Serel Memory entries from `.claude/settings.json` or `.codex/hooks.json`. Or delete the whole `hooks` object if you don't use any other hooks.
 

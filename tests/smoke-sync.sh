@@ -45,7 +45,7 @@ $GIT commit --quiet -m "scaffold from Serel Memory"
 
 # Install-time anchor (per README: written at install, points at the
 # upstream version the project was scaffolded from).
-printf '{ "upstream": "local/basecamp", "ref": "%s", "linked": false }\n' "$ANCHOR_REF" > .basecamp.json
+printf '{ "upstream": "local/serel-memory", "ref": "%s", "linked": false }\n' "$ANCHOR_REF" > .serel-memory.json
 
 # The user makes the project their own: real bank content, a .rules learning,
 # and a custom command of their own.
@@ -89,7 +89,7 @@ while IFS= read -r f; do
 done <<<"$changed"
 
 # Step 10: advance the anchor to the synced upstream commit.
-printf '{ "upstream": "local/basecamp", "ref": "%s", "linked": false }\n' "$($GIT rev-parse upstream/main)" > .basecamp.json
+printf '{ "upstream": "local/serel-memory", "ref": "%s", "linked": false }\n' "$($GIT rev-parse upstream/main)" > .serel-memory.json
 
 # --- Assertions -------------------------------------------------------------
 fail=0
@@ -115,7 +115,7 @@ grep -q "USER LEARNING: keep this line" .rules \
 [ -f .claude/commands/custom.md ] \
   || { echo "FAIL: downstream custom command was deleted (directory restore?)"; fail=1; }
 
-grep -q "$($GIT rev-parse upstream/main)" .basecamp.json \
+grep -q "$($GIT rev-parse upstream/main)" .serel-memory.json \
   || { echo "FAIL: anchor was not advanced to the synced upstream commit"; fail=1; }
 
 if [ "$fail" -eq 0 ]; then
