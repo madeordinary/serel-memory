@@ -33,7 +33,7 @@ jobs:
       - name: Sync allowlist never includes user memory
         run: tests/check-allowlist.sh
 
-      - name: Rename compatibility contract
+      - name: Identifier cutover guard (no retired v0.x identifiers)
         run: tests/check-compatibility.sh
 
       - name: degit export ships clean templates
@@ -44,6 +44,9 @@ jobs:
 
       - name: sync-upstream template-mode procedure works end to end
         run: tests/smoke-sync.sh
+
+      - name: v0.2 to v0.3 downstream migration path works end to end
+        run: tests/smoke-migrate-v02-v03.sh
 
   docs:
     # Markdown hygiene for the prompt files themselves. Same repo guard as above —

@@ -40,12 +40,14 @@ The one intentional exception is the cross-agent helper, which names the *other*
 
 These are load-bearing decisions. Change them only with a clear reason in the PR:
 
-- **The sync allowlist never includes `memory-bank/`, `.rules`, or `.basecamp.json`.** Syncing user memory or the project's provenance anchor would clobber a downstream project's context. `tests/check-allowlist.sh` enforces it.
+- **The sync allowlist never includes `memory-bank/`, `.rules`, or `.serel-memory.json`.** Syncing user memory or the project's provenance anchor would clobber a downstream project's context. `tests/check-allowlist.sh` enforces it.
 - **The shipped `memory-bank/` is clean templates**, not Serel Memory's own bank. Serel Memory's real working bank lives in a gitignored `memory-bank.local/` (maintainer-only). `tests/smoke-degit.sh` asserts the export stays clean.
 - **Bare workflow names** (`/start`, not `/serel-memory:start`). These are core workflows, not a namespaced plugin.
-- **The v0.x rename contract stays intact.** `.basecamp.json` remains the only
-  anchor filename, both hook kill-switch names work, and old/new repository
-  slugs remain compatible. `tests/check-compatibility.sh` enforces it.
+- **The v0.3.0 identifier cutover stays clean.** `.serel-memory.json` is the only
+  provenance-anchor filename on live surfaces, `SEREL_MEMORY_HOOKS` is the only
+  hook kill-switch spelling, and the retired pre-rename repository slug appears
+  nowhere outside `CHANGELOG.md` and `docs/research/` (the historical record).
+  `tests/check-compatibility.sh` enforces it.
 - **No runtime dependencies, no build step.** Markdown, plus optional bash hooks. If a change needs a package manager, it probably belongs in a fork.
 
 ## Running the checks
@@ -60,10 +62,8 @@ npx --yes markdownlint-cli2 "**/*.md"    # markdown hygiene (config: .markdownli
 ```
 
 CI runs the same set plus a link check (`lychee`, config in `lychee.toml`). It
-runs on `madeordinary/serel-memory` and temporarily on
-`gusfeliciano/basecamp`; after one green canonical run and successful
-legacy-URL verification, the former-slug guard can be removed. It self-disables
-in unrelated forks and copies.
+runs only on `madeordinary/serel-memory` and self-disables in unrelated forks
+and copies.
 
 ## Style
 

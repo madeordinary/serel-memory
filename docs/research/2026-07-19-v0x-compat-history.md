@@ -1,5 +1,14 @@
 # Basecamp to Serel Memory compatibility
 
+> **Historical record.** The v0.x compatibility contract described in this
+> document **ended with Serel Memory 0.3.0** (July 19, 2026): the
+> `.basecamp.json` anchor became `.serel-memory.json`, the `BASECAMP_HOOKS`
+> fallback was removed, and `sync-upstream` stopped treating the legacy
+> `gusfeliciano/basecamp` slug as an alias of the canonical repository.
+> This file is kept as migration history only (it originally lived at
+> `docs/basecamp-compatibility.md`); see `CHANGELOG.md` for the 0.3.0 cutover
+> and downstream migration steps.
+
 Basecamp has been renamed **Serel Memory** and its canonical GitHub home is now
 `madeordinary/serel-memory`. The repository's commits, `v0.1.0` tag, release,
 and MIT license continue in place.

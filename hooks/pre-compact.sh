@@ -6,12 +6,11 @@
 # is summarized away.
 #
 # To disable temporarily: export SEREL_MEMORY_HOOKS=off
-# BASECAMP_HOOKS=off remains supported throughout v0.x.
 # To disable permanently: remove from .claude/settings.json
 
 set -euo pipefail
 
-if [ "${SEREL_MEMORY_HOOKS:-}" = "off" ] || [ "${BASECAMP_HOOKS:-}" = "off" ]; then
+if [ "${SEREL_MEMORY_HOOKS:-}" = "off" ]; then
   exit 0
 fi
 

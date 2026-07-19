@@ -6,7 +6,6 @@
 #
 # To disable, either:
 #   - export SEREL_MEMORY_HOOKS=off  (temporary, current session only)
-#   - export BASECAMP_HOOKS=off      (legacy spelling, supported through v0.x)
 #   - remove the entries from .claude/settings.json  (permanent)
 
 set -euo pipefail
@@ -48,7 +47,6 @@ if command -v jq >/dev/null 2>&1; then
   echo "  PreCompact   → $PRE_COMPACT_CMD"
   echo ""
   echo "  To disable temporarily: export SEREL_MEMORY_HOOKS=off"
-  echo "  Legacy v0.x spelling: export BASECAMP_HOOKS=off"
   echo "  To disable permanently: remove the entries from $SETTINGS"
 else
   echo "jq is not installed. Either install it (brew install jq) and re-run,"

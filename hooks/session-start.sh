@@ -5,13 +5,12 @@
 # Registered via hooks/enable-hooks.sh. Off by default.
 #
 # To disable temporarily for one session: export SEREL_MEMORY_HOOKS=off
-# BASECAMP_HOOKS=off remains supported throughout v0.x.
 # To disable permanently: remove the entries from .claude/settings.json
 
 set -euo pipefail
 
-# Honor either kill-switch. A deliberate disable always wins if both are set.
-if [ "${SEREL_MEMORY_HOOKS:-}" = "off" ] || [ "${BASECAMP_HOOKS:-}" = "off" ]; then
+# Honor the kill switch.
+if [ "${SEREL_MEMORY_HOOKS:-}" = "off" ]; then
   exit 0
 fi
 

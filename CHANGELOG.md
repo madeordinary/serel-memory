@@ -8,6 +8,47 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 No changes yet.
 
+## [0.3.0] — 2026-07-19
+
+The Basecamp → Serel Memory identifier cutover. Ends the v0.x compatibility
+contract that 0.2.0 opened; the contract's history is preserved in
+`docs/research/2026-07-19-v0x-compat-history.md`.
+
+### Changed
+
+- **Provenance anchor renamed:** `.serel-memory.json` is now the single anchor
+  filename, replacing `.basecamp.json` (same JSON schema:
+  `{"upstream","ref","linked"}`). `sync-upstream` reads and writes only the new
+  name, and the sync allowlist invariant now guards the new name.
+- **`sync-upstream` fails fast on a legacy-only anchor.** Finding a
+  `.basecamp.json` with no `.serel-memory.json` stops the sync with a
+  migrate-first message — the project is never silently treated as unanchored
+  and no baseline is silently reconstructed.
+- README install paths and examples pin `v0.3.0` and write `.serel-memory.json`.
+
+### Removed
+
+- **`BASECAMP_HOOKS` fallback.** `SEREL_MEMORY_HOOKS=off` is the only hook kill
+  switch; the legacy spelling no longer disables the hooks.
+- **Legacy upstream aliasing.** `sync-upstream` no longer treats
+  `gusfeliciano/basecamp` as equivalent to `madeordinary/serel-memory`; any
+  remote/anchor slug mismatch is surfaced for the user to resolve.
+
+### Migrating a v0.x install
+
+1. Refresh the vendored tooling (`.claude/commands/`, `.agents/skills/`,
+   `hooks/`, `CLAUDE.md`) from the `v0.3.0` tag. Replace files automatically
+   only when they are byte-identical to a known upstream vintage (v0.1.0 or
+   v0.2.0); merge or keep locally modified files individually.
+2. Rename the anchor: `git mv .basecamp.json .serel-memory.json` (or plain
+   `mv` if untracked), then set `"ref": "v0.3.0"` after the tooling refresh
+   verifies clean.
+3. Replace any use of `BASECAMP_HOOKS=off` with `SEREL_MEMORY_HOOKS=off`
+   (shell profiles, CI, direnv).
+4. If an `upstream` git remote or anchor still points at the old
+   `gusfeliciano/basecamp` slug, normalize it to
+   `https://github.com/madeordinary/serel-memory.git`.
+
 ## [0.2.0] — 2026-07-18
 
 ### Added
@@ -106,6 +147,7 @@ remain intact. Pin it from the canonical home with
   to parity; fixed a duplicate step number in the `ask-codex`/`ask-claude` workflows.
 - Fixed the broken file-tree rendering and tightened install instructions in the README.
 
-[Unreleased]: https://github.com/madeordinary/serel-memory/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/madeordinary/serel-memory/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.3.0
 [0.2.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.2.0
 [0.1.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.1.0

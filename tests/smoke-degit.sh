@@ -25,8 +25,8 @@ fi
 
 # 1c. The provenance anchor is per-project state written AT INSTALL (see README).
 # Shipping a pre-made one would stamp every downstream project with false provenance.
-if [ -e "$tmp/.basecamp.json" ]; then
-  echo "LEAK: .basecamp.json is present in the degit export (anchor must be install-written)"; fail=1
+if [ -e "$tmp/.serel-memory.json" ]; then
+  echo "LEAK: .serel-memory.json is present in the degit export (anchor must be install-written)"; fail=1
 fi
 
 # 2. No Serel Memory/Basecamp-specific live dev content in the shipped bank or .rules.
