@@ -6,7 +6,37 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [Unreleased]
 
-No changes yet.
+### Fixed
+
+- `sync-upstream` (both adapters) resolves the anchor explicitly: `git fetch
+  upstream main` does not fetch tags, so a tag anchor such as `v0.3.0` never
+  resolved and the "changed since anchor" report came back empty. The anchor
+  is now fetched with `--no-tags` into a private ref
+  (`refs/serel-memory/anchor`), never into the project's own tags. Found on
+  the first real downstream sync.
+- `sync-upstream` advances the anchor only after at least one file was
+  restored (or the user explicitly skipped everything); an empty restore
+  no longer moves it.
+- `sync-upstream` offers back allowlisted framework files the project
+  deleted that did not change upstream (they never appear in the anchor
+  diff). `tests/smoke-sync.sh` now uses a tag anchor and a deleted
+  framework doc, and runs the documented resolve snippet from both adapters.
+
+### Changed
+
+- Contract "Clean stop": the Checkpoint is the resume note (branch and HEAD,
+  uncommitted, verified, first action); `wip:` commits only on a requested
+  pause over the session's own changes; inherited completion claims are
+  re-verified on resume. Reflected in the pre-compact hook and
+  `/update-memory`.
+- Learning routing: a repeated `.rules` entry or recurring correction first
+  asks why the existing guidance did not take, then proposes a test or hook
+  check (`/update-memory`, `/retro`, contract "Memory writes").
+- `/review` and `/security-check` print one `DISAGREEMENTS:` line per
+  explicit contradiction between the two passes; agreement is confidence,
+  not priority.
+- `decisionLog.md` entries follow *decision / why / evidence / result*
+  (contract "Memory writes", template hint).
 
 ## [0.4.0] — 2026-09-09
 

@@ -23,7 +23,7 @@ Use this skill to update the memory bank from the current session. Always show p
    - `techContext.md` for dependencies, environment variables, runtime, or operational constraints
    - `decisionLog.md` for durable architectural, product, workflow, or operational decisions. If a past decision changed, **supersede, don't delete**: append "SUPERSEDED by … (date)" and move it to the Superseded section.
    - `productContext.md` or `projectbrief.md` only if product intent changed
-5. Append to `.rules` only for non-obvious reusable learnings, then **prune** it: if it's over ~40 lines or holds stale lines, drop what's no longer true and promote stabilized conventions into `systemPatterns.md`.
+5. Append to `.rules` only for non-obvious reusable learnings. If the entry is a repeat, or the same correction has recurred, first ask why the existing guidance did not take, then propose a test or hook check instead of a second line (contract "Memory writes" item 5). Then **prune** it: if it's over ~40 lines or holds stale lines, drop what's no longer true and promote stabilized conventions into `systemPatterns.md`.
 6. **Retention (required).** Write the proposed `activeContext.md` and `progress.md` to a temp location and run the read-only helper on each - it measures the file *as it would be after this update*:
 
    ```bash
@@ -88,6 +88,7 @@ Wait for confirmation before writing.
 ## Rules
 
 - Do not bloat the bank.
+- The `## Checkpoint` is the resume note (branch and HEAD, uncommitted, verified, first action). No `wip:` commit unless the user asked for a pause (contract "Clean stop").
 - Do not journal one-off events.
 - Never write to two scopes in one pass. If a learning clearly belongs to another project bank or to the root, say so and offer to run this workflow again with that `--scope`, rather than writing outside the resolved scope.
 - If `.rules` already covers a learning, refine the existing entry instead of duplicating it.

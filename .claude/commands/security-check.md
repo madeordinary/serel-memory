@@ -41,8 +41,10 @@ succeeds and the diff is non-trivial (≥ 20 changed lines):
    returned, proceed single-model and say so.
 4. Merge with provenance: tag every finding `[both]`, `[claude]`, or
    `[codex]`. Verify `[codex]`-only findings against the actual code before
-   including them. Findings tagged `[both]` deserve extra weight — two models
-   independently agreeing is the strongest signal this workflow produces.
+   including them. Findings tagged `[both]` carry the most confidence, but confidence
+   is not priority: a single verified vulnerability outranks two matching
+   low-severity notes. Add one `DISAGREEMENTS:` line per explicit
+   contradiction; silence from a model is not disagreement.
 
 This pass never blocks the check: if Codex is missing or slow, complete
 single-model and say so in the SECURITY SUMMARY.

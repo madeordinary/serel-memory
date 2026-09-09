@@ -22,7 +22,7 @@ Steps:
    - `techContext.md` — only if dependencies, env vars, or runtime changed
    - `decisionLog.md` — only if a durable architectural, product, workflow, or operational decision was made. If a past decision changed, **supersede, don't delete**: append "SUPERSEDED by … (date)" and move it to the Superseded section.
    - `productContext.md` / `projectbrief.md` — only if the goal or user model actually shifted
-5. Append to `.rules` any non-obvious thing learned this session: a user preference, a gotcha, a rejected approach worth remembering. Then **prune `.rules`**: if it's over ~40 lines or holds stale/obsolete lines, drop what's no longer true and promote stabilized conventions into `systemPatterns.md`. Keep it high-signal, not append-forever.
+5. Append to `.rules` any non-obvious thing learned this session: a user preference, a gotcha, a rejected approach worth remembering. If the entry is a repeat, or the same correction has recurred, first ask why the existing guidance did not take, then propose a test or hook check instead of a second line (contract "Memory writes" item 5). Then **prune `.rules`**: if it's over ~40 lines or holds stale/obsolete lines, drop what's no longer true and promote stabilized conventions into `systemPatterns.md`. Keep it high-signal, not append-forever.
 6. **Retention (required).** Write the proposed `activeContext.md` and `progress.md` to a temp location and run the read-only helper on each — it measures the file *as it would be after this update*:
 
    ```bash
@@ -87,6 +87,7 @@ Wait for confirmation before writing any file. If the user pushes back, revise �
 Rules:
 
 - Don't bloat. Every line in the bank should still be earning its place.
+- The `## Checkpoint` is the resume note (branch and HEAD, uncommitted, verified, first action). No `wip:` commit unless the user asked for a pause (contract "Clean stop").
 - Don't journal — this isn't a log. Current-state sections (`Current focus`, `Checkpoint`, `Next steps`, `Open questions`, `Notes for next session`) are rewritten in place; historical entries rotate losslessly to `archive/` per step 6, never deleted, never paraphrased.
 - Never write to two scopes in one pass. If a learning clearly belongs to another project bank or to the root, say so and offer to run this workflow again with that `--scope`, rather than writing outside the resolved scope.
 - If `.rules` already covers a learning, refine the existing entry instead of duplicating.
