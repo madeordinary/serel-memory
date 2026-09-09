@@ -44,7 +44,7 @@ scopes=()
 anchor="$ROOT/.serel-memory.json"
 if [ -f "$anchor" ] && grep -q '"scopes"' "$anchor"; then
   if command -v jq >/dev/null 2>&1; then
-    if stype="$(jq -r '(.scopes // null) | type' "$anchor" 2>/dev/null)"; then
+    if stype="$(jq -r 'if has("scopes") then (.scopes | type) else "absent" end' "$anchor" 2>/dev/null)"; then
       if [ "$stype" = "array" ]; then
         raw="$(jq -r '.scopes[] | if type=="string" then . else "\u0001" end' "$anchor")"
         while IFS= read -r line; do
@@ -52,7 +52,7 @@ if [ -f "$anchor" ] && grep -q '"scopes"' "$anchor"; then
           if [ "$line" = $'\001' ]; then warn "\"scopes\" must be an array of strings — treating as single-bank"; scopes=(); break; fi
           scopes+=("$line")
         done <<<"$raw"
-      elif [ "$stype" != "null" ]; then
+      elif [ "$stype" != "absent" ]; then
         warn "\"scopes\" must be an array of strings (got $stype) — treating as single-bank"
       fi
     else
@@ -71,7 +71,8 @@ fi
 if [ "${#scopes[@]}" -gt 0 ]; then
   norm=()
   for s in "${scopes[@]}"; do
-    s="$(printf '%s' "$s" | sed -E 's#^(\./)+##; s#/+#/#g; s#/\./#/#g; s#/$##')"
+    # BSD sed needs each label/branch as its own -e expression.
+    s="$(printf '%s' "$s" | sed -E -e 's#/+#/#g' -e 's#^(\./)+##' -e ':a' -e 's#/\./#/#' -e 'ta' -e 's#/\.$##' -e 's#/$##')"
     norm+=("$s")
   done
   scopes=("${norm[@]}")
