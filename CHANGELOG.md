@@ -6,6 +6,19 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [Unreleased]
 
+No changes yet.
+
+## [0.4.0] — 2026-09-09
+
+Two field-driven additions: a retention layer that keeps the two volatile
+bank files bounded without losing history, and opt-in scoped banks for repos
+that host several initiatives. Repos without `scopes` see only the retention
+step in `/update-memory`; the session read, hooks, and sync behave as before.
+
+Upgrade from 0.3.0: run `/sync-upstream` (or `$sync-upstream`) and start a
+fresh session before adding `"scopes"` to `.serel-memory.json`. Using scopes
+requires `jq`; Serel Memory itself still has no dependency.
+
 ### Added
 
 - **Scoped banks (opt-in).** A repo may list project folders under `"scopes"`
@@ -20,7 +33,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
   `tests/smoke-scopes.sh` covers explicit/cwd/root selection, unknown and
   uninitialized scopes, degraded configurations (overlap, missing dir, bad
   JSON, no `jq` → single-bank with a warning), overlay composition, and
-  byte-identical hook output for repos without `scopes`.
+  unchanged hook output for repos without `scopes` (SessionStart identical
+  to 0.3.0; PreCompact differs only by the retention step).
 - **Retention layer.** `hooks/lib/rotate-check.sh` (read-only) measures
   `activeContext.md` and `progress.md` against soft targets — 200 lines /
   12 KB, and the 10 newest milestones — and selects the oldest historical
@@ -196,7 +210,8 @@ remain intact. Pin it from the canonical home with
   to parity; fixed a duplicate step number in the `ask-codex`/`ask-claude` workflows.
 - Fixed the broken file-tree rendering and tightened install instructions in the README.
 
-[Unreleased]: https://github.com/madeordinary/serel-memory/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/madeordinary/serel-memory/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/madeordinary/serel-memory/tree/v0.4.0
 [0.3.0]: https://github.com/madeordinary/serel-memory/tree/v0.3.0
 [0.2.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.2.0
 [0.1.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.1.0
