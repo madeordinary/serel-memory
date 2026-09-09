@@ -28,6 +28,7 @@ fi
 # scope — the documented exception in docs/workflow-contract.md "Resolving
 # scope". Project banks (if the repo configures "scopes") are only listed.
 LIB="$(dirname "${BASH_SOURCE[0]}")/lib/resolve-scope.sh"
+RESOLVER_WARNINGS="$(bash "$LIB" --root "$ROOT" --scope . 2>&1 >/dev/null || true)"
 IFS=$'\t' read -r _ BANK_REL _ RULES_REL _ _ < <(bash "$LIB" --root "$ROOT" --scope . 2>/dev/null)
 BANK_DIR="$ROOT/$BANK_REL"
 BANK_LABEL="$BANK_REL"
@@ -69,6 +70,12 @@ fi
 # Scoped banks (opt-in): list project banks by selector only. Nothing from a
 # project bank is read here — one bank per invocation.
 SCOPE_LIST="$(bash "$LIB" --root "$ROOT" --list 2>/dev/null || echo "SCOPES: none")"
+if [ -n "$RESOLVER_WARNINGS" ]; then
+  echo "### Serel Memory notice"
+  echo ""
+  printf '%s\n' "$RESOLVER_WARNINGS"
+  echo ""
+fi
 if [ "$SCOPE_LIST" != "SCOPES: none" ]; then
   echo "### Scopes (project banks in this repo)"
   echo ""

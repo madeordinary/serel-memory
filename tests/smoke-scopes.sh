@@ -4,8 +4,11 @@
 # Builds a fixture repo with a root bank and three project roots, then drives
 # hooks/lib/resolve-scope.sh through every documented case and checks both
 # hooks: with scopes they list project selectors and read no project bank;
-# without scopes their output is byte-identical to the v0.3.0 hooks.
+# without scopes SessionStart output is identical to the v0.3.0 hook and
+# PreCompact differs only by the documented retention step.
 # shellcheck disable=SC2015,SC2016  # ok/bad never fail (plain either/or); backticks in grep patterns are literal
+# Hook output is always captured into a variable before grep -q: with pipefail,
+# grep -q closing the pipe early would SIGPIPE the hook and fail the pipeline.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 ROOT="$PWD"
@@ -60,6 +63,8 @@ anchor_with '["projects/running", "projects/watching"]'
 [ "$(res --scope projects/running/gadget)" = "$(printf 'projects/running/gadget\tprojects/running/gadget/memory-bank\tprojects/running/gadget/.rules\t-\t.rules\tuninitialized')" ] \
   && ok "--scope gadget → valid but uninitialized, no local rules" || bad "gadget: $(res --scope projects/running/gadget)"
 if out="$(res --scope projects/nope 2>"$tmp/err")"; then bad "unknown --scope accepted: $out"; else
+  rc=0; res --scope projects/nope >/dev/null 2>&1 || rc=$?
+  [ "$rc" -eq 2 ] && ok "unknown --scope exit code is exactly 2" || bad "unknown --scope exit code $rc"
   grep -q "unknown scope 'projects/nope'" "$tmp/err" && grep -q -- "--scope projects/running/widget" "$tmp/err" \
     && ok "unknown --scope exits 2 and lists selectors" || bad "unknown --scope stderr: $(cat "$tmp/err")"; fi
 res --scope projects/running >/dev/null 2>&1 && bad "a scope ROOT was accepted as a project" || ok "scope root itself is not selectable"
@@ -68,6 +73,22 @@ res --scope projects/running >/dev/null 2>&1 && bad "a scope ROOT was accepted a
 [ "$(cd docs && "$R" --root "$F" | cut -f1)" = "." ] && ok "cwd outside any project → root" || bad "cwd outside project"
 [ "$(cd projects/watching/thing && "$R" --root "$F" --scope . | cut -f1)" = "." ] && ok "--scope . from nested cwd → root" || bad "--scope . from nested"
 [ "$(res --cwd "$F/projects/running/gadget" | cut -f1,6)" = "$(printf 'projects/running/gadget\tuninitialized')" ] && ok "--cwd into an uninitialized project" || bad "--cwd gadget"
+
+# --- Aliases normalize; non-array scopes warn; overlay-only projects count ----
+anchor_with '["./projects/running/", "projects//watching"]'
+[ "$(cd projects/watching/thing && "$R" --root "$F" | cut -f1)" = "projects/watching/thing" ] && ok "aliased roots (./, //, trailing /) still match nested cwd" || bad "alias root cwd match: $(cd projects/watching/thing && "$R" --root "$F")"
+[ "$(res --scope projects/running/widget | cut -f1)" = "projects/running/widget" ] && ok "aliased root: explicit selector works" || bad "alias explicit"
+anchor_with '["projects/running", "./projects/running"]'
+res 2>"$tmp/err" | grep -q '^\.	' && grep -q "overlap" "$tmp/err" && ok "aliased duplicate roots caught as overlap" || bad "alias overlap"
+anchor_with '"projects/running"'
+res 2>"$tmp/err" | grep -q '^\.	' && grep -q "must be an array" "$tmp/err" && ok "non-array scopes → warning, single-bank" || bad "non-array: $(cat "$tmp/err")"
+anchor_with '["projects/running", 3]'
+res 2>"$tmp/err" | grep -q '^\.	' && grep -q "array of strings" "$tmp/err" && ok "non-string element → warning, single-bank" || bad "non-string element: $(cat "$tmp/err")"
+anchor_with '["projects/running", "projects/watching"]'
+mkdir projects/running/gadget/memory-bank.local
+[ "$(res --list | grep gadget | cut -f3)" = "initialized" ] && ok "overlay-only project enumerates as initialized" || bad "overlay-only enumeration: $(res --list | grep gadget)"
+[ "$(res --scope projects/running/gadget | cut -f2,6)" = "$(printf 'projects/running/gadget/memory-bank.local\tinitialized')" ] && ok "overlay-only project selects its overlay" || bad "overlay-only select"
+rmdir projects/running/gadget/memory-bank.local
 
 # --- Degraded configurations disable scopes with a warning --------------------
 anchor_with '["projects", "projects/running"]'
@@ -82,6 +103,10 @@ anchor_with '["projects/running", "projects/watching"]'
 mkdir -p "$tmp/nojq"; for b in bash sh awk sed grep find sort cut git tr mktemp dirname basename cat printf wc head tail; do p="$(command -v "$b" 2>/dev/null || true)"; [ -n "$p" ] && ln -sf "$p" "$tmp/nojq/$b"; done
 PATH="$tmp/nojq" "$R" --root "$F" 2>"$tmp/err" | grep -q '^\.	' && grep -q "jq is required" "$tmp/err" && ok "no jq → warning, single-bank" || bad "no-jq handling: $(cat "$tmp/err")"
 [ "$(PATH="$tmp/nojq" "$R" --root "$F" --list 2>/dev/null)" = "SCOPES: none" ] && ok "no jq → list is none" || bad "no-jq list"
+nojq_out="$(CLAUDE_PROJECT_DIR="$F" PATH="$tmp/nojq" bash "$ROOT/hooks/session-start.sh" 2>&1)"
+printf '%s\n' "$nojq_out" | grep -q '^### Serel Memory notice' && ok "session-start surfaces the no-jq downgrade" || bad "session-start hid the no-jq warning — tail: $(printf '%s\n' "$nojq_out" | grep -n 'notice\|resolve-scope\|not found' | head -3 | tr '\n' '|')"
+nojq_pc="$(CLAUDE_PROJECT_DIR="$F" PATH="$tmp/nojq" bash "$ROOT/hooks/pre-compact.sh" 2>&1)"
+printf '%s\n' "$nojq_pc" | grep -q 'Serel Memory notice: resolve-scope: jq is required' && ok "pre-compact surfaces the no-jq downgrade" || bad "pre-compact hid the no-jq warning"
 
 # --- Maintainer overlay composes inside the selected scope --------------------
 mkdir memory-bank.local
@@ -102,14 +127,16 @@ printf '%s\n' "$out" | grep -q -- '^- --scope projects/running/widget \[initiali
 printf '%s\n' "$out" | grep -q -- '^- --scope projects/running/gadget \[uninitialized\]' && ok "session-start: gadget marked uninitialized" || bad "session-start: gadget"
 printf '%s\n' "$out" | grep -q 'WIDGET-BANK-MARKER' && bad "session-start: READ a project bank" || ok "session-start: no project bank content"
 printf '%s\n' "$out" | grep -q '^### memory-bank/activeContext.md' && ok "session-start: root bank loaded" || bad "session-start: root bank missing"
-pc="$(cd projects/watching/thing && bash "$ROOT/hooks/pre-compact.sh")"
+pc="$(cd projects/watching/thing && bash "$ROOT/hooks/pre-compact.sh" 2>&1)"
 printf '%s\n' "$pc" | grep -q 'Scope resolved by cwd: `projects/watching/thing`' && ok "pre-compact: names the cwd scope" || bad "pre-compact: $(printf '%s\n' "$pc" | tail -2)"
 printf '%s\n' "$pc" | grep -q 'effective bank `projects/watching/thing/memory-bank`' && ok "pre-compact: names the project bank" || bad "pre-compact bank"
+printf '%s\n' "$pc" | grep -q 'never remembered' && ok "pre-compact: no remembered scope" || bad "pre-compact: remembered-scope wording"
+printf '%s\n' "$pc" | grep -qi 'selected a different' && bad "pre-compact still tells the agent to reuse an earlier --scope" || ok "pre-compact: no earlier-scope override"
 
 # Without scopes: byte-identical to the v0.3.0 hooks on the same fixture.
 anchor_without
 new_ss="$(bash "$ROOT/hooks/session-start.sh")"; old_ss="$(bash "$tmp/old-session-start.sh")"
-[ "$new_ss" = "$old_ss" ] && ok "session-start without scopes is byte-identical to v0.3.0" || { bad "session-start drifted from v0.3.0"; diff <(printf '%s\n' "$old_ss") <(printf '%s\n' "$new_ss") | head -20; }
+[ "$new_ss" = "$old_ss" ] && ok "session-start without scopes is identical to v0.3.0" || { bad "session-start drifted from v0.3.0"; diff <(printf '%s\n' "$old_ss") <(printf '%s\n' "$new_ss") | head -20; }
 new_pc="$(bash "$ROOT/hooks/pre-compact.sh")"; old_pc="$(bash "$tmp/old-pre-compact.sh")"
 # The pre-compact text gained the retention step (documented change); compare everything else.
 strip_ret() { sed '/^5\. Apply the update-memory retention step/,/^$/d'; }
@@ -119,7 +146,8 @@ strip_ret() { sed '/^5\. Apply the update-memory retention step/,/^$/d'; }
 mkdir memory-bank.local && cp memory-bank/*.md memory-bank.local/ && rm -rf memory-bank
 ov="$(bash "$ROOT/hooks/session-start.sh" 2>&1)"
 printf '%s\n' "$ov" | grep -q '^### memory-bank.local/activeContext.md' && ok "session-start: overlay-only bank loads" || bad "session-start: overlay-only — headings: $(printf '%s\n' "$ov" | grep '^###' | tr '\n' '|')"
-bash "$ROOT/hooks/pre-compact.sh" | grep -q 'pre-compact memory bank refresh' && ok "pre-compact: overlay-only bank still fires" || bad "pre-compact: overlay-only"
+ov_pc="$(bash "$ROOT/hooks/pre-compact.sh" 2>&1)"
+printf '%s\n' "$ov_pc" | grep -q 'pre-compact memory bank refresh' && ok "pre-compact: overlay-only bank still fires" || bad "pre-compact: overlay-only"
 
 if [ "$fail" -eq 0 ]; then echo "scopes OK"; fi
 exit "$fail"

@@ -44,8 +44,17 @@ scopes=()
 anchor="$ROOT/.serel-memory.json"
 if [ -f "$anchor" ] && grep -q '"scopes"' "$anchor"; then
   if command -v jq >/dev/null 2>&1; then
-    if raw="$(jq -r '(.scopes // []) | if type=="array" then .[] else empty end' "$anchor" 2>/dev/null)"; then
-      while IFS= read -r line; do [ -n "$line" ] && scopes+=("$line"); done <<<"$raw"
+    if stype="$(jq -r '(.scopes // null) | type' "$anchor" 2>/dev/null)"; then
+      if [ "$stype" = "array" ]; then
+        raw="$(jq -r '.scopes[] | if type=="string" then . else "\u0001" end' "$anchor")"
+        while IFS= read -r line; do
+          [ -n "$line" ] || continue
+          if [ "$line" = $'\001' ]; then warn "\"scopes\" must be an array of strings — treating as single-bank"; scopes=(); break; fi
+          scopes+=("$line")
+        done <<<"$raw"
+      elif [ "$stype" != "null" ]; then
+        warn "\"scopes\" must be an array of strings (got $stype) — treating as single-bank"
+      fi
     else
       warn "cannot parse $anchor — treating as single-bank"
     fi
@@ -56,19 +65,37 @@ fi
 
 # Validate: relative, no '..', existing directories, non-overlapping. Any
 # problem disables scopes entirely (conservative: never guess a bank).
+# Normalize before validating so aliases ("./a", "a//b", "a/") cannot evade the
+# overlap check or the cwd match: strip "./" prefixes, collapse "//", drop the
+# trailing "/".
 if [ "${#scopes[@]}" -gt 0 ]; then
+  norm=()
+  for s in "${scopes[@]}"; do
+    s="$(printf '%s' "$s" | sed -E 's#^(\./)+##; s#/+#/#g; s#/\./#/#g; s#/$##')"
+    norm+=("$s")
+  done
+  scopes=("${norm[@]}")
   valid=1
   for s in "${scopes[@]}"; do
-    s="${s%/}"
     case "$s" in
       /*|../*|*/../*|*/..|..|.|"") warn "invalid scope root '$s'"; valid=0 ;;
       *) [ -d "$ROOT/$s" ] || { warn "scope root '$s' is not a directory"; valid=0; } ;;
     esac
   done
-  for a in "${scopes[@]}"; do for b in "${scopes[@]}"; do
-    [ "$a" = "$b" ] && continue
-    case "${b%/}/" in "${a%/}/"*) warn "scope roots overlap: '$a' contains '$b'"; valid=0 ;; esac
-  done; done
+  n="${#scopes[@]}"; i=0
+  while [ "$i" -lt "$n" ]; do
+    j=$((i + 1))
+    while [ "$j" -lt "$n" ]; do
+      a="${scopes[i]}"; b="${scopes[j]}"
+      if [ "$a" = "$b" ]; then warn "scope roots overlap: '$a' listed twice"; valid=0
+      else
+        case "$b/" in "$a/"*) warn "scope roots overlap: '$a' contains '$b'"; valid=0 ;; esac
+        case "$a/" in "$b/"*) warn "scope roots overlap: '$b' contains '$a'"; valid=0 ;; esac
+      fi
+      j=$((j + 1))
+    done
+    i=$((i + 1))
+  done
   if [ "$valid" -eq 0 ]; then warn "scopes disabled — single-bank behavior"; scopes=(); fi
 fi
 
@@ -82,7 +109,8 @@ for s in "${scopes[@]:-}"; do
   done < <(find "$ROOT/$s" -mindepth 1 -maxdepth 1 -type d ! -name '.*' 2>/dev/null | sort)
 done
 
-state_of() { [ -d "$ROOT/$1/memory-bank" ] && echo initialized || echo uninitialized; }
+# Same effective-bank rule as selection: an overlay counts as a bank.
+state_of() { { [ -d "$ROOT/$1/memory-bank.local" ] || [ -d "$ROOT/$1/memory-bank" ]; } && echo initialized || echo uninitialized; }
 
 if [ "$LIST" -eq 1 ]; then
   if [ "${#projects[@]}" -eq 0 ]; then echo "SCOPES: none"; exit 0; fi

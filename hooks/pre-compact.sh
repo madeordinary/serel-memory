@@ -25,9 +25,10 @@ fi
 # reminder names the right bank. Single-bank repos print nothing extra.
 LIB="$(dirname "${BASH_SOURCE[0]}")/lib/resolve-scope.sh"
 SCOPE_NOTE=""
+RESOLVER_WARNINGS="$(bash "$LIB" --root "$ROOT" --cwd "$PWD" 2>&1 >/dev/null || true)"
 if [ "$(bash "$LIB" --root "$ROOT" --list 2>/dev/null || echo "SCOPES: none")" != "SCOPES: none" ]; then
   IFS=$'\t' read -r SCOPE_ROOT BANK_REL RULES_WRITE _ _ _ < <(bash "$LIB" --root "$ROOT" --cwd "$PWD" 2>/dev/null)
-  SCOPE_NOTE="Scope resolved by cwd: \`$SCOPE_ROOT\` — effective bank \`$BANK_REL\`, rules \`$RULES_WRITE\`. If /start selected a different \`--scope\` this session, apply the updates to that bank instead (one bank per invocation)."
+  SCOPE_NOTE="Scope resolved by cwd: \`$SCOPE_ROOT\` — effective bank \`$BANK_REL\`, rules \`$RULES_WRITE\`. Apply the updates there. To target another bank, run \`/update-memory --scope <path>\` explicitly — a scope chosen earlier in the session is never remembered."
 fi
 
 cat <<'EOF'
@@ -70,6 +71,10 @@ effective bank — apply all of the updates below to `memory-bank.local/` and it
 Show the diffs to the user and ask for confirmation before writing. Then proceed
 with the compaction.
 EOF
+if [ -n "$RESOLVER_WARNINGS" ]; then
+  echo ""
+  echo "Serel Memory notice: $RESOLVER_WARNINGS"
+fi
 if [ -n "$SCOPE_NOTE" ]; then
   echo ""
   echo "$SCOPE_NOTE"
