@@ -8,6 +8,19 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ### Added
 
+- **Scoped banks (opt-in).** A repo may list project folders under `"scopes"`
+  in `.serel-memory.json`; each project root then carries its own full bank
+  and `.rules`. Every workflow resolves exactly one bank per invocation —
+  `--scope <path>` (`.` = root), else the current directory, else the root —
+  with no remembered selection. At the root, `/start` and the SessionStart
+  hook list project selectors without reading any project bank. The shared
+  resolver `hooks/lib/resolve-scope.sh` drives both hooks; the rule, the
+  `.rules` inheritance model, scope-relative artifacts, and the non-code
+  workspace guidance live in `docs/workflow-contract.md` "Resolving scope".
+  `tests/smoke-scopes.sh` covers explicit/cwd/root selection, unknown and
+  uninitialized scopes, degraded configurations (overlap, missing dir, bad
+  JSON, no `jq` → single-bank with a warning), overlay composition, and
+  byte-identical hook output for repos without `scopes`.
 - **Retention layer.** `hooks/lib/rotate-check.sh` (read-only) measures
   `activeContext.md` and `progress.md` against soft targets — 200 lines /
   12 KB, and the 10 newest milestones — and selects the oldest historical
@@ -20,6 +33,15 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ### Changed
 
+- `sync-upstream` (both adapters) is explicitly repo-root anchored and updates
+  the anchor's `ref`/`linked` in place with `jq`, preserving every other key
+  (such as `scopes`); without `jq` it stops with a one-line manual edit
+  instead of regenerating the file. `tests/smoke-sync.sh` now runs the
+  documented snippets verbatim from both adapters, including reconstruction
+  of a missing anchor and a sync started from inside a project folder.
+- All 15 bank-touching workflow pairs carry a one-line scope pointer;
+  `/start` gains a gated `Scope:` audit row and root-level project listing;
+  `/update-memory` never writes to two scopes in one pass.
 - `/update-memory` and `$update-memory` gain a required retention step: they
   run the helper on the *proposed* files and fold any rotation into the same
   confirmation as the content diffs, then re-check after writing. The

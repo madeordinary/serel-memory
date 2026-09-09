@@ -115,7 +115,8 @@ your-project/
 │   ├── session-start.sh      # auto-load memory bank at session start
 │   ├── pre-compact.sh        # remind agent to update bank before context loss
 │   ├── enable-hooks.sh       # register Claude Code hooks
-│   └── enable-codex-hooks.sh # register Codex hooks
+│   ├── enable-codex-hooks.sh # register Codex hooks
+│   └── lib/                  # read-only helpers: retention check, scope resolver
 └── docs/
     ├── workflow-contract.md  # how workflows should be shaped
     └── cross-agent-review.md # second-opinion loop policy
@@ -340,6 +341,27 @@ Keep the core bank small. If a topic is too large for the core files, add focuse
 - `memory-bank/testing.md`
 
 These are optional. Agents should read them only when the current task touches that topic.
+
+## Scoped banks (optional)
+
+One repo, several initiatives — a portfolio workspace, a product manager's daily-driver repo, a monorepo with independent tracks. A single `activeContext.md` tangles them. Scoped banks let the bank structure mirror the work: one **root bank** for cross-project state, plus one full, standard-shaped bank per project folder.
+
+Opt in by naming the parent folders that hold projects:
+
+```json
+{ "upstream": "madeordinary/serel-memory", "ref": "v0.4.0", "linked": false,
+  "scopes": ["projects/running", "projects/watching"] }
+```
+
+Every immediate child of a scope root is a project root with its own `memory-bank/` and `.rules`. Then every workflow resolves **exactly one** bank per invocation — `--scope <path>` (`.` is the root), else the folder you're in, else the root — and never remembers a previous choice:
+
+```text
+/start                                   # root bank + a list of project selectors
+/start --scope projects/running/widget   # that project's bank, nothing else
+/update-memory --scope .                 # write the root bank from a nested folder
+```
+
+At the root, `/start` and the session hook list projects by selector only; no project bank is read until you pick one. Moving a project between scope roots is a folder move — nothing inside changes. Without `scopes`, nothing changes at all. The full rule, including how `.rules` inherit and how non-code workspaces fill `systemPatterns`/`techContext`, is in `docs/workflow-contract.md` "Resolving scope"; `hooks/lib/resolve-scope.sh` implements it for the hooks, and `tests/smoke-scopes.sh` proves it. `sync-upstream` and the anchor stay at the repo root regardless of scope.
 
 ## Optional Second Opinions
 

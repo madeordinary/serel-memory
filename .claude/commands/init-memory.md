@@ -8,6 +8,8 @@ Use this when Serel Memory has just been dropped into an existing project and th
 
 **Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), it is the working bank — the empty/template-only check and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 Steps:
 
 1. Read the repo structure. Use `ls` and `find` to map the top-level layout. Skip `node_modules/`, `.git/`, `dist/`, `build/`.

@@ -10,6 +10,7 @@ These hooks automate part of Serel Memory's workflow. They're **off by default**
 | `pre-compact.sh` | `PreCompact` | Reminds the agent to refresh `activeContext.md`, `progress.md`, and `decisionLog.md` before Claude Code compacts context. Replaces remembering `/update-memory`. |
 | `enable-hooks.sh` | n/a | One-shot script that registers Claude Code hooks in `.claude/settings.json`. |
 | `enable-codex-hooks.sh` | n/a | One-shot script that registers the Codex `SessionStart` hook in `.codex/hooks.json`. |
+| `lib/resolve-scope.sh` | n/a | Read-only scope resolver shared by both hooks and the tests: picks the one bank an invocation targets (`--scope <path>`, else cwd, else root) and lists project banks. Single-bank repos always resolve to the root. |
 | `lib/rotate-check.sh` | n/a | Read-only retention helper used by `/update-memory` and the pre-compact reminder: measures `activeContext.md` / `progress.md` against the contract targets and lists which old entries would rotate to `memory-bank/archive/`. It never writes. |
 
 ## Enable Claude Code Hooks

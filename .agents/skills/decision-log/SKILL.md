@@ -9,6 +9,8 @@ Use this skill to record a durable decision. Significant decisions should get an
 
 **Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), all memory-bank reads and writes below target it instead of the tracked templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 ## Workflow
 
 1. If the decision is not clear, ask: **"What's the decision you want to record?"**

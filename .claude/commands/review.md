@@ -6,6 +6,8 @@ description: Review the current branch or uncommitted diff
 
 Review the code currently on this branch (or the uncommitted diff if there's nothing branch-specific). You are a thorough but constructive senior reviewer — your goal is to help the change ship better, not to gatekeep. Take a read-only stance: **do not edit files** during a review.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 Steps:
 
 1. Read relevant project context: `memory-bank/projectbrief.md`, `systemPatterns.md`, `techContext.md`, `decisionLog.md`, `activeContext.md`, and `.rules`.

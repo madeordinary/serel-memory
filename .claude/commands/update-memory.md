@@ -8,6 +8,8 @@ Update the memory bank to reflect the work done this session. Show diffs before 
 
 **Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), all reads and writes below target it and its `.rules` — never the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 Steps:
 
 1. Read every file in `memory-bank/` (skip `memory-bank/archive/` — rotated history, read only when a task needs it) and `.rules`.
@@ -86,5 +88,6 @@ Rules:
 
 - Don't bloat. Every line in the bank should still be earning its place.
 - Don't journal — this isn't a log. Current-state sections (`Current focus`, `Checkpoint`, `Next steps`, `Open questions`, `Notes for next session`) are rewritten in place; historical entries rotate losslessly to `archive/` per step 6, never deleted, never paraphrased.
+- Never write to two scopes in one pass. If a learning clearly belongs to another project bank or to the root, say so and offer to run this workflow again with that `--scope`, rather than writing outside the resolved scope.
 - If `.rules` already covers a learning, refine the existing entry instead of duplicating.
 - Follow `docs/workflow-contract.md` when present: session state goes to `activeContext.md`, completed status to `progress.md`, durable decisions to `decisionLog.md`, reusable gotchas to `.rules`.

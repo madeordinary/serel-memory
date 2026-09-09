@@ -7,6 +7,8 @@ description: "Break down a task before implementation in Codex. Use when the use
 
 Use this skill when the user wants a plan before execution. Do not edit files while planning.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 ## Workflow
 
 1. Read the relevant memory-bank files for project intent:

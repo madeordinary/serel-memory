@@ -8,6 +8,8 @@ Surface risks and unknowns that aren't already captured in the memory bank. The 
 
 **Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), all memory-bank and `.rules` reads and writes below target it instead of the tracked templates; skip files it doesn't contain. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 Steps:
 
 1. Read `memory-bank/projectbrief.md` for goals and success criteria.

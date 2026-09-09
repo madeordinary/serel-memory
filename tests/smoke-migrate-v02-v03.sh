@@ -177,8 +177,10 @@ while IFS= read -r f; do
     || { echo "FAIL: refreshed tooling disagrees with upstream: $f"; fail=1; }
 done <<<"$changed"
 
-# Step 10 / migration finish: advance the anchor to the synced upstream commit.
-printf '{ "upstream": "madeordinary/serel-memory", "ref": "%s", "linked": false }\n' "$($GIT rev-parse upstream/main)" > .serel-memory.json
+# Step 10 / migration finish: advance the anchor with the documented snippet.
+UPDATE_SNIPPET="$(awk '/^[[:space:]]*# Anchor update: keep every other key/,/^[[:space:]]*fi[[:space:]]*$/' "$ROOT/.claude/commands/sync-upstream.md")"
+[ -n "$UPDATE_SNIPPET" ] || { echo "FAIL: could not extract the anchor-update snippet"; exit 1; }
+bash -c "$UPDATE_SNIPPET"
 
 # --- Final-state assertions ----------------------------------------------------
 [ -e .basecamp.json ] \

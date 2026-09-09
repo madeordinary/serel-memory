@@ -23,6 +23,10 @@ If any memory bank file is missing, empty, or still only template placeholders, 
 
 Tip: `bash hooks/enable-hooks.sh` registers an optional SessionStart hook that auto-loads the bank so you don't need `/start` every session (see `hooks/README.md`).
 
+### Scoped banks (optional)
+
+A repo that hosts several initiatives may list project folders under `"scopes"` in `.serel-memory.json`. Then each project root carries its own full bank and `.rules`, and every workflow resolves exactly one scope per invocation: `--scope <path>` (`.` = root), else the current directory, else the root — never a remembered choice. Read one bank, write one bank; at the root, only list the project selectors. Rules: "Resolving scope" in `docs/workflow-contract.md`. Without `scopes`, nothing changes.
+
 ### Maintainer overlay (upstream Serel Memory development only)
 
 If a `memory-bank.local/` directory exists, you are working on the upstream Serel Memory repo itself. That directory is the real working bank (gitignored, never shipped), and it **is** the effective bank:

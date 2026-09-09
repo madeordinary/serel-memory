@@ -7,6 +7,8 @@ description: "Draft a stakeholder-ready weekly update from the memory bank and r
 
 Draft a weekly update suitable for stakeholders, pulling from the memory bank and recent git activity. The output should be skimmable in 30 seconds.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 ## Workflow
 
 1. Read:

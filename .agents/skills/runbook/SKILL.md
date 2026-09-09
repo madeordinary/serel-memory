@@ -7,6 +7,8 @@ description: "Generate or update an operational runbook for a service or change.
 
 Produce an operational runbook entry for the service or change being made. This is for the person on-call at 3am, not the developer who already knows the codebase.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 ## Workflow
 
 1. Determine the target:

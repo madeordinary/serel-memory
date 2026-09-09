@@ -13,10 +13,78 @@ Every workflow should make these things clear:
 - **Output contract**: the exact shape users should expect back.
 - **Stop conditions**: when the agent must pause for user input instead of guessing.
 
+## Resolving scope
+
+By default a repo has one bank at its root and every workflow targets it —
+nothing below applies. A repo that hosts several initiatives can opt in to
+**scoped banks**: one root bank for portfolio state plus one full bank per
+project folder, each with the standard seven files and its own `.rules`.
+
+Opt in by listing the parent folders that hold projects in
+`.serel-memory.json` (any other key is left alone):
+
+```json
+{ "upstream": "madeordinary/serel-memory", "ref": "v0.4.0", "linked": false,
+  "scopes": ["projects/running", "projects/watching"] }
+```
+
+Every immediate child folder of a scope root is a **project root**. Its bank
+is `<project root>/memory-bank/`; a project root without one is valid but
+*uninitialized* — `/init-memory`, `/from-prd`, and `/discover` may create it;
+every other workflow stops with the usual uninitialized message.
+
+**One rule, everywhere.** Each invocation resolves exactly one scope, and it
+never remembers a previous choice:
+
+1. `--scope <path>` — `.` selects the root; a path equal to a project root
+   selects that project; anything else stops and lists the valid selectors.
+   Paths, never bare names: they cannot collide with mode words or with other
+   workflows' arguments.
+2. Otherwise, if the current directory is inside a project root, that project.
+3. Otherwise, the root.
+
+`hooks/lib/resolve-scope.sh` implements this rule for the hooks and the
+tests; workflow prompts describe the same rule. The maintainer overlay
+(below) is then applied *inside* the selected scope root.
+
+**Rules files.** Writes go to the selected scope's own `.rules` (the overlay's
+when the overlay is selected, even if it does not exist yet — never the
+tracked root `.rules`). Reads use the first existing of the scope's write
+target and the scope's plain `.rules`; at project scope the repo's effective
+`.rules` is read too, as inherited guidance — local entries win on conflict,
+and it is never written from a project scope.
+
+**One bank per invocation.** A workflow reads one bank and writes one bank.
+The only exception is enumeration: at the root, `/start` and the SessionStart
+hook list project roots as usable selectors with an `initialized` /
+`uninitialized` marker — no project bank content is read. If a learning
+belongs to another scope, say so and offer to re-run with that selector;
+never write outside the resolved scope.
+
+**Scope-relative artifacts.** `/init-memory` inspects the scope root;
+`/handoff` writes `<scope root>/docs/handoff.md`; `/decision-log` writes
+`<scope root>/docs/decisions/`; `/retro` and `/runbook` write under
+`<scope root>/docs/`. Archives rotate under the selected effective bank.
+
+**Exceptions.** The SessionStart hook runs from the repo root and always
+loads the root scope (plus the enumeration). `sync-upstream` is repo-root
+anchored regardless of scope: framework files and the anchor live at the
+root only. Malformed or overlapping `scopes`, or a missing `jq`, disable
+scopes with one warning — the repo behaves as single-bank rather than
+guessing.
+
+**Non-code workspaces.** The bank shape is domain-neutral. For a portfolio
+or product-management workspace, `systemPatterns.md` describes how the work
+gets done (systems of record, rituals, who decides) and `techContext.md`
+lists tools, data sources, and access. A project whose spec lives in an
+external system of record keeps `projectbrief.md` as a declared mirror.
+Project-specific preflights (a warehouse connectivity probe, say) belong in a
+project-local command, never in `start.md`, so `sync-upstream` stays clean.
+
 ## Resolving the effective bank
 
 Every reference to "the memory bank" or `.rules` in a workflow means the
-**effective bank**:
+**effective bank** within the resolved scope:
 
 - If `memory-bank.local/` exists (upstream Serel Memory development only — it is
   gitignored and never ships), it is the effective bank: read and write its

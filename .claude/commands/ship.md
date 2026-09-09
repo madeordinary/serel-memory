@@ -6,6 +6,8 @@ description: Pre-merge checklist — ship or don't ship
 
 You're being asked whether the current branch is ready to merge. Run through the checklist and produce a clear ship/don't-ship recommendation.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 Checklist:
 
 1. **Tests pass.** Run the test suite. If there are no tests for a project that should have them, flag it.
