@@ -28,6 +28,25 @@ if [ -z "$ALLOWLIST_LINE" ]; then
 fi
 read -r -a ALLOWLIST <<<"$ALLOWLIST_LINE"
 
+# Documented snippets, extracted verbatim from BOTH adapters and required to
+# agree — the test runs what the doc tells an agent to run.
+extract() { awk "/^[[:space:]]*$2/,/^[[:space:]]*fi[[:space:]]*\$/" "$1"; }
+UPDATE_SNIPPET="$(extract .claude/commands/sync-upstream.md '# Anchor update: keep every other key')"
+[ -n "$UPDATE_SNIPPET" ] || { echo "FAIL: could not extract the anchor-update snippet from sync-upstream.md"; exit 1; }
+[ "$UPDATE_SNIPPET" = "$(extract .agents/skills/sync-upstream/SKILL.md '# Anchor update: keep every other key')" ] \
+  || { echo "FAIL: anchor-update snippet differs between command and skill adapters"; exit 1; }
+# shellcheck disable=SC2016  # the \$ is a literal for grep, not an expansion
+ROOT_SNIPPET="$(grep -m1 '^[[:space:]]*cd "\$(git rev-parse --show-toplevel)"' .claude/commands/sync-upstream.md | sed 's/^[[:space:]]*//')"
+[ -n "$ROOT_SNIPPET" ] || { echo "FAIL: sync-upstream.md has no repo-root cd line"; exit 1; }
+# shellcheck disable=SC2016
+grep -q '^[[:space:]]*cd "\$(git rev-parse --show-toplevel)"' .agents/skills/sync-upstream/SKILL.md \
+  || { echo "FAIL: sync-upstream skill has no repo-root cd line"; exit 1; }
+# shellcheck disable=SC2016  # fixed-string search for a literal $( in the doc
+create_start="$(grep -n -F 'UP="$(git remote get-url upstream' .claude/commands/sync-upstream.md | head -1 | cut -d: -f1)"
+create_end="$(grep -n -F '"linked": true }' .claude/commands/sync-upstream.md | awk -F: -v s="$create_start" '$1 > s {print $1; exit}')"
+CREATE_SNIPPET="$( [ -n "$create_start" ] && [ -n "$create_end" ] && sed -n "${create_start},${create_end}p" .claude/commands/sync-upstream.md | sed 's/^[[:space:]]*//')"
+[ -n "$CREATE_SNIPPET" ] || { echo "FAIL: could not extract the anchor-create snippet from sync-upstream.md"; exit 1; }
+
 # --- Build the "upstream" repo: a clone of this repo at HEAD ---------------
 git clone --quiet "$ROOT" "$tmp/upstream"
 # CI checkouts are detached HEADs, so the clone may lack a main branch — the
@@ -45,7 +64,10 @@ $GIT commit --quiet -m "scaffold from Serel Memory"
 
 # Install-time anchor (per README: written at install, points at the
 # upstream version the project was scaffolded from).
-printf '{ "upstream": "local/serel-memory", "ref": "%s", "linked": false }\n' "$ANCHOR_REF" > .serel-memory.json
+# The anchor carries extra keys — scoped banks plus a nested key that happens to
+# be named "ref" — which a blind rewrite would destroy.
+printf '{ "upstream": "local/serel-memory", "ref": "%s", "linked": true,\n  "scopes": ["projects"], "nested": { "ref": "keep-me" } }\n' "$ANCHOR_REF" > .serel-memory.json
+mkdir -p projects/widget
 
 # The user makes the project their own: real bank content, a .rules learning,
 # and a custom command of their own.
@@ -88,8 +110,9 @@ while IFS= read -r f; do
   [ -n "$f" ] && $GIT restore --source=upstream/main -- "$f"
 done <<<"$changed"
 
-# Step 10: advance the anchor to the synced upstream commit.
-printf '{ "upstream": "local/serel-memory", "ref": "%s", "linked": false }\n' "$($GIT rev-parse upstream/main)" > .serel-memory.json
+# Step 10: advance the anchor with the DOCUMENTED snippet (run from a scope
+# folder on purpose: the documented root cd must bring it back to the root).
+(cd projects/widget && bash -c "$ROOT_SNIPPET && $UPDATE_SNIPPET")
 
 # --- Assertions -------------------------------------------------------------
 fail=0
@@ -115,8 +138,24 @@ grep -q "USER LEARNING: keep this line" .rules \
 [ -f .claude/commands/custom.md ] \
   || { echo "FAIL: downstream custom command was deleted (directory restore?)"; fail=1; }
 
-grep -q "$($GIT rev-parse upstream/main)" .serel-memory.json \
+[ "$(jq -r .ref .serel-memory.json)" = "$($GIT rev-parse upstream/main)" ] \
   || { echo "FAIL: anchor was not advanced to the synced upstream commit"; fail=1; }
+[ "$(jq -r .linked .serel-memory.json)" = "false" ] \
+  || { echo "FAIL: anchor linked flag was not cleared after a reviewed sync"; fail=1; }
+[ "$(jq -c .scopes .serel-memory.json)" = '["projects"]' ] \
+  || { echo "FAIL: anchor update dropped the scopes key"; fail=1; }
+[ "$(jq -r .nested.ref .serel-memory.json)" = "keep-me" ] \
+  || { echo "FAIL: anchor update touched a nested key named ref"; fail=1; }
+[ ! -e projects/widget/.serel-memory.json ] \
+  || { echo "FAIL: sync run from a scope folder created a child anchor"; fail=1; }
+
+# Step 5 "No anchor?": the documented reconstruction creates a linked anchor.
+rm .serel-memory.json
+(bash -c "$CREATE_SNIPPET")
+[ "$(jq -r .linked .serel-memory.json)" = "true" ] \
+  || { echo "FAIL: reconstructed anchor is not marked linked"; fail=1; }
+[ "$(jq -r .ref .serel-memory.json)" = "$($GIT rev-parse upstream/main)" ] \
+  || { echo "FAIL: reconstructed anchor does not point at upstream/main"; fail=1; }
 
 if [ "$fail" -eq 0 ]; then
   echo "sync smoke OK: template-mode sync updates framework files, spares user memory, advances the anchor"

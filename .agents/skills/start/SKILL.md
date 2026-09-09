@@ -12,9 +12,13 @@ Use this skill to orient a Codex session around the Serel Memory bank.
 - If empty, `quick`, or `brief` → use **Quick mode** (compact output; both modes read the same inputs).
 - If `full`, `onboard`, or `dashboard` → use **Full mode** (rich onboarding dashboard).
 
+Also check the arguments for `--scope <path>` (scoped banks only - see "Resolving scope" in `docs/workflow-contract.md`). `--scope .` is the root; a path equal to a project root selects that project's bank; anything else: stop and list the valid selectors (`hooks/lib/resolve-scope.sh --list`). Without it, resolve by the current directory, then the root. Never read more than one bank in a pass.
+
 ## Step 1 — Read the memory bank (both modes)
 
 **Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), it is the working bank — read its files and its `.rules` instead of the tracked ones, skip files it doesn't contain (intent lives in `README.md`/`docs/`), and don't report the blank tracked templates as uninitialized. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
 
 1. Read every file in `memory-bank/` in this order:
    - `projectbrief.md`
@@ -41,6 +45,7 @@ Produce a context audit and summary:
 CONTEXT AUDIT:
 - Read: [memory-bank files and .rules]
 - Optional docs read: [paths or "(none)"]
+- Scope: [only when the repo configures `scopes`: `.` or the selected project root]
 - Uninitialized: [missing, empty, or template-only files]
 - Recent commits not reflected in memory: [yes/no/unknown]
 - Working tree: [clean / dirty summary]
@@ -53,7 +58,7 @@ NEXT STEPS: [from activeContext.md - top 1-3]
 OPEN QUESTIONS: [anything blocking or unresolved]
 ```
 
-End with: **"Where do you want to pick up?"** Then wait.
+If the repo configures `scopes` and the scope resolved to the root, add an **Active scopes** list before the closing question — one line per project root from `hooks/lib/resolve-scope.sh --list`, as `--scope <path> [initialized|uninitialized]`. Read nothing from those banks. Then end with: **"Which scope, or stay at the root?"** Otherwise end with: **"Where do you want to pick up?"** Then wait.
 
 ### Full mode (`$start full`)
 

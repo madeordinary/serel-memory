@@ -7,6 +7,8 @@ description: "Review the current branch, diff, or proposed change in Codex. Use 
 
 Use this skill to review code or a proposed change. Take a code-review stance: findings first, grounded in file and line references when possible. Do not edit files.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 ## Workflow
 
 1. Read relevant project context:

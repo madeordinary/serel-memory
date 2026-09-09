@@ -17,8 +17,17 @@ fi
 ROOT="${CLAUDE_PROJECT_DIR:-$PWD}"
 
 # If Serel Memory isn't installed here, do nothing
-if [ ! -d "$ROOT/memory-bank" ]; then
+if [ ! -d "$ROOT/memory-bank" ] && [ ! -d "$ROOT/memory-bank.local" ]; then
   exit 0
+fi
+
+# Scoped banks (opt-in): resolve by cwd through the shared resolver so the
+# reminder names the right bank. Single-bank repos print nothing extra.
+LIB="$(dirname "${BASH_SOURCE[0]}")/lib/resolve-scope.sh"
+SCOPE_NOTE=""
+if [ "$(bash "$LIB" --root "$ROOT" --list 2>/dev/null || echo "SCOPES: none")" != "SCOPES: none" ]; then
+  IFS=$'\t' read -r SCOPE_ROOT BANK_REL RULES_WRITE _ _ _ < <(bash "$LIB" --root "$ROOT" --cwd "$PWD" 2>/dev/null)
+  SCOPE_NOTE="Scope resolved by cwd: \`$SCOPE_ROOT\` — effective bank \`$BANK_REL\`, rules \`$RULES_WRITE\`. If /start selected a different \`--scope\` this session, apply the updates to that bank instead (one bank per invocation)."
 fi
 
 cat <<'EOF'
@@ -61,3 +70,7 @@ effective bank — apply all of the updates below to `memory-bank.local/` and it
 Show the diffs to the user and ask for confirmation before writing. Then proceed
 with the compaction.
 EOF
+if [ -n "$SCOPE_NOTE" ]; then
+  echo ""
+  echo "$SCOPE_NOTE"
+fi

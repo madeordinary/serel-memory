@@ -7,6 +7,8 @@ description: "Run a pre-merge ship readiness checklist. Use when the user asks w
 
 Use this skill to decide whether the current branch or change is ready to merge.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 ## Checklist
 
 1. Tests pass. Run the project test suite if discoverable.

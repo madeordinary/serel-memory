@@ -14,6 +14,8 @@ This sits between `/discover` and `/init-memory`:
 
 **Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), it is the working bank — the substantive-content check and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 ## Steps
 
 1. Determine the PRD path.

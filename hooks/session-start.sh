@@ -23,21 +23,19 @@ if [ ! -d "$ROOT/memory-bank" ] && [ ! -d "$ROOT/memory-bank.local" ]; then
   exit 0
 fi
 
-# Maintainer overlay: upstream Serel Memory development keeps its real working
-# bank in gitignored memory-bank.local/ (the tracked memory-bank/ ships as
-# blank starter templates). When the overlay exists, it IS the effective bank.
-# Downstream projects never have this directory.
-BANK_DIR="$ROOT/memory-bank"
-BANK_LABEL="memory-bank"
-RULES_FILE="$ROOT/.rules"
-RULES_LABEL=".rules"
-if [ -d "$ROOT/memory-bank.local" ]; then
-  BANK_DIR="$ROOT/memory-bank.local"
-  BANK_LABEL="memory-bank.local"
-  if [ -f "$ROOT/memory-bank.local/.rules" ]; then
-    RULES_FILE="$ROOT/memory-bank.local/.rules"
-    RULES_LABEL="memory-bank.local/.rules"
-  fi
+# Resolve the effective bank through the shared resolver (maintainer overlay
+# aware). SessionStart runs from the repo root, so it always loads the ROOT
+# scope — the documented exception in docs/workflow-contract.md "Resolving
+# scope". Project banks (if the repo configures "scopes") are only listed.
+LIB="$(dirname "${BASH_SOURCE[0]}")/lib/resolve-scope.sh"
+IFS=$'\t' read -r _ BANK_REL _ RULES_REL _ _ < <(bash "$LIB" --root "$ROOT" --scope . 2>/dev/null)
+BANK_DIR="$ROOT/$BANK_REL"
+BANK_LABEL="$BANK_REL"
+RULES_FILE=""
+RULES_LABEL=""
+if [ "$RULES_REL" != "-" ]; then
+  RULES_FILE="$ROOT/$RULES_REL"
+  RULES_LABEL="$RULES_REL"
 fi
 
 cat <<'HEADER'
@@ -61,10 +59,24 @@ for f in projectbrief productContext systemPatterns techContext decisionLog acti
   fi
 done
 
-if [ -f "$RULES_FILE" ]; then
+if [ -n "$RULES_FILE" ] && [ -f "$RULES_FILE" ]; then
   echo "### $RULES_LABEL"
   echo ""
   cat "$RULES_FILE"
+  echo ""
+fi
+
+# Scoped banks (opt-in): list project banks by selector only. Nothing from a
+# project bank is read here — one bank per invocation.
+SCOPE_LIST="$(bash "$LIB" --root "$ROOT" --list 2>/dev/null || echo "SCOPES: none")"
+if [ "$SCOPE_LIST" != "SCOPES: none" ]; then
+  echo "### Scopes (project banks in this repo)"
+  echo ""
+  echo "Only the ROOT bank above was loaded. Each project below has its own bank;"
+  echo "select one with \`--scope <path>\` (for example \`/start --scope <path>\`)."
+  echo "Nothing from these banks was read."
+  echo ""
+  printf '%s\n' "$SCOPE_LIST" | awk -F'\t' '$1=="P"{printf "- --scope %s [%s]\n", $2, $3}'
   echo ""
 fi
 

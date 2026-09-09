@@ -11,6 +11,8 @@ First check whether `memory-bank/projectbrief.md` already has substantive conten
 
 **Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), it is the working bank — the check above and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 ## Phase 1 - Open Prompt
 
 Ask:

@@ -9,6 +9,8 @@ Run a retrospective pulling from the memory bank and git activity so the convers
 
 **Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), all memory-bank and `.rules` reads and writes below target it instead of the tracked templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 ## Workflow
 
 1. Ask the user for the timeframe if not obvious: "Retro on the last week, the last sprint, since the last retro? Default: last 7 days."

@@ -7,6 +7,8 @@ description: "Generate a handoff document from a project. Use when the user asks
 
 Use this skill to create a concise handoff for a smart engineer or PM picking up the project cold.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 ## Workflow
 
 1. Read every file in `memory-bank/`, including `decisionLog.md` (skip `memory-bank/archive/` unless the handoff needs that history).

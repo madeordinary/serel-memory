@@ -6,6 +6,8 @@ description: Break a task into steps before executing
 
 For the task the user just described, do NOT take any action yet. Produce a plan first.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 First, read for project intent so the plan is grounded, not guessed:
 
 - The relevant `memory-bank/` files (`projectbrief.md`, `productContext.md`, `systemPatterns.md`, `techContext.md`, `decisionLog.md`, `activeContext.md`, `progress.md`) and `.rules`.

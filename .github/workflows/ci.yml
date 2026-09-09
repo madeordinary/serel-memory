@@ -51,6 +51,9 @@ jobs:
       - name: Retention helper selects lossless rotations per the contract
         run: tests/smoke-retention.sh
 
+      - name: Scoped banks resolve one bank per invocation; hooks unchanged without scopes
+        run: tests/smoke-scopes.sh
+
   docs:
     # Markdown hygiene for the prompt files themselves. Same repo guard as above —
     # downstream projects own their docs and shouldn't inherit these checks.

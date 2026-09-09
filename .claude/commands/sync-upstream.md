@@ -6,6 +6,8 @@ description: Check the upstream Serel Memory repo for updates and selectively pu
 
 Check the upstream Serel Memory repo for new framework updates (skills, commands, agent instructions) and help the user decide what to pull into their project.
 
+**Scope:** `--scope` does not apply here. Sync is repo-root anchored even when the repo configures `scopes` — framework files and the anchor live at the root only (see "Resolving scope" in `docs/workflow-contract.md`).
+
 ## Preconditions
 
 - Git must be available.
@@ -51,6 +53,10 @@ scaffolded from or last synced to:
 The anchor makes template-mode reports precise: instead of diffing every file
 blindly, you can show exactly what changed upstream since `ref`.
 
+Scoped banks (`"scopes"` in the anchor, see `docs/workflow-contract.md`
+"Resolving scope") do not change sync: everything here is repo-root relative.
+Never create a `.serel-memory.json` inside a project folder.
+
 `.serel-memory.json` is the single provenance-anchor filename as of Serel
 Memory 0.3.0. Never create a second anchor file; two mutable anchors could
 disagree. A legacy `.basecamp.json` left over from a v0.x install is never
@@ -69,6 +75,7 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
 1. **Preflight: require a clean worktree, and read the anchor.**
 
    ```bash
+   cd "$(git rev-parse --show-toplevel)"  # sync is repo-root anchored: framework files and the anchor live at the root, never in a scope folder
    git status --porcelain -- .agents/skills/ .claude/commands/ AGENTS.md CLAUDE.md docs/workflow-contract.md docs/cross-agent-review.md hooks/
    # Legacy-anchor guard: fail fast, never treat as unanchored, never reconstruct.
    if [ ! -f .serel-memory.json ] && [ -f .basecamp.json ]; then  # legacy anchor present
@@ -203,14 +210,20 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
    git restore --source=upstream/main -- <new-file-path>
    ```
 
-10. **After syncing, update the anchor and summarize.** Advance `.serel-memory.json` to the upstream commit you just synced from, so the next sync reports only what's newer (derive `upstream` from the remote as in step 5):
+10. **After syncing, update the anchor and summarize.** Advance `.serel-memory.json` to the upstream commit you just synced from, so the next sync reports only what's newer. Update the two provenance keys in place — the anchor may carry other keys (such as `scopes`) that must survive:
 
     ```bash
-    printf '{ "upstream": "%s", "ref": "%s", "linked": false }\n' "$UP" "$(git rev-parse upstream/main)" > .serel-memory.json
+    # Anchor update: keep every other key (e.g. "scopes"); never rewrite the file blind.
+    if command -v jq >/dev/null 2>&1; then
+      tmp="$(mktemp)" && jq --arg ref "$(git rev-parse upstream/main)" '.ref = $ref | .linked = false' .serel-memory.json > "$tmp" && mv "$tmp" .serel-memory.json
+    else
+      echo "jq not found: edit .serel-memory.json by hand — set \"ref\" to $(git rev-parse upstream/main) and \"linked\" to false; leave every other key as it is."
+    fi
     ```
 
     (After a reviewed sync the baseline is now known, so `linked` becomes `false`
-    even if the anchor was originally reconstructed.)
+    even if the anchor was originally reconstructed.) If `jq` is missing, stop
+    and give the user that one-line manual edit — never regenerate the file.
 
     If the user **skipped** some upstream changes, tell them before advancing: once the anchor moves, skipped changes stop appearing in the "new since last sync" report (they still show up in the file-level diff against `upstream/main`). Let them choose: advance the anchor anyway (skip means "no thanks"), or keep the old anchor (skip means "not yet").
 

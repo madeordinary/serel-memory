@@ -6,6 +6,8 @@ description: Generate a handoff document for someone picking up this project col
 
 Produce a handoff document for someone who's never seen this project before. The audience is a smart engineer or PM who needs to be able to take this over within a few days.
 
+**Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
 Steps:
 
 1. Read every file in `memory-bank/` for full project context (skip `memory-bank/archive/` unless the handoff needs that history).
