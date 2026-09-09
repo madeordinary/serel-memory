@@ -119,6 +119,10 @@ printf '%s\n' "$r" | grep -q '^ROTATABLE: 7 units' && ok "F2 seven dated section
 sel="$(field "$r" SELECT)"
 case "$sel" in units\ *..7\ *) ok "F2 selection is a suffix ending at the oldest unit" ;; *) bad "F2 selection not oldest-last: $sel" ;; esac
 assert_spans_clean "$tmp/f2/activeContext.md" "$r" F2
+# Independent expectation: the two oldest dated sections, computed from the
+# fixture itself (heading line .. last non-blank line before the next H2).
+exp_spans="$(awk '/^## Recent changes \(2026-04 session\)/{a=NR} /^## Recent changes \(2026-03 session\)/{b=NR} NF{last=NR} END{print a"-"(b-2)" "b"-"last}' "$tmp/f2/activeContext.md")"
+[ "$(printf '%s\n' "$sel" | sed 's/.*lines: *//')" = "$exp_spans" ] && ok "F2 spans match independently computed ranges ($exp_spans)" || bad "F2 spans $(printf '%s\n' "$sel" | sed 's/.*lines: *//') != expected $exp_spans"
 pl="$(printf '%s\n' "$r" | sed -n 's/^PREDICTED: lines=\([0-9]*\).*/\1/p')"
 [ "$pl" -le 200 ] && ok "F2 predicted lines $pl <= 200" || bad "F2 predicted lines $pl > 200"
 # The selection must be MINIMAL: one fewer unit would still be over target.
@@ -193,6 +197,39 @@ assert_exact_prediction "$tmp/f6live/activeContext.md" "$r" F6
 [ "$(wc -c < "$tmp/f6live/activeContext.md" | tr -d ' ')" -le 12000 ] && ok "F6 rotated file under 12000 bytes" || bad "F6 still over bytes"
 r2="$("$CHECK" "$tmp/f6live/activeContext.md" activeContext)"
 [ "$(field "$r2" RESULT)" = "NO-OP" ] && ok "F6 rerun is NO-OP" || bad "F6 rerun: $(field "$r2" RESULT)"
+
+# --- F7: a fenced "## Recent changes (...)" inside Current focus is not a section
+mkdir -p "$tmp/f7"
+{ echo "# Active Context"; echo; echo "## Current focus"; echo; echo "Example of the archive layout:"; echo '```'; echo "## Recent changes (2020-01 session)"; echo "- not a real entry"; echo '```'; for i in $(seq 1 210); do echo "- current item $i"; done; echo; echo "## Notes for next session"; echo; echo "- keep me"; } > "$tmp/f7/activeContext.md"
+r="$("$CHECK" "$tmp/f7/activeContext.md" activeContext)"
+printf '%s\n' "$r" | grep -q '^ROTATABLE: 0 units' && ok "F7 fenced heading ignored (0 units)" || bad "F7 fenced heading counted: $(field "$r" ROTATABLE)"
+printf '%s\n' "$r" | grep -q '^SELECT:' && bad "F7 selected protected content" || ok "F7 nothing selected"
+
+# --- F8: a ### sub-heading inside a bullet section stops unit collection ------
+mkdir -p "$tmp/f8"
+{ active_head; echo "## Recent changes"; echo; for i in $(seq 1 30); do printf -- '- Entry %02d: %s\n' "$i" "$(printf 'x%.0s' $(seq 1 200))"; done; echo; echo "### Sub-section that is not a bullet"; echo; for i in $(seq 31 60); do printf -- '- Entry %02d: %s\n' "$i" "$(printf 'y%.0s' $(seq 1 200))"; done; } > "$tmp/f8/activeContext.md"
+r="$("$CHECK" "$tmp/f8/activeContext.md" activeContext)"
+printf '%s\n' "$r" | grep -q '^UNSUPPORTED: sub-heading' && ok "F8 sub-heading reported as unsupported" || bad "F8 no UNSUPPORTED line"
+printf '%s\n' "$r" | grep -q '^ROTATABLE: 30 units' && ok "F8 only the 30 bullets before the sub-heading are units" || bad "F8 units: $(field "$r" ROTATABLE)"
+sp="$(field "$r" SELECT | sed 's/.*lines: *//')"
+for x in $sp; do [ "${x#*-}" -lt "$(grep -n '^### ' "$tmp/f8/activeContext.md" | cut -d: -f1)" ] || bad "F8 span $x reaches past the sub-heading"; done
+ok "F8 no span crosses the sub-heading"
+
+# --- F9: every dated section must go → newest heading + pointer survive ------
+mkdir -p "$tmp/f9" "$tmp/f9live"
+{ echo "# Active Context"; echo; echo "## Current focus"; echo; for i in $(seq 1 190); do echo "- current item $i"; done; echo; dated_section 2026-09 8; dated_section 2026-08 8; } > "$tmp/f9/activeContext.md"
+r="$("$CHECK" "$tmp/f9/activeContext.md" activeContext)"
+[ "$(field "$r" SELECT | cut -d' ' -f1-3)" = "units 1..2 (2)" ] && ok "F9 both sections selected" || bad "F9 select: $(field "$r" SELECT)"
+cp "$tmp/f9/activeContext.md" "$tmp/f9live/activeContext.md"
+apply_rotation "$tmp/f9live/activeContext.md" "$r" "$tmp/f9live/archive.md"
+assert_exact_prediction "$tmp/f9live/activeContext.md" "$r" F9
+grep -q '^## Recent changes (2026-09 session)$' "$tmp/f9live/activeContext.md" && ok "F9 newest heading kept as the pointer's home" || bad "F9 newest heading rotated away"
+grep -q '^Older entries: archive/activeContext-\*\.md$' "$tmp/f9live/activeContext.md" && ok "F9 pointer present" || bad "F9 pointer missing"
+grep -c '^- Item ' "$tmp/f9live/archive.md" | grep -qx 16 && ok "F9 all 16 items archived verbatim" || bad "F9 archive item count: $(grep -c '^- Item ' "$tmp/f9live/archive.md")"
+case "$(field "$r" RESULT)" in OVERAGE-REMAINS*|ROTATE*) ok "F9 result reported ($(field "$r" RESULT | cut -c1-15))" ;; *) bad "F9 result: $(field "$r" RESULT)" ;; esac
+r2="$("$CHECK" "$tmp/f9live/activeContext.md" activeContext)"
+printf '%s\n' "$r2" | grep -q '^POINTER: present' && ok "F9 rerun sees the pointer" || bad "F9 rerun pointer"
+printf '%s\n' "$r2" | grep -q '^SELECT:' && bad "F9 rerun selected again" || ok "F9 rerun selects nothing"
 
 # --- Usage errors ------------------------------------------------------------
 "$CHECK" "$tmp/f1/activeContext.md" bogus >/dev/null 2>&1 && bad "bad kind accepted" || ok "bad kind rejected (exit 2)"
