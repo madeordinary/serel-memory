@@ -56,4 +56,4 @@ Save to `docs/retros/YYYY-MM-DD.md`. Create the directory if needed.
 - Action items need owners and concrete next steps, not "we should think about X."
 - If last retro's commitments weren't met, note it. Patterns matter more than single misses.
 
-After writing, ask the user if any items should be elevated to `.rules` as durable learnings.
+After writing, ask the user if any items should be elevated to `.rules` as durable learnings. For a learning that is already in `.rules` or repeats a past retro, ask why the guidance did not take and propose a test or hook check instead of another line.

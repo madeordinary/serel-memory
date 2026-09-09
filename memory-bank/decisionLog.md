@@ -11,6 +11,8 @@
 
 ## Active decisions
 
+<!-- Entry shape: **decision** (date) — why; evidence: <pointer>; result: <outcome | pending>. -->
+
 <!-- Format: **[decision]**: [what was decided] — [why] (alternatives: [A], [B]). -->
 
 -

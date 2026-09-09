@@ -65,7 +65,7 @@ of the same diff, merged with provenance:
    returned, proceed single-model and say so.
 4. Merge: tag every finding `[both]`, `[codex]`, or `[claude]`. Verify
    `[claude]`-only findings against the actual code before including them —
-   drop what you can't confirm and note it under QUESTIONS instead.
+   drop what you can't confirm and note it under QUESTIONS instead. Then add one `DISAGREEMENTS:` line per explicit contradiction (one model says X, the other says not-X); silence from a model is not disagreement. Agreement is confidence, not priority — a single verified correctness or security finding outranks two matching style notes.
 
 This pass never blocks the review: if Claude is missing, slow, or the diff is
 trivial, complete single-model and label the SUMMARY accordingly.

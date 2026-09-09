@@ -96,11 +96,21 @@ Use this exact list in all git commands:
    mismatch and ask which is correct before proceeding. If the user forked from
    a different origin, ask for the correct URL.
 
-3. **Fetch upstream without merging:**
+3. **Fetch upstream without merging, then resolve the anchor:**
 
    ```bash
    git fetch upstream main
+   # Anchor resolve: `git fetch upstream main` does NOT fetch tags, so resolve the anchor explicitly and privately.
+   REF="$(jq -r .ref .serel-memory.json 2>/dev/null || true)"
+   if [ -n "$REF" ] && git ls-remote --exit-code --tags upstream "refs/tags/$REF" >/dev/null 2>&1; then
+     git fetch --no-tags upstream "+refs/tags/$REF:refs/serel-memory/anchor" && ANCHOR="refs/serel-memory/anchor"
+   elif [ -n "$REF" ]; then
+     git fetch upstream "$REF" >/dev/null 2>&1 && ANCHOR="$REF"
+   fi
+   git rev-parse --verify --quiet "${ANCHOR:-no-anchor}^{commit}" >/dev/null && echo "anchor resolves: $ANCHOR" || echo "anchor does not resolve"
    ```
+
+   The tag (or commit) is fetched into a private ref, never into the project's own tags. Use `$ANCHOR` wherever the steps below say `<ref>`. If it does not resolve, say so and fall back to the direct `HEAD`-vs-`upstream/main` diff only.
 
 4. **Detect sync mode:**
 
@@ -113,14 +123,14 @@ Use this exact list in all git commands:
 
 5. **Diff only framework files** using the allowlist.
 
-   **Template mode with an anchor:** if the anchor's `ref` resolves in the fetched upstream history (`git rev-parse --verify "<ref>^{commit}"`), also show the precise what's-new report:
+   **Template mode with an anchor:** if the anchor resolved in step 3, also show the precise what's-new report:
 
    ```bash
-   git log --oneline "<ref>"..upstream/main -- <allowlist>
-   git diff "<ref>" upstream/main --stat -- <allowlist>
+   git log --oneline "$ANCHOR"..upstream/main -- <allowlist>
+   git diff "$ANCHOR" upstream/main --stat -- <allowlist>
    ```
 
-   Keep the direct `HEAD`-vs-`upstream/main` file diff for conflict detection. If `"linked": true`, remind the user anchor-based diffs may include changes their copy already has.
+   Keep the direct `HEAD`-vs-`upstream/main` file diff for conflict detection **and for files the project no longer has** (`git diff --name-only --diff-filter=A HEAD upstream/main -- <allowlist>`; offer them under NEW FILES — an allowlisted file deleted downstream that did not change upstream never appears in the anchor diff). If `"linked": true`, remind the user anchor-based diffs may include changes their copy already has.
 
    **No anchor?** Offer to reconstruct one, marked as linked (baseline starts today; exact original version unknown). Derive `upstream` from the actual remote — don't hardcode it:
 
@@ -153,9 +163,9 @@ Use this exact list in all git commands:
 
    Do not offer cherry-pick by commit — upstream commits may touch both framework and project files.
 
-9. **Execute** using `git restore --source=upstream/main -- <path>` for safe files, **one file at a time** from the upstream-changed list — never a whole allowlisted directory, which would delete any custom commands/skills the project added. The directory allowlist is for diff discovery, not restore. For conflicting files, show the diff and let the user decide per-file.
+9. **Execute** using `git restore --source=upstream/main -- <path>` for safe files, **one file at a time** from the upstream-changed list (anchor diff plus the absent-locally list from step 5) — never a whole allowlisted directory, which would delete any custom commands/skills the project added. The directory allowlist is for diff discovery, not restore. For conflicting files, show the diff and let the user decide per-file.
 
-10. **After syncing, update the anchor**, then summarize. Update the two provenance keys in place — the anchor may carry other keys (such as `scopes`) that must survive:
+10. **After syncing, update the anchor**, then summarize. **Only if at least one file was restored, or the user explicitly chose to skip everything** — an empty restore must never move the anchor. Update the two provenance keys in place — the anchor may carry other keys (such as `scopes`) that must survive — then drop the private ref (`git update-ref -d refs/serel-memory/anchor`):
 
     ```bash
     # Anchor update: keep every other key (e.g. "scopes"); never rewrite the file blind.

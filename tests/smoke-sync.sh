@@ -45,6 +45,10 @@ grep -q '^[[:space:]]*cd "\$(git rev-parse --show-toplevel)"' .agents/skills/syn
 create_start="$(grep -n -F 'UP="$(git remote get-url upstream' .claude/commands/sync-upstream.md | head -1 | cut -d: -f1)"
 create_end="$(grep -n -F '"linked": true }' .claude/commands/sync-upstream.md | awk -F: -v s="$create_start" '$1 > s {print $1; exit}')"
 CREATE_SNIPPET="$( [ -n "$create_start" ] && [ -n "$create_end" ] && sed -n "${create_start},${create_end}p" .claude/commands/sync-upstream.md | sed 's/^[[:space:]]*//')"
+RESOLVE_SNIPPET="$(awk '/^[[:space:]]*# Anchor resolve:/,/anchor does not resolve"$/' .claude/commands/sync-upstream.md | sed 's/^[[:space:]]*//')"
+[ -n "$RESOLVE_SNIPPET" ] || { echo "FAIL: could not extract the anchor-resolve snippet from sync-upstream.md"; exit 1; }
+[ "$RESOLVE_SNIPPET" = "$(awk '/^[[:space:]]*# Anchor resolve:/,/anchor does not resolve"$/' .agents/skills/sync-upstream/SKILL.md | sed 's/^[[:space:]]*//')" ] \
+  || { echo "FAIL: anchor-resolve snippet differs between command and skill adapters"; exit 1; }
 [ -n "$CREATE_SNIPPET" ] || { echo "FAIL: could not extract the anchor-create snippet from sync-upstream.md"; exit 1; }
 
 # --- Build the "upstream" repo: a clone of this repo at HEAD ---------------
@@ -52,7 +56,12 @@ git clone --quiet "$ROOT" "$tmp/upstream"
 # CI checkouts are detached HEADs, so the clone may lack a main branch — the
 # sync procedure fetches upstream main, so pin one at HEAD.
 git -C "$tmp/upstream" checkout --quiet -B main
-ANCHOR_REF="$(git -C "$tmp/upstream" rev-parse HEAD)"
+# The install anchor is a TAG, as the README tells users to write it. Tags are
+# not fetched by `git fetch upstream main`, which is exactly the bug the
+# documented resolve step exists for.
+git -C "$tmp/upstream" tag v9.9.9-fixture
+ANCHOR_REF="v9.9.9-fixture"
+ANCHOR_SHA="$(git -C "$tmp/upstream" rev-parse HEAD)"
 
 # --- Scaffold the downstream project (degit-style: tracked tree, no history)
 mkdir "$tmp/project"
@@ -74,6 +83,8 @@ mkdir -p projects/widget
 echo "## Current focus: shipping the downstream widget" >> memory-bank/activeContext.md
 echo "- USER LEARNING: keep this line" >> .rules
 echo "# /custom — downstream-only command" > .claude/commands/custom.md
+# ... and deletes an allowlisted framework doc that will NOT change upstream.
+git rm -q docs/cross-agent-review.md
 $GIT add -A
 $GIT commit --quiet -m "user content"
 
@@ -97,18 +108,27 @@ if $GIT merge-base HEAD upstream/main >/dev/null 2>&1; then
   exit 1
 fi
 
-# Step 5: anchor ref must resolve in the fetched upstream history, giving the
-# precise "changed since last sync" report, limited to the allowlist.
-if ! $GIT rev-parse --verify --quiet "$ANCHOR_REF^{commit}" >/dev/null; then
-  echo "FAIL: anchor ref does not resolve after fetch"
-  exit 1
-fi
-changed="$($GIT diff --name-only "$ANCHOR_REF" upstream/main -- "${ALLOWLIST[@]}")"
+# Step 3: the tag anchor must NOT resolve from `fetch upstream main` alone
+# (that is the bug), and MUST resolve through the documented resolve snippet,
+# into a private ref that leaves the project's own tags untouched.
+$GIT rev-parse --verify --quiet "$ANCHOR_REF^{commit}" >/dev/null \
+  && { echo "FAIL: fixture invalid — tag anchor resolved before the resolve step"; exit 1; }
+resolve_out="$(bash -c "$RESOLVE_SNIPPET" 2>&1)"
+printf '%s\n' "$resolve_out" | grep -q '^anchor resolves: refs/serel-memory/anchor$' \
+  || { echo "FAIL: documented resolve step did not resolve the tag anchor: $resolve_out"; exit 1; }
+[ "$($GIT rev-parse "refs/serel-memory/anchor^{commit}")" = "$ANCHOR_SHA" ] \
+  || { echo "FAIL: private anchor ref points at the wrong commit"; exit 1; }
+$GIT tag -l | grep -qx "$ANCHOR_REF" && { echo "FAIL: resolve step polluted the project's tags"; exit 1; }
+ANCHOR="refs/serel-memory/anchor"
 
-# Step 9: restore INDIVIDUAL files from the changed list — never directories.
+# Step 5: precise report since the anchor, plus files the project no longer has.
+changed="$($GIT diff --name-only "$ANCHOR" upstream/main -- "${ALLOWLIST[@]}")"
+absent="$($GIT diff --name-only --diff-filter=A HEAD upstream/main -- "${ALLOWLIST[@]}")"
+
+# Step 9: restore INDIVIDUAL files from both lists — never directories.
 while IFS= read -r f; do
   [ -n "$f" ] && $GIT restore --source=upstream/main -- "$f"
-done <<<"$changed"
+done <<<"$(printf '%s\n%s\n' "$changed" "$absent" | sort -u)"
 
 # Step 10: advance the anchor with the DOCUMENTED snippet (run from a scope
 # folder on purpose: the documented root cd must bring it back to the root).
@@ -128,6 +148,12 @@ grep -q "UPSTREAM-CHANGE-MARKER" .claude/commands/ship.md \
   || { echo "FAIL: framework file was not updated from upstream"; fail=1; }
 [ -f .claude/commands/new-workflow.md ] \
   || { echo "FAIL: new upstream framework file was not pulled"; fail=1; }
+printf '%s\n' "$absent" | grep -qx 'docs/cross-agent-review.md' \
+  || { echo "FAIL: allowlisted doc deleted downstream (unchanged upstream) was not offered back"; fail=1; }
+[ -f docs/cross-agent-review.md ] \
+  || { echo "FAIL: deleted framework doc was not restored"; fail=1; }
+printf '%s\n' "$changed" | grep -qx 'docs/cross-agent-review.md' \
+  && { echo "FAIL: unchanged doc showed up in the anchor diff (fixture invalid)"; fail=1; }
 
 grep -q "shipping the downstream widget" memory-bank/activeContext.md \
   || { echo "FAIL: user memory bank content was lost"; fail=1; }

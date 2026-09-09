@@ -126,11 +126,36 @@ Use this promotion path:
 2. Current session state goes in `memory-bank/activeContext.md`.
 3. Completed status goes in `memory-bank/progress.md`.
 4. Durable decisions go in `memory-bank/decisionLog.md` and, when useful, `docs/decisions/`.
-5. Reusable patterns and gotchas go in `.rules`.
+   An entry says *decision / why / evidence / result* and keeps its date,
+   status, and supersession link; an accepted-but-unbuilt decision records
+   `result: pending`. ADRs still carry alternatives and consequences.
+5. Reusable patterns and gotchas go in `.rules`. When a `.rules` entry is
+   about to be written a second time, or a correction recurs, first ask why
+   the existing guidance did not take (did it trigger? was it already there?
+   wording or placement?), then propose the structural form — a test, a hook
+   check, a CI step. Keep the prose rule until the mechanism exists and works;
+   judgment rules stay prose with a concrete failure example.
 6. Stable architecture goes in `memory-bank/systemPatterns.md`.
 
 Do not turn the memory bank into a journal. A line should survive because it helps
 the next session make a better decision.
+
+## Clean stop
+
+When a session ends or context is about to compact, leave a state a
+cold-start agent can resume from without redoing work:
+
+- Finish or back out of the current atomic step. Never stop mid-edit in a
+  known-broken state.
+- The `## Checkpoint` records the branch and HEAD, what is uncommitted, what
+  is verified (and how), and the first action on resume. That is the resume
+  note; nothing else needs writing.
+- Commit a `wip:` only when the user asked for a pause and only over changes
+  this session authored. Never on compaction, never on "keep going", never
+  over someone else's dirty files.
+- On resume, the prior trail is authoritative for reasoning and completed
+  investigation; inherited *completion claims* are re-verified on the real
+  artifact before being relied on.
 
 ## Retention
 

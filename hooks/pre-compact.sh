@@ -47,8 +47,9 @@ effective bank — apply all of the updates below to `memory-bank.local/` and it
    - Recent changes (top of the list, most recent first)
    - Next steps
    - If multi-session work is underway, the `## Checkpoint` section — one
-     resumable state (branch, what's done, exact next step), overwritten
-     in place
+     resumable state (branch and HEAD, what is uncommitted, what is
+     verified, first action on resume), overwritten in place. Do not
+     commit a `wip:` on compaction (contract "Clean stop").
    - Any new open questions
 
 2. Update `memory-bank/progress.md`:

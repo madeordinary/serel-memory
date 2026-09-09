@@ -108,11 +108,21 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
    mismatch and ask the user which is correct before proceeding. If the user
    forked from a different origin, ask them for the correct URL.
 
-3. **Fetch upstream without merging.**
+3. **Fetch upstream without merging, then resolve the anchor.**
 
    ```bash
    git fetch upstream main
+   # Anchor resolve: `git fetch upstream main` does NOT fetch tags, so resolve the anchor explicitly and privately.
+   REF="$(jq -r .ref .serel-memory.json 2>/dev/null || true)"
+   if [ -n "$REF" ] && git ls-remote --exit-code --tags upstream "refs/tags/$REF" >/dev/null 2>&1; then
+     git fetch --no-tags upstream "+refs/tags/$REF:refs/serel-memory/anchor" && ANCHOR="refs/serel-memory/anchor"
+   elif [ -n "$REF" ]; then
+     git fetch upstream "$REF" >/dev/null 2>&1 && ANCHOR="$REF"
+   fi
+   git rev-parse --verify --quiet "${ANCHOR:-no-anchor}^{commit}" >/dev/null && echo "anchor resolves: $ANCHOR" || echo "anchor does not resolve"
    ```
+
+   The tag (or commit) is fetched into a private ref, never into the project's own tags — a downstream `v0.3.0` must not collide with upstream's. Use `$ANCHOR` wherever the steps below say `<ref>`. If it does not resolve, say so and fall back to the direct `HEAD`-vs-`upstream/main` diff only.
 
 4. **Detect sync mode.**
 
@@ -137,14 +147,14 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
    git diff HEAD upstream/main --stat -- <allowlist>
    ```
 
-   **Template mode with an anchor:** if `.serel-memory.json` has a `ref` that resolves in the fetched upstream history (`git rev-parse --verify "<ref>^{commit}"` after the fetch), also show what actually changed upstream since the anchor — this is the precise report:
+   **Template mode with an anchor:** if the anchor resolved in step 3, also show what actually changed upstream since it — this is the precise report:
 
    ```bash
-   git log --oneline "<ref>"..upstream/main -- <allowlist>
-   git diff "<ref>" upstream/main --stat -- <allowlist>
+   git log --oneline "$ANCHOR"..upstream/main -- <allowlist>
+   git diff "$ANCHOR" upstream/main --stat -- <allowlist>
    ```
 
-   Keep using the direct `HEAD`-vs-`upstream/main` file diff for conflict detection (the project's local edits aren't in upstream history). If the anchor has `"linked": true`, remind the user that anchor-based diffs may include changes their copy already has.
+   Keep using the direct `HEAD`-vs-`upstream/main` file diff for conflict detection (the project's local edits aren't in upstream history) **and for files the project no longer has**: an allowlisted file deleted downstream that did not change upstream never appears in the anchor diff, so list it from `git diff --name-only --diff-filter=A HEAD upstream/main -- <allowlist>` and offer it back under NEW FILES. If the anchor has `"linked": true`, remind the user that anchor-based diffs may include changes their copy already has.
 
    **No anchor?** Offer to reconstruct one now, marked as linked. Derive `upstream` from the actual remote — don't hardcode it:
 
@@ -194,7 +204,7 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
 
    Do not offer cherry-pick by commit — upstream commits may touch both framework and project files.
 
-9. **Execute the chosen strategy.** Restore **individual files** from the upstream-changed list — never a whole allowlisted directory (e.g. `git restore --source=upstream/main -- .claude/commands/`), which would also delete any custom commands or skills the downstream project added. The directory allowlist is for diff *discovery*, not for restore.
+9. **Execute the chosen strategy.** Restore **individual files** from the upstream-changed list (anchor diff plus the absent-locally list from step 5) — never a whole allowlisted directory (e.g. `git restore --source=upstream/main -- .claude/commands/`), which would also delete any custom commands or skills the downstream project added. The directory allowlist is for diff *discovery*, not for restore.
 
    For safe files, use restore from upstream:
 
@@ -210,7 +220,7 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
    git restore --source=upstream/main -- <new-file-path>
    ```
 
-10. **After syncing, update the anchor and summarize.** Advance `.serel-memory.json` to the upstream commit you just synced from, so the next sync reports only what's newer. Update the two provenance keys in place — the anchor may carry other keys (such as `scopes`) that must survive:
+10. **After syncing, update the anchor and summarize.** Advance `.serel-memory.json` to the upstream commit you just synced from, so the next sync reports only what's newer. **Only if at least one file was restored, or the user explicitly chose to skip everything** — an empty restore (an unresolved anchor, a mis-parsed list) must never move the anchor, or the next sync silently loses those changes. Update the two provenance keys in place — the anchor may carry other keys (such as `scopes`) that must survive — then drop the private ref (`git update-ref -d refs/serel-memory/anchor`):
 
     ```bash
     # Anchor update: keep every other key (e.g. "scopes"); never rewrite the file blind.

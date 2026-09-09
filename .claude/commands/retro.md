@@ -57,4 +57,4 @@ Rules:
 - Action items need owners and concrete next steps, not "we should think about X."
 - If last retro's commitments weren't met, note it. Patterns matter more than single misses.
 
-After writing, ask the user if they want any items elevated to `.rules` as durable learnings worth carrying across all future retros.
+After writing, ask the user if they want any items elevated to `.rules` as durable learnings worth carrying across all future retros. For a learning that is already in `.rules` or repeats a past retro, ask why the guidance did not take and propose a test or hook check instead of another line.

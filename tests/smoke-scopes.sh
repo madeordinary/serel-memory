@@ -41,7 +41,6 @@ $GIT init --quiet && $GIT add -A && $GIT commit --quiet -m "fixture"
 
 # Older hooks for the no-scopes byte-identity baseline.
 git -C "$ROOT" show v0.3.0:hooks/session-start.sh > "$tmp/old-session-start.sh"
-git -C "$ROOT" show v0.3.0:hooks/pre-compact.sh   > "$tmp/old-pre-compact.sh"
 
 res() { "$R" --root "$F" "$@"; }
 
@@ -147,11 +146,17 @@ printf '%s\n' "$pc" | grep -qi 'selected a different' && bad "pre-compact still 
 anchor_without
 new_ss="$(bash "$ROOT/hooks/session-start.sh")"; old_ss="$(bash "$tmp/old-session-start.sh")"
 [ "$new_ss" = "$old_ss" ] && ok "session-start without scopes is identical to v0.3.0" || { bad "session-start drifted from v0.3.0"; diff <(printf '%s\n' "$old_ss") <(printf '%s\n' "$new_ss") | head -20; }
-new_pc="$(bash "$ROOT/hooks/pre-compact.sh")"; old_pc="$(bash "$tmp/old-pre-compact.sh")"
-# The pre-compact text gained the retention step (documented change); compare everything else.
-strip_ret() { sed '/^5\. Apply the update-memory retention step/,/^$/d'; }
-[ "$(printf '%s\n' "$new_pc" | strip_ret)" = "$old_pc" ] && ok "pre-compact without scopes matches v0.3.0 (plus the retention step)" \
-  || { bad "pre-compact drifted from v0.3.0"; diff <(printf '%s\n' "$old_pc") <(printf '%s\n' "$new_pc" | strip_ret) | head -20; }
+# pre-compact's wording evolves with the contract, so the scope guarantee is
+# checked directly: on the same fixture, the hook prints exactly the same text
+# with and without scopes except for the scope note.
+pc_without="$(bash "$ROOT/hooks/pre-compact.sh" 2>&1)"
+anchor_with '["projects/running", "projects/watching"]'
+pc_with="$(bash "$ROOT/hooks/pre-compact.sh" 2>&1)"
+anchor_without
+[ "$(printf '%s\n' "$pc_with" | grep -v '^Scope resolved by cwd:' | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}')" = "$(printf '%s\n' "$pc_without" | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}')" ] \
+  && ok "pre-compact: scopes add only the scope note" \
+  || { bad "pre-compact: scopes changed unrelated output"; diff <(printf '%s\n' "$pc_without") <(printf '%s\n' "$pc_with") | head -10; }
+printf '%s\n' "$pc_without" | grep -q '^Scope resolved by cwd:' && bad "pre-compact: scope note printed without scopes" || ok "pre-compact: no scope note without scopes"
 # Overlay-only bank: hooks must still load it.
 mkdir memory-bank.local && cp memory-bank/*.md memory-bank.local/ && rm -rf memory-bank
 ov="$(bash "$ROOT/hooks/session-start.sh" 2>&1)"
