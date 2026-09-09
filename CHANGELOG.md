@@ -6,7 +6,18 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [Unreleased]
 
-No changes yet.
+### Added
+
+- A repository-root `.serel-memory.json` provenance anchor for the upstream
+  repository itself.
+
+### Changed
+
+- `.gitattributes` is excluded from archive/degit exports along with the
+  maintainer-only files it governs, so downstream copies do not inherit
+  upstream export rules.
+- The June 6 improvement-roadmap document is explicitly marked superseded by
+  the July 10 rescope recorded in the maintainer decision log.
 
 ## [0.3.0] — 2026-07-19
 
@@ -148,6 +159,6 @@ remain intact. Pin it from the canonical home with
 - Fixed the broken file-tree rendering and tightened install instructions in the README.
 
 [Unreleased]: https://github.com/madeordinary/serel-memory/compare/v0.3.0...HEAD
-[0.3.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.3.0
+[0.3.0]: https://github.com/madeordinary/serel-memory/tree/v0.3.0
 [0.2.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.2.0
 [0.1.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.1.0
