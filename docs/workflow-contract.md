@@ -157,6 +157,9 @@ in place by the normal update:
 - activeContext: an entire `## Recent changes (<suffix>)` section — the
   heading travels with its body — or a top-level bullet (a line starting
   with `-`) with its continuation lines under an unsuffixed `## Recent changes`.
+  The newest dated section is the exception: its heading stays live as the
+  pointer's home and is *copied* into the archive (the helper reports it
+  as `ARCHIVE-PREFIX`).
 - progress: a top-level bullet under `## Recent milestones`.
 - Any other structure is left untouched and reported as remaining overage.
 

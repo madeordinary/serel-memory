@@ -30,6 +30,9 @@ apply_rotation() {
   base="$(basename "$file" .md)"
   [ -n "$spans" ] || return 0
   [ -f "$archive" ] || printf '# Rotated entries from %s.md\n' "$base" > "$archive"
+  local pfx
+  pfx="$(printf '%s\n' "$report" | sed -n 's/^ARCHIVE-PREFIX: line \([0-9]*\) .*/\1/p' | head -1)"
+  [ -n "$pfx" ] && sed -n "${pfx}p" "$file" >> "$archive"
   for sp in $spans; do
     sed -n "${sp%-*},${sp#*-}p" "$file" >> "$archive"
   done
@@ -226,10 +229,38 @@ assert_exact_prediction "$tmp/f9live/activeContext.md" "$r" F9
 grep -q '^## Recent changes (2026-09 session)$' "$tmp/f9live/activeContext.md" && ok "F9 newest heading kept as the pointer's home" || bad "F9 newest heading rotated away"
 grep -q '^Older entries: archive/activeContext-\*\.md$' "$tmp/f9live/activeContext.md" && ok "F9 pointer present" || bad "F9 pointer missing"
 grep -c '^- Item ' "$tmp/f9live/archive.md" | grep -qx 16 && ok "F9 all 16 items archived verbatim" || bad "F9 archive item count: $(grep -c '^- Item ' "$tmp/f9live/archive.md")"
+grep -q '^## Recent changes (2026-09 session)$' "$tmp/f9live/archive.md" && ok "F9 newest heading copied into the archive (date kept with its bullets)" || bad "F9 archive lost the newest heading"
+printf '%s\n' "$r" | grep -q '^ARCHIVE-PREFIX: line' && ok "F9 report carries ARCHIVE-PREFIX" || bad "F9 no ARCHIVE-PREFIX"
 case "$(field "$r" RESULT)" in OVERAGE-REMAINS*|ROTATE*) ok "F9 result reported ($(field "$r" RESULT | cut -c1-15))" ;; *) bad "F9 result: $(field "$r" RESULT)" ;; esac
 r2="$("$CHECK" "$tmp/f9live/activeContext.md" activeContext)"
 printf '%s\n' "$r2" | grep -q '^POINTER: present' && ok "F9 rerun sees the pointer" || bad "F9 rerun pointer"
 printf '%s\n' "$r2" | grep -q '^SELECT:' && bad "F9 rerun selected again" || ok "F9 rerun selects nothing"
+
+# --- F10: rotate, then rerun while protected content is still over target ----
+mkdir -p "$tmp/f10"
+{ echo "# Active Context"; echo; echo "## Current focus"; echo; for i in $(seq 1 230); do echo "- current item $i"; done; echo; dated_section 2026-09 5; dated_section 2026-08 5; } > "$tmp/f10/activeContext.md"
+r="$("$CHECK" "$tmp/f10/activeContext.md" activeContext)"
+case "$(field "$r" RESULT)" in OVERAGE-REMAINS*) ok "F10 first pass: rotate what it can, report overage" ;; *) bad "F10 first: $(field "$r" RESULT)" ;; esac
+apply_rotation "$tmp/f10/activeContext.md" "$r" "$tmp/f10/archive.md"
+if r2="$("$CHECK" "$tmp/f10/activeContext.md" activeContext 2>"$tmp/f10.err")"; then
+  case "$(field "$r2" RESULT)" in OVERAGE-REMAINS*) ok "F10 rerun on a heading-only section does not crash and reports overage" ;; *) bad "F10 rerun: $(field "$r2" RESULT)" ;; esac
+  printf '%s\n' "$r2" | grep -q '^SELECT:' && bad "F10 rerun selected the empty section" || ok "F10 rerun selects nothing"
+else
+  bad "F10 rerun crashed: $(cat "$tmp/f10.err")"
+fi
+
+# --- F11: fences that must not fool the scanner ------------------------------
+mkdir -p "$tmp/f11a" "$tmp/f11b"
+{ echo "# Active Context"; echo; echo "## Current focus"; echo; echo '````markdown'; echo 'Example:'; echo '```'; echo "## Recent changes (2020-01 session)"; echo '```'; echo '````'; for i in $(seq 1 210); do echo "- current item $i"; done; } > "$tmp/f11a/activeContext.md"
+r="$("$CHECK" "$tmp/f11a/activeContext.md" activeContext)"
+printf '%s\n' "$r" | grep -q '^ROTATABLE: 0 units' && ok "F11a four-backtick fence quoting a triple-backtick example stays one fence" || bad "F11a: $(field "$r" ROTATABLE)"
+{ echo "# Active Context"; echo; echo "## Current focus"; echo; echo '   ```'; echo "## Recent changes (2020-01 session)"; echo '   ```'; for i in $(seq 1 210); do echo "- current item $i"; done; } > "$tmp/f11b/activeContext.md"
+r="$("$CHECK" "$tmp/f11b/activeContext.md" activeContext)"
+printf '%s\n' "$r" | grep -q '^ROTATABLE: 0 units' && ok "F11b indented fence is still a fence" || bad "F11b: $(field "$r" ROTATABLE)"
+mkdir -p "$tmp/f11c"
+{ echo "# Active Context"; echo; echo "## Current focus"; echo; echo '~~~'; echo "## Recent changes (2020-01 session)"; echo '```'; echo "still inside the tilde fence"; echo '~~~'; for i in $(seq 1 210); do echo "- current item $i"; done; } > "$tmp/f11c/activeContext.md"
+r="$("$CHECK" "$tmp/f11c/activeContext.md" activeContext)"
+printf '%s\n' "$r" | grep -q '^ROTATABLE: 0 units' && ok "F11c a backtick line does not close a tilde fence" || bad "F11c: $(field "$r" ROTATABLE)"
 
 # --- Usage errors ------------------------------------------------------------
 "$CHECK" "$tmp/f1/activeContext.md" bogus >/dev/null 2>&1 && bad "bad kind accepted" || ok "bad kind rejected (exit 2)"

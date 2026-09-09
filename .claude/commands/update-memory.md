@@ -31,7 +31,7 @@ Steps:
    ```
 
    - `RESULT: NO-OP` — nothing to do.
-   - `RESULT: ROTATE n` — add to the proposal below, for each selected line range: an append of those lines verbatim to the named `memory-bank/archive/<file>-<YYYY-MM>.md` (create it with a one-line header if missing), their removal from the live file, and — if `POINTER: missing` — one line `Older entries: archive/<file>-*.md` directly under the first `## Recent ...` heading. Never rotate a protected section; never paraphrase what moves.
+   - `RESULT: ROTATE n` — add to the proposal below, for each selected line range: an append of those lines verbatim to the named `memory-bank/archive/<file>-<YYYY-MM>.md` (create it with a one-line header if missing), their removal from the live file, the heading named by any `ARCHIVE-PREFIX` line copied into the archive ahead of its span (it stays live), and — if `POINTER: missing` — one line `Older entries: archive/<file>-*.md` directly under the first `## Recent ...` heading. Never rotate a protected section; never paraphrase what moves.
    - `RESULT: OVERAGE-REMAINS` — rotate what it selected (if anything) and say plainly that current-state content alone is over the target; the user decides whether to trim it.
 
    After the user confirms and the files are written, run the helper again on the live files and report its `RESULT` lines. Targets and rules: `docs/workflow-contract.md` "Retention".

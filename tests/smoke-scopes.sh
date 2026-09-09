@@ -80,6 +80,16 @@ anchor_with '["./projects/running/", "projects//watching"]'
 [ "$(res --scope projects/running/widget | cut -f1)" = "projects/running/widget" ] && ok "aliased root: explicit selector works" || bad "alias explicit"
 anchor_with '["projects/running", "./projects/running"]'
 res 2>"$tmp/err" | grep -q '^\.	' && grep -q "overlap" "$tmp/err" && ok "aliased duplicate roots caught as overlap" || bad "alias overlap"
+anchor_with '["projects/watching/."]'
+[ "$(cd projects/watching/thing && "$R" --root "$F" | cut -f1)" = "projects/watching/thing" ] && ok "root written as 'dir/.' still matches nested cwd" || bad "dir/. cwd match: $(cd projects/watching/thing && "$R" --root "$F")"
+anchor_with '["projects/.", "projects/running"]'
+res 2>"$tmp/err" | grep -q '^\.	' && grep -q "overlap" "$tmp/err" && ok "'dir/.' alias caught by overlap check" || bad "dir/. overlap"
+anchor_with 'false'
+res 2>"$tmp/err" | grep -q '^\.	' && grep -q "must be an array" "$tmp/err" && ok "scopes:false → warning, single-bank" || bad "scopes:false: $(cat "$tmp/err")"
+anchor_with 'null'
+res 2>"$tmp/err" | grep -q '^\.	' && grep -q "must be an array" "$tmp/err" && ok "scopes:null → warning, single-bank" || bad "scopes:null: $(cat "$tmp/err")"
+anchor_without
+res 2>"$tmp/err" >/dev/null; [ -s "$tmp/err" ] && bad "absent scopes key produced a warning: $(cat "$tmp/err")" || ok "absent scopes key: no warning"
 anchor_with '"projects/running"'
 res 2>"$tmp/err" | grep -q '^\.	' && grep -q "must be an array" "$tmp/err" && ok "non-array scopes → warning, single-bank" || bad "non-array: $(cat "$tmp/err")"
 anchor_with '["projects/running", 3]'

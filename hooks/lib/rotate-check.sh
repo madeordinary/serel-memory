@@ -52,8 +52,20 @@ scan="$(awk -v kind="$kind" '
   }
   BEGIN { ustart = 0; mode = ""; infence = 0 }
   # Fenced code is opaque: never a heading, bullet, or pointer. It is body
-  # text of whatever unit encloses it (or nothing).
-  /^(```|~~~)/ { infence = !infence; if (ustart > 0) ulast = NR; next }
+  # text of whatever unit encloses it (or nothing). A fence opens with 3+
+  # backticks or tildes (up to 3 spaces of indent) and closes only with the
+  # same character, at least as long, and nothing but whitespace after it —
+  # so a ```` fence that quotes ``` examples stays one fence.
+  /^ *(```|~~~)/ {
+    m = $0; sub(/^ */, "", m)
+    if (length($0) - length(m) <= 3) {   # more than 3 spaces of indent is not a fence
+      ch = substr(m, 1, 1)
+      n = 0; while (substr(m, n + 1, 1) == ch) n++
+      if (!infence) { infence = 1; fch = ch; flen = n; if (ustart > 0) ulast = NR; next }
+      rest = substr(m, n + 1); gsub(/[[:space:]]/, "", rest)
+      if (ch == fch && n >= flen && rest == "") { infence = 0; if (ustart > 0) ulast = NR; next }
+    }
+  }
   infence      { if (ustart > 0) ulast = NR; next }
   # A sub-heading inside a bullet section is not a bullet continuation; the
   # structure is unsupported from there on, so stop collecting units.
@@ -122,27 +134,28 @@ echo "ROTATABLE: $unit_count units (oldest last)"
 [ -n "$unsupported" ] && echo "UNSUPPORTED: sub-heading at line $unsupported inside a bullet section; units after it are not collected"
 
 i=0
-declare -a u_start u_end u_bytes
+first_section_seen=0
+declare -a u_start u_end u_bytes u_prefix
 while IFS=$'\t' read -r _ s e t title; do
   [ -n "$s" ] || continue
-  i=$((i + 1))
-  # The newest dated section keeps its heading line — that is where the
+  prefix=""
+  # The newest dated section keeps its heading line live — that is where the
   # archive pointer lives — so its span starts after the heading (and after
-  # the pointer when it sits directly under it). Rotating everything then
-  # leaves the heading + pointer behind instead of orphaning the archive.
-  if [ "$i" -eq 1 ] && [ "$t" = "section" ]; then
+  # the pointer when it sits directly under it). The heading is still COPIED
+  # to the archive (ARCHIVE-PREFIX) so the rotated bullets keep their date.
+  if [ "$t" = "section" ] && [ "$first_section_seen" -eq 0 ]; then
+    first_section_seen=1
+    prefix="$s"
     s=$((s + 1))
     if [ -n "$pointer" ] && [ "$pointer" -eq "$s" ]; then s=$((s + 1)); fi
-    # skip a blank line directly after the heading/pointer
     if [ "$s" -le "$e" ] && [ -z "$(sed -n "${s}p" "$file")" ]; then s=$((s + 1)); fi
     if [ "$s" -gt "$e" ]; then continue; fi   # heading-only section: nothing to rotate
-    i_first_section_trimmed=1
   fi
-  u_start[i]="$s"; u_end[i]="$e"; u_bytes[i]="$(span_bytes "$s" "$e")"
+  i=$((i + 1))
+  u_start[i]="$s"; u_end[i]="$e"; u_bytes[i]="$(span_bytes "$s" "$e")"; u_prefix[i]="$prefix"
   printf 'UNIT %d: %s-%s %s "%s"\n' "$i" "$s" "$e" "$t" "$title"
 done <<<"$units"
 unit_count="$i"
-: "${i_first_section_trimmed:=0}"
 
 # --- Selection ---------------------------------------------------------------
 sel_from=0   # first selected unit index (selection is a suffix: units sel_from..unit_count)
@@ -197,6 +210,11 @@ if [ "$sel_from" -gt 0 ]; then
     j=$((j + 1))
   done
   echo "SELECT: units $sel_from..$unit_count ($n) lines:${spans}"
+  j="$sel_from"
+  while [ "$j" -le "$unit_count" ]; do
+    [ -n "${u_prefix[j]}" ] && echo "ARCHIVE-PREFIX: line ${u_prefix[j]} (copy this heading into the archive before span ${u_start[j]}-${u_end[j]}; it stays live as the pointer's home)"
+    j=$((j + 1))
+  done
   echo "ARCHIVE: archive/${base}-$(date +%Y-%m).md"
   if [ "$kind" = "activeContext" ]; then
     echo "PREDICTED: lines=$pred_lines bytes=$pred_bytes"
