@@ -25,7 +25,7 @@ Use this skill to orient a Codex session around the Serel Memory bank.
    - `activeContext.md`
    - `progress.md`
 2. Read `.rules`.
-3. Look for optional docs under `memory-bank/` that clearly match the user's task or active context, and read only the relevant ones.
+3. Look for optional docs under `memory-bank/` that clearly match the user's task or active context, and read only the relevant ones. Never read `memory-bank/archive/` at startup.
 4. Run `git log --oneline -10`.
 5. Run `git status`.
 

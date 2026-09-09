@@ -103,6 +103,9 @@ grep -q "$V020_REF" .basecamp.json \
   || { echo "FAIL: legacy anchor was modified during fail-fast"; fail=1; }
 
 # --- Migrate: refresh tooling per the §1.3 per-file rule ---------------------
+# Candidates are enumerated from the CANDIDATE upstream export under the
+# allowlist (not the old downstream tree), so files upstream added since the
+# fixture's vintage — e.g. hooks/lib/ helpers — are installed too.
 manual_merges=""
 while IFS= read -r rel; do
   [ -n "$rel" ] || continue
@@ -119,8 +122,7 @@ while IFS= read -r rel; do
     cp "$tmp/v030/$rel" "$rel"
   fi
 done <<EOF
-$(find .claude/commands .agents/skills hooks -type f)
-CLAUDE.md
+$(cd "$tmp/v030" && find "${ALLOWLIST[@]}" -type f 2>/dev/null | sort)
 EOF
 
 if [ -n "$manual_merges" ]; then

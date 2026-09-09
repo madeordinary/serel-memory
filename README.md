@@ -226,6 +226,8 @@ When a chat is getting long or the agent is losing the thread:
 
 Plain English works too: say "update memory bank", then "start from the memory bank."
 
+The bank stays readable because `/update-memory` also applies **retention**: `activeContext.md` is held to about 200 lines / 12 KB and `progress.md` keeps its 10 newest milestones. Older history moves verbatim into `memory-bank/archive/` with a pointer line left behind — nothing is deleted, and archives are never part of the session read. Current focus, checkpoint, next steps, and open questions are never rotated. Rules and targets: `docs/workflow-contract.md` "Retention".
+
 ## Hooks (optional)
 
 Manual workflows depend on you remembering to run them. Hooks make session-start memory loading happen automatically, and Claude Code hooks also remind you to update memory before compaction. They're **off by default** — opt in per project.

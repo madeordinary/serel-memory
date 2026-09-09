@@ -11,7 +11,7 @@ Use this skill to update the memory bank from the current session. Always show p
 
 ## Workflow
 
-1. Read every file in `memory-bank/` and `.rules`.
+1. Read every file in `memory-bank/` (skip `memory-bank/archive/` - rotated history, read only when a task needs it) and `.rules`.
 2. Review what changed this session: built, decided, learned, deferred, or discovered.
 3. Propose updates, focusing on:
    - `memory-bank/activeContext.md` - current focus, recent changes, next steps, open questions
@@ -22,6 +22,18 @@ Use this skill to update the memory bank from the current session. Always show p
    - `decisionLog.md` for durable architectural, product, workflow, or operational decisions. If a past decision changed, **supersede, don't delete**: append "SUPERSEDED by … (date)" and move it to the Superseded section.
    - `productContext.md` or `projectbrief.md` only if product intent changed
 5. Append to `.rules` only for non-obvious reusable learnings, then **prune** it: if it's over ~40 lines or holds stale lines, drop what's no longer true and promote stabilized conventions into `systemPatterns.md`.
+6. **Retention (required).** Write the proposed `activeContext.md` and `progress.md` to a temp location and run the read-only helper on each - it measures the file *as it would be after this update*:
+
+   ```bash
+   hooks/lib/rotate-check.sh "$TMP/activeContext.md" activeContext
+   hooks/lib/rotate-check.sh "$TMP/progress.md" progress
+   ```
+
+   - `RESULT: NO-OP` - nothing to do.
+   - `RESULT: ROTATE n` - add to the proposal, for each selected line range: an append of those lines verbatim to the named `memory-bank/archive/<file>-<YYYY-MM>.md` (create it with a one-line header if missing), their removal from the live file, and - if `POINTER: missing` - one line `Older entries: archive/<file>-*.md` directly under the first `## Recent ...` heading. Never rotate a protected section; never paraphrase what moves.
+   - `RESULT: OVERAGE-REMAINS` - rotate what it selected (if anything) and say plainly that current-state content alone is over the target; the user decides whether to trim it.
+
+   After the user confirms and the files are written, run the helper again on the live files and report its `RESULT` lines. Targets and rules: `docs/workflow-contract.md` "Retention".
 
 For each proposed change, show:
 
@@ -76,5 +88,5 @@ Wait for confirmation before writing.
 - Do not bloat the bank.
 - Do not journal one-off events.
 - If `.rules` already covers a learning, refine the existing entry instead of duplicating it.
-- Keep `activeContext.md` current rather than preserving old session history.
+- Keep `activeContext.md` current: current-state sections (`Current focus`, `Checkpoint`, `Next steps`, `Open questions`, `Notes for next session`) are rewritten in place; historical entries rotate losslessly to `archive/` per step 6, never deleted, never paraphrased.
 - Promote information according to `docs/workflow-contract.md`: session state to `activeContext.md`, completed status to `progress.md`, durable decisions to `decisionLog.md`, reusable gotchas to `.rules`.

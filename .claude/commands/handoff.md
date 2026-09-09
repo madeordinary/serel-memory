@@ -8,7 +8,7 @@ Produce a handoff document for someone who's never seen this project before. The
 
 Steps:
 
-1. Read every file in `memory-bank/` for full project context.
+1. Read every file in `memory-bank/` for full project context (skip `memory-bank/archive/` unless the handoff needs that history).
 2. Read `.rules` for non-obvious patterns and preferences.
 3. Read the project's `README.md` (the user-facing one, not Serel Memory's).
 4. Scan `docs/` if it exists, especially `docs/decisions/` and `docs/runbooks/`.

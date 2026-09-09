@@ -28,7 +28,7 @@ Do these in order, before anything else:
    - `activeContext.md`
    - `progress.md`
 2. Read `.rules`.
-3. Look for optional docs under `memory-bank/` that clearly match the user's task or active context, and read only the relevant ones.
+3. Look for optional docs under `memory-bank/` that clearly match the user's task or active context, and read only the relevant ones. Never read `memory-bank/archive/` at startup.
 4. Run `git log --oneline -10` to see recent activity.
 5. Run `git status` to see uncommitted changes.
 
