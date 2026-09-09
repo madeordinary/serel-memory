@@ -17,7 +17,7 @@ Read these files, in this order, before doing anything else:
 
 Then read the last 5–10 git commits for recent context.
 
-If the task clearly touches a specific feature, integration, deployment path, testing strategy, or API, look for relevant optional docs under `memory-bank/` and read only the ones that apply.
+If the task clearly touches a specific feature, integration, deployment path, testing strategy, or API, look for relevant optional docs under `memory-bank/` and read only the ones that apply. `memory-bank/archive/` holds rotated history — never part of the session read; open it only when a task needs that history.
 
 If any memory bank file is missing, empty, or still only template placeholders, note it and ask the user before proceeding. On a fresh install the bank *starts* blank by design — seed it with `/discover` (no code yet), `/init-memory` (code exists), or `/from-prd` (a spec exists) before relying on it.
 

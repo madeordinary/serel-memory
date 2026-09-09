@@ -63,3 +63,52 @@ Use this promotion path:
 
 Do not turn the memory bank into a journal. A line should survive because it helps
 the next session make a better decision.
+
+## Retention
+
+Bank files are read every session, so their size is the framework's context
+budget. Retention keeps the two volatile files bounded without losing history.
+
+**Soft targets, per effective bank:**
+
+- `activeContext.md`: at most 200 lines and 12,000 bytes.
+- `progress.md`: `## Recent milestones` keeps its 10 newest entries.
+- `.rules`: about 40 lines (existing rule; pruned, not rotated).
+
+**Protected sections are never rotated** — they are current state, rewritten
+in place by the normal update:
+
+- activeContext: `## Current focus`, `## Checkpoint`, `## Next steps`,
+  `## Open questions`, `## Notes for next session`. Move a note into
+  `Recent changes` once it is done; age alone does not make it history.
+- progress: `## Status`, `## What works`, `## In progress`,
+  `## What's left to build`, `## Known issues`.
+
+**Rotatable units**, oldest first (banks are newest-first, so oldest is last):
+
+- activeContext: an entire `## Recent changes (<suffix>)` section — the
+  heading travels with its body — or a top-level bullet (a line starting
+  with `-`) with its continuation lines under an unsuffixed `## Recent changes`.
+- progress: a top-level bullet under `## Recent milestones`.
+- Any other structure is left untouched and reported as remaining overage.
+
+**Rotation is lossless.** Selected units move verbatim to
+`<effective bank>/archive/<file>-<YYYY-MM>.md` (append, or create with a
+one-line header), and the live file keeps one pointer line,
+`Older entries: archive/<file>-*.md`, directly under the first
+`## Recent ...` heading. If protected content alone exceeds the target,
+report it and rotate nothing further — never truncate current state.
+Rotating again with nothing rotatable is a no-op.
+
+**Mechanism.** `hooks/lib/rotate-check.sh <file> <activeContext|progress>`
+is read-only: it measures a file, lists rotatable units as line ranges,
+predicts the result of rotating the fewest oldest units that meet the
+target, and ends with `RESULT: NO-OP`, `RESULT: ROTATE n`, or
+`RESULT: OVERAGE-REMAINS`. `/update-memory` and `$update-memory` must run it
+on the *proposed* files, fold any `ROTATE n` into the same confirmation as
+the content diffs, and re-run it after writing. The approval gate is
+unchanged — the helper selects, the user approves, the agent writes.
+
+**Archives are not routine reads.** `archive/` is excluded from the session
+read list, `/start`, `/update-memory`, `/handoff`, and both hooks. Read an
+archive only when the task needs that history.

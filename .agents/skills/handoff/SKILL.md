@@ -9,7 +9,7 @@ Use this skill to create a concise handoff for a smart engineer or PM picking up
 
 ## Workflow
 
-1. Read every file in `memory-bank/`, including `decisionLog.md`.
+1. Read every file in `memory-bank/`, including `decisionLog.md` (skip `memory-bank/archive/` unless the handoff needs that history).
 2. Read `.rules`.
 3. Read the project `README.md` if present.
 4. Scan `docs/`, especially `docs/decisions/` and `docs/runbooks/`.

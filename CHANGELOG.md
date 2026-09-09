@@ -8,11 +8,27 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ### Added
 
+- **Retention layer.** `hooks/lib/rotate-check.sh` (read-only) measures
+  `activeContext.md` and `progress.md` against soft targets — 200 lines /
+  12 KB, and the 10 newest milestones — and selects the oldest historical
+  entries to rotate verbatim into `memory-bank/archive/<file>-<YYYY-MM>.md`.
+  Current-state sections are never rotated; nothing is deleted. Contract in
+  `docs/workflow-contract.md` "Retention"; `tests/smoke-retention.sh` proves
+  the selections are lossless and the predictions exact.
 - A repository-root `.serel-memory.json` provenance anchor for the upstream
   repository itself.
 
 ### Changed
 
+- `/update-memory` and `$update-memory` gain a required retention step: they
+  run the helper on the *proposed* files and fold any rotation into the same
+  confirmation as the content diffs, then re-check after writing. The
+  pre-compact hook points at that step. This applies to every install.
+- `memory-bank/archive/` is excluded from routine reads (session read list,
+  `/start`, `/update-memory`, `/handoff`, both hooks).
+- `tests/smoke-migrate-v02-v03.sh` enumerates refresh candidates from the
+  upstream export under the allowlist, so files added upstream after the
+  fixture's vintage (such as `hooks/lib/`) are installed by a migration.
 - `.gitattributes` is excluded from archive/degit exports along with the
   maintainer-only files it governs, so downstream copies do not inherit
   upstream export rules.

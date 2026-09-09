@@ -52,6 +52,12 @@ effective bank — apply all of the updates below to `memory-bank.local/` and it
 4. If anything non-obvious was learned this session — a user preference, a
    gotcha, a rejected approach worth remembering — append it to `.rules`.
 
+5. Apply the update-memory retention step: run
+   `hooks/lib/rotate-check.sh` on the proposed `activeContext.md` and
+   `progress.md`, and include any `ROTATE n` archive moves in the same diffs
+   (see `docs/workflow-contract.md` "Retention"). Skip `memory-bank/archive/`
+   when reading.
+
 Show the diffs to the user and ask for confirmation before writing. Then proceed
 with the compaction.
 EOF

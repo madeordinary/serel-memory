@@ -22,10 +22,10 @@ jobs:
           fetch-depth: 0
 
       - name: Make scripts executable
-        run: chmod +x tests/*.sh hooks/*.sh
+        run: chmod +x tests/*.sh hooks/*.sh hooks/lib/*.sh
 
       - name: ShellCheck hooks and tests
-        run: shellcheck hooks/*.sh tests/*.sh
+        run: shellcheck hooks/*.sh hooks/lib/*.sh tests/*.sh
 
       - name: Adapter parity (Claude commands <-> Codex skills)
         run: tests/check-parity.sh
@@ -47,6 +47,9 @@ jobs:
 
       - name: v0.2 to v0.3 downstream migration path works end to end
         run: tests/smoke-migrate-v02-v03.sh
+
+      - name: Retention helper selects lossless rotations per the contract
+        run: tests/smoke-retention.sh
 
   docs:
     # Markdown hygiene for the prompt files themselves. Same repo guard as above —
