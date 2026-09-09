@@ -211,7 +211,7 @@ remain intact. Pin it from the canonical home with
 - Fixed the broken file-tree rendering and tightened install instructions in the README.
 
 [Unreleased]: https://github.com/madeordinary/serel-memory/compare/v0.4.0...HEAD
-[0.4.0]: https://github.com/madeordinary/serel-memory/tree/v0.4.0
-[0.3.0]: https://github.com/madeordinary/serel-memory/tree/v0.3.0
+[0.4.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.4.0
+[0.3.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.3.0
 [0.2.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.2.0
 [0.1.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.1.0
