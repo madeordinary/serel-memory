@@ -249,7 +249,9 @@ dangerous than one that reports drift.
 ```
 
 One line, outside fenced code, optionally wrapped in parentheses. Every marker
-on a line is read. Paths are whitespace-separated and resolve against the scope
+on a line is read. A revision written as a placeholder in angle brackets —
+`verified: <sha> <path>` — is the syntax being described rather than a claim
+being made, and is skipped: a bank is free to document this feature. Paths are whitespace-separated and resolve against the scope
 root first, then the repo root; a tracked directory is valid evidence. The
 syntax has no quoting or escaping, so a path cannot contain a space, and `)`
 always ends the marker — rename such a path or leave the claim unmarked rather

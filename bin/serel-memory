@@ -431,6 +431,14 @@ check_one_marker() {
   local -a words resolved
   read -r -a words < <(printf '%s\n' "$rest")
   local sha="${words[0]:-}"
+  case "$sha" in
+    '<'*'>')
+      # `verified: <sha> <path>...` written out in prose is the syntax being
+      # described, not a claim being made. A bank that documents the feature —
+      # this one does — is not drifting, and saying so would teach downstream
+      # projects to stop writing about it.
+      return 0 ;;
+  esac
   if [ -z "$sha" ]; then
     finding INCOMPLETE "$loc" "marker names no evidence: expected 'verified: <sha> <path> [<path>...]'"
     return 0
