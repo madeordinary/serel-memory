@@ -362,7 +362,9 @@ check_unmarked() {
   ' "$root/$bank/progress.md")"
   n_unmarked="$n"
   if [ "$n" -gt 0 ]; then
-    finding INFO "$bank/progress.md" "$n unmarked bullets in recognized sections; semantic claims are not assessed"
+    local word="bullets"
+    [ "$n" -eq 1 ] && word="bullet"
+    finding INFO "$bank/progress.md" "$n unmarked $word in recognized sections; semantic claims are not assessed"
   fi
 }
 
