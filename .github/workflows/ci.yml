@@ -22,10 +22,10 @@ jobs:
           fetch-depth: 0
 
       - name: Make scripts executable
-        run: chmod +x tests/*.sh hooks/*.sh hooks/lib/*.sh
+        run: chmod +x tests/*.sh hooks/*.sh hooks/lib/*.sh bin/serel-memory
 
-      - name: ShellCheck hooks and tests
-        run: shellcheck hooks/*.sh hooks/lib/*.sh tests/*.sh
+      - name: ShellCheck hooks, tests, and bin
+        run: shellcheck hooks/*.sh hooks/lib/*.sh tests/*.sh bin/serel-memory
 
       - name: Adapter parity (Claude commands <-> Codex skills)
         run: tests/check-parity.sh
@@ -53,6 +53,12 @@ jobs:
 
       - name: Scoped banks resolve one bank per invocation; hooks unchanged without scopes
         run: tests/smoke-scopes.sh
+
+      # The checker is never run against this repo's own bank: the tracked
+      # templates are intentionally blank and the maintainer bank is gitignored.
+      # Synthetic fixtures only.
+      - name: Drift checker reports every finding kind with the documented exit codes
+        run: tests/smoke-check.sh
 
   docs:
     # Markdown hygiene for the prompt files themselves. Same repo guard as above —
