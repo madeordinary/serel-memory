@@ -10,6 +10,11 @@
 #      Test-code exceptions (this guard's own patterns; migration fixtures):
 #        - tests/check-compatibility.sh
 #        - tests/smoke-migrate-v02-v03.sh
+#      Detector exception: bin/serel-memory must name the legacy anchor to
+#      DETECT it — the drift checker reports a leftover v0.x anchor as DRIFT.
+#      Narrow by design: only this one file, and only because reading the
+#      filename is the check. Everything else stays guarded.
+#        - bin/serel-memory
 #      Adapter exception: the two sync-upstream adapters may name the legacy
 #      anchor ONLY on lines that also say "legacy" (the fail-fast instruction).
 #   2. Both sync-upstream adapters carry the legacy-anchor fail-fast guard,
@@ -31,6 +36,7 @@ scan_files="$(git ls-files | grep -vE \
   -e '^docs/research/' \
   -e '^tests/check-compatibility\.sh$' \
   -e '^tests/smoke-migrate-v02-v03\.sh$' \
+  -e '^bin/serel-memory$' \
   -e '^\.claude/commands/sync-upstream\.md$' \
   -e '^\.agents/skills/sync-upstream/SKILL\.md$')"
 
