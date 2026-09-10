@@ -29,14 +29,19 @@ and give it a narrow, honest remit.
 - **It refuses to decide meaning.** No line is ever reported as true or false.
   A `verified: <sha> <path>...` marker is compared, not believed: the checker
   says the declared evidence is unchanged or differs since that sha. Bullets
-  without a marker are *counted, not judged*, and the count is printed — the
-  visible measure of what the check does not cover.
+  without a marker are *counted, not judged* — the two recognized `progress.md`
+  sections, not the whole bank — and the count is printed, the visible measure
+  of what the check does not cover.
 - **Not-assessed is louder than bad.** Any `INCOMPLETE` exits 2, above the 1
-  for real `DRIFT` or `STALE`. A checker that cannot see must never look clean.
+  for real `DRIFT` or `STALE`. A checker that cannot see must never look clean,
+  so every subprocess status is checked and a failure becomes a finding rather
+  than a silent pass.
 - **Offline-first.** No fetch, ever. The framework baseline runs only when the
-  anchor's `ref` already resolves locally (`sync-upstream` leaves it in
-  `refs/serel-memory/anchor`); otherwise the summary says `baseline:
-  unavailable` rather than silently skipping a check.
+  anchor's `ref` already resolves locally — a clone or fork carrying the
+  upstream tags, or a private `refs/serel-memory/anchor` left behind by a sync
+  that stopped before advancing the anchor (a completed `sync-upstream` deletes
+  it). Otherwise the summary says `baseline: unavailable` rather than silently
+  skipping a check.
 - **One scope per invocation**, resolved by the existing
   `hooks/lib/resolve-scope.sh` called as a subprocess — the resolver stays the
   single implementation of that rule.

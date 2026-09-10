@@ -217,8 +217,10 @@ offline pass over the effective bank in the resolved scope. It exists because
 about its own writing. The checker answers only the part a machine can settle,
 and says plainly which part it left alone.
 
-**Findings.** One line each, `<KIND> <location> <message>`, where location is a
-repo-relative path (with `:line` for a marker) or `repo`:
+**Findings.** One line each, `<KIND> <location> <message>`. The location is a
+repo-relative path — `<file>:<line>` when the finding is about one line, plain
+`<file>` when it is about the whole file — or `repo` for a repository-wide
+finding:
 
 - `DRIFT` — the repo contradicts the bank: a missing core file, a file that
   still holds only template placeholders, a framework file present in the
@@ -246,18 +248,29 @@ dangerous than one that reports drift.
 - The renderer renders widgets (verified: <sha> <path> [<path>...])
 ```
 
-One line, outside fenced code, optionally wrapped in parentheses and ending at
-`)`. Paths resolve against the scope root first, then the repo root. The
-checker reports `declared evidence unchanged` or `declared evidence differs
-since <sha>` — never "verified" or "true". A marker in a fenced block is
-documentation, not a claim.
+One line, outside fenced code, optionally wrapped in parentheses. Every marker
+on a line is read. Paths are whitespace-separated and resolve against the scope
+root first, then the repo root; a tracked directory is valid evidence. The
+syntax has no quoting or escaping, so a path cannot contain a space, and `)`
+always ends the marker — rename such a path or leave the claim unmarked rather
+than trying to escape it. The checker reports `declared evidence unchanged` or
+`declared evidence differs since <sha>` — never "verified" or "true". A marker
+inside a fenced block is documentation, not a claim.
 
 **What is NOT assessed.** Whether a bank line is *true*; whether an unmarked
-bullet is still accurate (they are counted, and that count is the honest
-measure of what the check does not cover); anything requiring the network. The
-framework baseline is compared only when the anchor's `ref` already resolves
-locally — `sync-upstream` is what makes it resolve; until then the summary says
-`baseline: unavailable`.
+bullet is still accurate. Unmarked bullets are counted — top-level `-`, `*`, or
+`+` bullets under `## What works` and `## Recent milestones` in `progress.md`,
+the two recognized sections, not the whole bank — and that count is the honest
+measure of what the check does not cover. Nothing requiring the network is
+assessed: the framework baseline is compared only when the anchor's `ref`
+already resolves locally (a clone or fork carrying the upstream tags, or a
+private `refs/serel-memory/anchor` left behind by an interrupted sync — a
+completed `sync-upstream` deletes that ref). Otherwise the summary says
+`baseline: unavailable` rather than quietly skipping the comparison.
+
+**A failed check is never a clean one.** Every subprocess status is checked; a
+command that fails becomes `INCOMPLETE`, and the summary line prints even when
+the run aborts.
 
 `/start` and `/update-memory` run the checker when it is present and report its
 summary line. It never blocks either workflow.
