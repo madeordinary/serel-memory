@@ -192,12 +192,12 @@ If the project already has code or important files, drop Serel Memory's files in
 cd ~/path/to/your-existing-project
 
 git clone --depth 1 --branch v0.4.0 https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
-rsync -av --ignore-existing --exclude 'settings.local.json' /tmp/serel-memory/memory-bank /tmp/serel-memory/.agents /tmp/serel-memory/.claude /tmp/serel-memory/.rules /tmp/serel-memory/AGENTS.md /tmp/serel-memory/CLAUDE.md /tmp/serel-memory/hooks /tmp/serel-memory/bin /tmp/serel-memory/docs .
+rsync -av --ignore-existing --exclude 'settings.local.json' /tmp/serel-memory/memory-bank /tmp/serel-memory/.agents /tmp/serel-memory/.claude /tmp/serel-memory/.rules /tmp/serel-memory/AGENTS.md /tmp/serel-memory/CLAUDE.md /tmp/serel-memory/hooks /tmp/serel-memory/docs .
 rm -rf /tmp/serel-memory
 [ -e .serel-memory.json ] || printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.4.0", "linked": false }\n' > .serel-memory.json
 ```
 
-The `rsync` command is intentionally one line so shell line-continuation mistakes cannot drop the source/destination arguments. Existing files and folders, including something like `docs/prd.md`, are preserved because `--ignore-existing` skips paths that are already present.
+`bin/` (the drift checker) arrives with 0.5.0; once you pin a release that ships it, add `/tmp/serel-memory/bin` to that copy list. The `rsync` command is intentionally one line so shell line-continuation mistakes cannot drop the source/destination arguments. Existing files and folders, including something like `docs/prd.md`, are preserved because `--ignore-existing` skips paths that are already present.
 
 Do not run `degit` directly into an existing git repo with files unless you have already reviewed what it will overwrite. The `rsync --ignore-existing` path above is safer because it skips files that already exist. That also means existing `AGENTS.md`, `.rules`, `.claude/`, or `.agents/` files may need a manual merge to pick up Serel Memory's instructions and workflows.
 
@@ -256,8 +256,9 @@ line is *true*. A line can declare its own evidence:
 
 and the checker then says only whether that evidence has changed since that
 commit — never "verified", never "correct". Bullets without a marker are
-counted, not graded, and the count is printed, so the report also tells you how
-much it didn't cover. Requires `jq`. `/start` and `/update-memory` run it when
+counted, not graded — the two recognized `progress.md` sections, not the whole
+bank — and the count is printed, so the report also tells you how much it
+didn't cover. Requires `jq`. `/start` and `/update-memory` run it when
 it's there and quote its summary line; it blocks neither. Full rules:
 `docs/workflow-contract.md` "Drift check".
 
