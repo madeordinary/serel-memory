@@ -29,12 +29,19 @@ for f in .claude/commands/sync-upstream.md .agents/skills/sync-upstream/SKILL.md
   # Positive coverage: every framework path must be IN the allowlist, or a
   # downstream sync silently stops updating it. bin/serel-memory is the newest
   # one — the drift checker ships with the framework, not with the project.
-  for required in bin/serel-memory hooks/ AGENTS.md; do
-    if ! echo "$matches" | grep -qF "$required"; then
-      echo "MISSING: sync allowlist in $f does not include $required"
-      fail=1
-    fi
-  done
+  # Checked per LINE, never aggregated: one complete list must not vouch for a
+  # second line (or the other adapter) that dropped a path.
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    for required in bin/serel-memory hooks/ AGENTS.md; do
+      case "$line" in
+        *"$required"*) ;;
+        *) echo "MISSING: an allowlist line in $f does not include $required:"
+           echo "  $line"
+           fail=1 ;;
+      esac
+    done
+  done <<<"$matches"
 done
 
 if [ "$fail" -eq 0 ]; then

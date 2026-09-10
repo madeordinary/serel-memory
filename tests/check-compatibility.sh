@@ -10,11 +10,10 @@
 #      Test-code exceptions (this guard's own patterns; migration fixtures):
 #        - tests/check-compatibility.sh
 #        - tests/smoke-migrate-v02-v03.sh
-#      Detector exception: bin/serel-memory must name the legacy anchor to
-#      DETECT it — the drift checker reports a leftover v0.x anchor as DRIFT.
-#      Narrow by design: only this one file, and only because reading the
-#      filename is the check. Everything else stays guarded.
-#        - bin/serel-memory
+#      Detector exception (one identifier, one file): bin/serel-memory may name
+#      the legacy ANCHOR FILENAME, because detecting a leftover v0.x anchor is
+#      the check. The retired kill switch and repository slug are still
+#      forbidden there — asserted separately in step 1b.
 #      Adapter exception: the two sync-upstream adapters may name the legacy
 #      anchor ONLY on lines that also say "legacy" (the fail-fast instruction).
 #   2. Both sync-upstream adapters carry the legacy-anchor fail-fast guard,
@@ -36,7 +35,6 @@ scan_files="$(git ls-files | grep -vE \
   -e '^docs/research/' \
   -e '^tests/check-compatibility\.sh$' \
   -e '^tests/smoke-migrate-v02-v03\.sh$' \
-  -e '^bin/serel-memory$' \
   -e '^\.claude/commands/sync-upstream\.md$' \
   -e '^\.agents/skills/sync-upstream/SKILL\.md$')"
 
@@ -45,11 +43,29 @@ if [ -z "$scan_files" ]; then
   fail=1
 else
   hits="$(printf '%s\n' "$scan_files" | xargs grep -nE 'BASECAMP_HOOKS|\.basecamp\.json|gusfeliciano/basecamp' 2>/dev/null || true)"
+  # Detector exception, narrow: drop the checker's own lines from this scan --
+  # it names the legacy anchor filename to detect it. Step 1b below still
+  # forbids the other two identifiers in that same file, so a line carrying
+  # both cannot slip through here.
+  if [ -n "$hits" ]; then
+    hits="$(printf '%s\n' "$hits" | grep -v '^bin/serel-memory:' || true)"
+  fi
   if [ -n "$hits" ]; then
     echo "RETIRED IDENTIFIER on a live surface (only CHANGELOG.md and docs/research/ may carry v0.x history):"
     printf '%s\n' "$hits" | sed 's/^/  /'
     fail=1
   fi
+fi
+
+# --- 1b. The detector may name the anchor filename, nothing else ------------
+if [ -f bin/serel-memory ]; then
+  if grep -qE 'BASECAMP_HOOKS|gusfeliciano/basecamp' bin/serel-memory; then
+    echo "RETIRED IDENTIFIER in bin/serel-memory (old kill switch or old repository slug)"
+    fail=1
+  fi
+else
+  echo "BAD FIXTURE: bin/serel-memory is missing"
+  fail=1
 fi
 
 # --- 2. Adapters: legacy anchor named only in the fail-fast context ----------
