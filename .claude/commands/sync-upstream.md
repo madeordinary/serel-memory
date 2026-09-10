@@ -26,6 +26,7 @@ Only framework files should be synced. Never auto-merge project-specific files.
 - `docs/workflow-contract.md` — workflow design contract
 - `docs/cross-agent-review.md` — second-opinion loop policy
 - `hooks/` — optional automation scripts
+- `bin/serel-memory` — the read-only drift checker
 
 **Project files** (never sync):
 
@@ -67,7 +68,7 @@ read — it triggers the fail-fast guard in step 1 until the user renames it.
 Only these paths are eligible for sync. Use this exact list in all git commands:
 
 ```text
-.agents/skills/ .claude/commands/ AGENTS.md CLAUDE.md docs/workflow-contract.md docs/cross-agent-review.md hooks/
+.agents/skills/ .claude/commands/ AGENTS.md CLAUDE.md docs/workflow-contract.md docs/cross-agent-review.md hooks/ bin/serel-memory
 ```
 
 ## Workflow
@@ -76,7 +77,7 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
 
    ```bash
    cd "$(git rev-parse --show-toplevel)"  # sync is repo-root anchored: framework files and the anchor live at the root, never in a scope folder
-   git status --porcelain -- .agents/skills/ .claude/commands/ AGENTS.md CLAUDE.md docs/workflow-contract.md docs/cross-agent-review.md hooks/
+   git status --porcelain -- .agents/skills/ .claude/commands/ AGENTS.md CLAUDE.md docs/workflow-contract.md docs/cross-agent-review.md hooks/ bin/serel-memory
    # Legacy-anchor guard: fail fast, never treat as unanchored, never reconstruct.
    if [ ! -f .serel-memory.json ] && [ -f .basecamp.json ]; then  # legacy anchor present
      echo "MIGRATION REQUIRED: this project still has a legacy .basecamp.json anchor."

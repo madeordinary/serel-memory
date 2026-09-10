@@ -25,6 +25,7 @@ Only sync framework files. Never auto-merge project-specific files.
 - `AGENTS.md`, `CLAUDE.md` — agent instructions
 - `docs/workflow-contract.md`, `docs/cross-agent-review.md` — framework docs
 - `hooks/` — optional automation scripts
+- `bin/serel-memory` — the read-only drift checker
 
 **Project files** (never sync):
 
@@ -66,7 +67,7 @@ read — it triggers the fail-fast guard in step 1 until the user renames it.
 Use this exact list in all git commands:
 
 ```text
-.agents/skills/ .claude/commands/ AGENTS.md CLAUDE.md docs/workflow-contract.md docs/cross-agent-review.md hooks/
+.agents/skills/ .claude/commands/ AGENTS.md CLAUDE.md docs/workflow-contract.md docs/cross-agent-review.md hooks/ bin/serel-memory
 ```
 
 ## Workflow
