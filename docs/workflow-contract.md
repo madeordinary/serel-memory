@@ -208,3 +208,56 @@ unchanged — the helper selects, the user approves, the agent writes.
 **Archives are not routine reads.** `archive/` is excluded from the session
 read list, `/start`, `/update-memory`, `/handoff`, and both hooks. Read an
 archive only when the task needs that history.
+
+## Drift check
+
+`bin/serel-memory check [--scope <path>] [--root <repo_root>]` is a read-only,
+offline pass over the effective bank in the resolved scope. It exists because
+"is the bank still true?" is the one question an agent should never answer
+about its own writing. The checker answers only the part a machine can settle,
+and says plainly which part it left alone.
+
+**Findings.** One line each, `<KIND> <location> <message>`, where location is a
+repo-relative path (with `:line` for a marker) or `repo`:
+
+- `DRIFT` — the repo contradicts the bank: a missing core file, a file that
+  still holds only template placeholders, a framework file present in the
+  anchor baseline but absent here, a leftover pre-0.3.0 anchor.
+- `STALE` — a bank line declared evidence and that evidence has moved.
+- `INCOMPLETE` — an assessment could not be made: no `jq`, an anchor that does
+  not parse, a marker naming an unknown revision or a path that is not at
+  `HEAD`, evidence dirty in the worktree, a degraded scope resolver.
+- `WARN` — a soft target is exceeded (retention). Exit-neutral.
+- `INFO` — context, never a verdict: overlay gaps, unmarked bullets, framework
+  files that differ from the baseline, no local baseline to compare against.
+
+Then exactly one summary line:
+`serel-memory check: <d> drift, <s> stale, <i> incomplete, <w> warn, <f> fresh,
+<u> unmarked, baseline: <ref|unavailable> — exit <code>`.
+
+**Exit contract.** Any `INCOMPLETE` → 2; else any `DRIFT` or `STALE` → 1; else
+0. `WARN` and `INFO` never change the exit code. An assessment that could not
+finish outranks one that finished badly: a checker that cannot see is more
+dangerous than one that reports drift.
+
+**Evidence markers.** A bank line may declare what it rests on:
+
+```text
+- The renderer renders widgets (verified: <sha> <path> [<path>...])
+```
+
+One line, outside fenced code, optionally wrapped in parentheses and ending at
+`)`. Paths resolve against the scope root first, then the repo root. The
+checker reports `declared evidence unchanged` or `declared evidence differs
+since <sha>` — never "verified" or "true". A marker in a fenced block is
+documentation, not a claim.
+
+**What is NOT assessed.** Whether a bank line is *true*; whether an unmarked
+bullet is still accurate (they are counted, and that count is the honest
+measure of what the check does not cover); anything requiring the network. The
+framework baseline is compared only when the anchor's `ref` already resolves
+locally — `sync-upstream` is what makes it resolve; until then the summary says
+`baseline: unavailable`.
+
+`/start` and `/update-memory` run the checker when it is present and report its
+summary line. It never blocks either workflow.

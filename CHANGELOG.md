@@ -6,6 +6,20 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [Unreleased]
 
+### Added
+
+- **Drift check.** `bin/serel-memory check [--scope <path>]` is a read-only,
+  offline pass over the effective bank: it verifies the anchor parses, the
+  seven core files exist and are not still template scaffolding, retention
+  targets are met, and every `verified: <sha> <path>...` evidence marker still
+  matches the repo at `HEAD`. Findings are `DRIFT` / `STALE` / `INCOMPLETE` /
+  `WARN` / `INFO` plus one summary line; exit 0 clean, 1 drift or stale, 2 an
+  assessment could not finish. It never judges whether a bank line is *true* —
+  unmarked bullets are counted, not graded — and it never uses the network.
+  `/start` and `/update-memory` report its summary when it is present; it
+  blocks neither. Requires `jq`. Contract: `docs/workflow-contract.md`
+  "Drift check"; rationale: `docs/decisions/002-deterministic-drift-checker.md`.
+
 ### Fixed
 
 - `sync-upstream` (both adapters) resolves the anchor explicitly: `git fetch

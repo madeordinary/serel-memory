@@ -117,6 +117,8 @@ your-project/
 │   ├── enable-hooks.sh       # register Claude Code hooks
 │   ├── enable-codex-hooks.sh # register Codex hooks
 │   └── lib/                  # read-only helpers: retention check, scope resolver
+├── bin/
+│   └── serel-memory          # read-only drift check over the bank
 └── docs/
     ├── workflow-contract.md  # how workflows should be shaped
     └── cross-agent-review.md # second-opinion loop policy
@@ -190,7 +192,7 @@ If the project already has code or important files, drop Serel Memory's files in
 cd ~/path/to/your-existing-project
 
 git clone --depth 1 --branch v0.4.0 https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
-rsync -av --ignore-existing --exclude 'settings.local.json' /tmp/serel-memory/memory-bank /tmp/serel-memory/.agents /tmp/serel-memory/.claude /tmp/serel-memory/.rules /tmp/serel-memory/AGENTS.md /tmp/serel-memory/CLAUDE.md /tmp/serel-memory/hooks /tmp/serel-memory/docs .
+rsync -av --ignore-existing --exclude 'settings.local.json' /tmp/serel-memory/memory-bank /tmp/serel-memory/.agents /tmp/serel-memory/.claude /tmp/serel-memory/.rules /tmp/serel-memory/AGENTS.md /tmp/serel-memory/CLAUDE.md /tmp/serel-memory/hooks /tmp/serel-memory/bin /tmp/serel-memory/docs .
 rm -rf /tmp/serel-memory
 [ -e .serel-memory.json ] || printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.4.0", "linked": false }\n' > .serel-memory.json
 ```
@@ -228,6 +230,36 @@ When a chat is getting long or the agent is losing the thread:
 Plain English works too: say "update memory bank", then "start from the memory bank."
 
 The bank stays readable because `/update-memory` also applies **retention**: `activeContext.md` is held to about 200 lines / 12 KB and `progress.md` keeps its 10 newest milestones. Older history moves verbatim into `memory-bank/archive/` with a pointer line left behind — nothing is deleted, and archives are never part of the session read. Current focus, checkpoint, next steps, and open questions are never rotated. Rules and targets: `docs/workflow-contract.md` "Retention".
+
+## Drift check
+
+The bank is written by the agent that later trusts it, so it needs a check that
+isn't another opinion. `bin/serel-memory check` is a read-only, offline pass
+over the bank:
+
+```bash
+bin/serel-memory check            # add --scope <path> in a repo with scoped banks
+```
+
+It reports what the repository can actually settle — the provenance anchor
+parses, the seven core files exist and aren't still blank templates, retention
+targets are met, framework files match the anchor baseline when one is
+available locally — and exits 0 (clean), 1 (drift or stale), or 2 (something
+could not be assessed at all).
+
+The interesting part is what it refuses to do. It never rules on whether a bank
+line is *true*. A line can declare its own evidence:
+
+```text
+- The renderer renders widgets (verified: a1b2c3d src/renderer.js)
+```
+
+and the checker then says only whether that evidence has changed since that
+commit — never "verified", never "correct". Bullets without a marker are
+counted, not graded, and the count is printed, so the report also tells you how
+much it didn't cover. Requires `jq`. `/start` and `/update-memory` run it when
+it's there and quote its summary line; it blocks neither. Full rules:
+`docs/workflow-contract.md` "Drift check".
 
 ## Hooks (optional)
 
