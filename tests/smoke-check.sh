@@ -227,6 +227,7 @@ assert_rc 0 "marker inside a fence is decorative"
 assert_count stale 0 "fenced marker"
 assert_count fresh 0 "fenced marker"
 assert_count unmarked 1 "fenced marker"
+assert_has "^INFO memory-bank/progress.md 1 unmarked bullet in recognized sections" "the unmarked note reads as English at n=1"
 
 # A marker anywhere in the bank counts, not only in progress.md.
 write_progress "$F/memory-bank" "- Nothing here"
