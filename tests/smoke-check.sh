@@ -633,6 +633,17 @@ assert_has "^INFO repo no anchor" "a missing anchor skips the baseline instead o
 [ "$(baseline_field)" = "unavailable" ] && ok "no anchor leaves the baseline unavailable" \
   || bad "baseline field is '$(baseline_field)', want unavailable"
 
+# A bank is allowed to document the marker syntax. An angle-bracket placeholder
+# is prose about the feature, not a claim over a revision nobody can resolve.
+write_progress "$F/memory-bank" "- The renderer renders widgets (verified: $BASE src/widget.js)
+- Mark a claim with \`verified: <sha> <path> [<path>...]\` to have it checked
+- Something nobody measured"
+run --root "$F"
+assert_rc 0 "a bank documenting the marker syntax"
+assert_count incomplete 0 "a placeholder revision is not an unresolvable claim"
+assert_count fresh 1 "the real marker beside it still counts"
+assert_not "unknown revision <sha>" "the placeholder is never reported as a revision"
+
 # =============================================================================
 # 12. The checker stays runnable on a read-only filesystem
 # =============================================================================

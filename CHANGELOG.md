@@ -6,7 +6,13 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [Unreleased]
 
-No changes yet.
+### Fixed
+
+- The drift check no longer reads a documented marker as a broken one. A bank
+  that writes out `verified: <sha> <path>` to explain the syntax was reported
+  as declaring evidence at an unresolvable revision, which pushed a healthy
+  bank to exit 2. An angle-bracket placeholder is now skipped. Found by
+  running the checker against this project's own bank.
 
 ## [0.5.0] — 2026-09-09
 
