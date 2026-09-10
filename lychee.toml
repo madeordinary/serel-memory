@@ -16,6 +16,12 @@ exclude = [
   "^https?://(www\\.)?medium\\.com",
   "^https?://twitter\\.com",
   "^https?://x\\.com",
+  # This repository's own version URLs. A release commit names the tag and the
+  # release page it is about to create, so they 404 while the release PR is in
+  # CI and resolve minutes later. They are generated from the version number,
+  # so there is nothing here a link check could catch that a wrong version
+  # number in the heading would not.
+  "^https://github\\.com/madeordinary/serel-memory/(releases/tag|tree|compare)/",
 ]
 
 exclude_path = [
