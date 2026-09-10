@@ -36,6 +36,14 @@ Steps:
 
    After the user confirms and the files are written, run the helper again on the live files and report its `RESULT` lines. Targets and rules: `docs/workflow-contract.md` "Retention".
 
+7. **Drift check (after writing).** If `bin/serel-memory` exists, run it on the resolved scope and report its summary line:
+
+   ```bash
+   "$(git rev-parse --show-toplevel)/bin/serel-memory" check --scope <resolved scope>
+   ```
+
+   It is read-only and never blocks the update. If it reports `DRIFT` or `STALE`, say what it found and offer to fix the bank in this pass.
+
 For each proposed change, show:
 
 ```text

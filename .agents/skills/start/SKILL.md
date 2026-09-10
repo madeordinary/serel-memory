@@ -32,6 +32,13 @@ Also check the arguments for `--scope <path>` (scoped banks only - see "Resolvin
 3. Look for optional docs under `memory-bank/` that clearly match the user's task or active context, and read only the relevant ones. Never read `memory-bank/archive/` at startup.
 4. Run `git log --oneline -10`.
 5. Run `git status`.
+6. If `bin/serel-memory` exists, run the read-only drift check on the resolved scope and keep its summary line for the audit:
+
+   ```bash
+   "$(git rev-parse --show-toplevel)/bin/serel-memory" check --scope <resolved scope>
+   ```
+
+   Report its findings and summary line as they are - it never blocks the session. If the file is absent, say `checker absent`.
 
 If any memory bank file is missing, empty, or still only template placeholders, mark it as `BLANK` or `UNINITIALIZED` and ask whether to initialize it before proceeding.
 
@@ -49,6 +56,7 @@ CONTEXT AUDIT:
 - Uninitialized: [missing, empty, or template-only files]
 - Recent commits not reflected in memory: [yes/no/unknown]
 - Working tree: [clean / dirty summary]
+- Drift: [the drift checker's summary line, or "checker absent"]
 
 PROJECT: [one sentence - what we're building]
 PHASE: [from progress.md]
