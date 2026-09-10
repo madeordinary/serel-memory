@@ -25,6 +25,13 @@ set -euo pipefail
 
 SELF="serel-memory"
 
+# Read-only means read-only, including the filesystem: an agent may well run
+# this inside a sandbox that grants no writes anywhere (that is how this
+# project runs its own cross-agent reviews). bash 3.2 backs a here-string or a
+# heredoc with a temp file, so this file uses neither — process substitution
+# reads through /dev/fd instead, and a pipe is out wherever the loop body has
+# to update a counter. tests/smoke-check.sh enforces that structurally.
+
 # The sync-upstream framework allowlist (see .claude/commands/sync-upstream.md).
 # Baseline comparison is bounded to these paths: everything else in a repo is
 # the user's own project.
@@ -42,15 +49,28 @@ SCOPE_ROOT="."
 BANK_DIR="memory-bank"
 
 usage() {
-  cat <<'USAGE'
-usage: serel-memory check [--scope <path>] [--root <repo_root>]
-
-  check   Read-only drift check over the effective memory bank.
-          Exit 0 clean, 1 drift or stale findings, 2 could not finish.
-USAGE
+  printf '%s\n' \
+    "usage: serel-memory check [--scope <path>] [--root <repo_root>]" \
+    "" \
+    "  check   Read-only drift check over the effective memory bank." \
+    "          Exit 0 clean, 1 drift or stale findings, 2 could not finish."
 }
 
 die() { echo "$SELF: $*" >&2; exit 2; }
+
+# Read a whole string, hand back one line of it. Neither helper closes its
+# input early: `head -1` and `grep -q` can SIGPIPE the writer, and under
+# `set -o pipefail` that reads as a failed assessment when nothing failed.
+first_line() { printf '%s\n' "$1" | awk 'NR == 1 { v = $0 } END { print v }'; }
+line_after() { # string prefix -> the rest of the first line starting with prefix
+  printf '%s\n' "$1" | awk -v p="$2" '
+    index($0, p) == 1 && !seen { v = substr($0, length(p) + 1); seen = 1 }
+    END { print v }'
+}
+has_line() { # string prefix -> 0 when some line starts with prefix
+  case $'\n'"$1" in *$'\n'"$2"*) return 0 ;; esac
+  return 1
+}
 
 finding() { # KIND location message
   printf '%s %s %s\n' "$1" "$2" "$3"
@@ -180,6 +200,8 @@ cmd_check() {
     finish
   fi
   if [ -z "$root" ]; then
+    # A failure here means "not in a repo", which the next guard reports as
+    # INCOMPLETE — the only discarded status in this file that cannot hide one.
     root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
   fi
   if [ -z "$root" ] || [ ! -d "$root" ]; then
@@ -265,7 +287,7 @@ resolve_scope() {
   while IFS= read -r line; do
     [ -n "$line" ] || continue
     finding INCOMPLETE repo "scopes: ${line#resolve-scope: }"
-  done <<<"$err"
+  done < <(printf '%s\n' "$err")
 
   local args=(--root "$ROOT" --cwd "$PWD")
   [ -n "$scope" ] && args+=(--scope "$scope")
@@ -274,6 +296,8 @@ resolve_scope() {
   if [ "$rc" -ne 0 ]; then
     # Re-run only to collect diagnostics; the resolver is read-only, so this
     # costs nothing but keeps the checker off the filesystem (no temp file).
+    # Diagnostics for a finding already decided above; its own status adds
+    # nothing, and a second failure must not mask the first.
     err="$(bash "$helper" "${args[@]}" 2>&1 >/dev/null || true)"
     finding INCOMPLETE repo "scope not resolved (status $rc): $(printf '%s' "$err" | tr '\n' ' ')"
     return 1
@@ -328,13 +352,13 @@ check_retention() {
   for kind in activeContext progress; do
     [ -f "$ROOT/$bank/$kind.md" ] || continue
     if ! out="$(bash "$helper" "$ROOT/$bank/$kind.md" "$kind" 2>&1)"; then
-      finding INCOMPLETE "$bank/$kind.md" "retention helper failed: $(printf '%s' "$out" | head -1)"
+      finding INCOMPLETE "$bank/$kind.md" "retention helper failed: $(first_line "$out")"
       continue
     fi
-    if printf '%s\n' "$out" | grep -q '^UNSUPPORTED:'; then
-      finding WARN "$bank/$kind.md" "retention cannot see part of $kind.md: $(printf '%s\n' "$out" | sed -n 's/^UNSUPPORTED: //p' | head -1)"
+    if has_line "$out" 'UNSUPPORTED: '; then
+      finding WARN "$bank/$kind.md" "retention cannot see part of $kind.md: $(line_after "$out" 'UNSUPPORTED: ')"
     fi
-    result="$(printf '%s\n' "$out" | sed -n 's/^RESULT: //p' | head -1)"
+    result="$(line_after "$out" 'RESULT: ')"
     case "$result" in
       ROTATE\ *)        finding WARN "$bank/$kind.md" "over the retention target: rotate-check says $result — run /update-memory" ;;
       OVERAGE-REMAINS*) finding WARN "$bank/$kind.md" "over the retention target: $result" ;;
@@ -377,7 +401,8 @@ check_markers() {
     return 0
   fi
   [ -n "$files" ] || return 0
-  while IFS= read -r file; do
+  # The outer loop owns descriptor 3 so the inner one can keep stdin.
+  while IFS= read -r file <&3; do
     [ -n "$file" ] || continue
     rel="${file#"$ROOT"/}"
     if ! scan="$(markers_in "$file")"; then
@@ -388,8 +413,8 @@ check_markers() {
     while IFS=$'\t' read -r lineno rest; do
       [ -n "$lineno" ] || continue
       check_one_marker "$pre" "$rel" "$lineno" "$rest"
-    done <<<"$scan"
-  done <<<"$files"
+    done < <(printf '%s\n' "$scan")
+  done 3< <(printf '%s\n' "$files")
 }
 
 # git rev-parse --verify --quiet: status 1 means "not there" (a real finding),
@@ -404,7 +429,7 @@ check_one_marker() {
   local pre="$1" rel="$2" lineno="$3" rest="$4"
   local loc="$rel:$lineno"
   local -a words resolved
-  read -r -a words <<<"$rest"
+  read -r -a words < <(printf '%s\n' "$rest")
   local sha="${words[0]:-}"
   if [ -z "$sha" ]; then
     finding INCOMPLETE "$loc" "marker names no evidence: expected 'verified: <sha> <path> [<path>...]'"
@@ -494,9 +519,19 @@ check_unmarked() {
 # already resolves locally — a clone or fork that carries the upstream tags, or
 # a private `refs/serel-memory/anchor` left by an interrupted sync. No fetch.
 check_baseline() {
-  local git_ok="$1" ref base="" cand f changed rc=0 st
+  local git_ok="$1" ref base="" cand f changed rc=0 st ref_rc=0
   [ "$git_ok" -eq 1 ] || return 0
-  ref="$(jq -r 'if type == "object" and (.ref | type) == "string" then .ref else "" end' "$ROOT/.serel-memory.json" 2>/dev/null || true)"
+  if [ ! -f "$ROOT/.serel-memory.json" ]; then
+    # check_anchor has already reported the missing anchor; say plainly that
+    # the framework files went uncompared rather than implying they matched.
+    finding INFO repo "no anchor: the framework files were not compared against a baseline"
+    return 0
+  fi
+  ref="$(jq -r 'if type == "object" and (.ref | type) == "string" then .ref else "" end' "$ROOT/.serel-memory.json" 2>/dev/null)" || ref_rc=$?
+  if [ "$ref_rc" -ne 0 ]; then
+    finding INCOMPLETE repo "could not read the anchor ref for the framework baseline (jq status $ref_rc)"
+    return 0
+  fi
   for cand in "refs/serel-memory/anchor" "$ref"; do
     [ -n "$cand" ] || continue
     st=0
@@ -518,6 +553,8 @@ check_baseline() {
   fi
   baseline_label="$base"   # name what we actually compared, not what the anchor wants
   [ -n "$changed" ] || return 0
+  # `git diff --name-only` already emits paths in sorted order, so this list
+  # needs no `sort` — and a pipeline here would swallow its own status.
   while IFS= read -r f; do
     [ -n "$f" ] || continue
     if [ -e "$ROOT/$f" ]; then
@@ -525,7 +562,7 @@ check_baseline() {
     else
       finding DRIFT "$f" "framework file missing: present in anchor baseline $baseline_label, absent here"
     fi
-  done <<<"$(printf '%s\n' "$changed" | sort)"
+  done < <(printf '%s\n' "$changed")
 }
 
 case "${1:-}" in

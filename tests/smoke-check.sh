@@ -596,5 +596,55 @@ assert_rc 2 "untracked file inside directory evidence"
 assert_has "evidence dirty in worktree: src" "an untracked file under directory evidence is INCOMPLETE"
 rm "$F/src/extra.js"
 
+# =============================================================================
+# 11. The baseline's own reads are assessments, not conveniences
+# =============================================================================
+# A jq that fails only on the baseline's query. The anchor still validates, so
+# this isolates the one read whose status used to be discarded.
+J="$tmp/jqshim"; mkdir -p "$J"
+REAL_JQ="$(command -v jq)"
+{
+  printf '%s\n' '#!/bin/sh'
+  printf '%s\n' 'for a in "$@"; do case "$a" in *"(.ref | type)"*) exit 9 ;; esac; done'
+  printf 'exec %s "$@"\n' "$REAL_JQ"
+} > "$J/jq"
+chmod +x "$J/jq"
+
+BJ="$tmp/baseline-jq"
+build_fixture "$BJ"
+git -C "$BJ" update-ref refs/serel-memory/anchor HEAD
+SAVED_PATH="$PATH"; PATH="$J:$PATH"
+run --root "$BJ"
+PATH="$SAVED_PATH"
+assert_rc 2 "the baseline's anchor read fails"
+assert_has "could not read the anchor ref" "a failed baseline read is INCOMPLETE, never a silent clean"
+[ "$(baseline_field)" = "unavailable" ] && ok "a failed baseline read leaves the baseline unavailable" \
+  || bad "baseline field is '$(baseline_field)', want unavailable"
+
+# No anchor at all: the framework files went uncompared, and the report says so
+# instead of implying they matched.
+BA="$tmp/baseline-noanchor"
+build_fixture "$BA"
+rm "$BA/.serel-memory.json"
+git -C "$BA" update-ref refs/serel-memory/anchor HEAD
+run --root "$BA"
+assert_rc 2 "no anchor"
+assert_has "^INFO repo no anchor" "a missing anchor skips the baseline instead of guessing"
+[ "$(baseline_field)" = "unavailable" ] && ok "no anchor leaves the baseline unavailable" \
+  || bad "baseline field is '$(baseline_field)', want unavailable"
+
+# =============================================================================
+# 12. The checker stays runnable on a read-only filesystem
+# =============================================================================
+# bash 3.2 backs a here-string or a heredoc with a temp file, and agents run
+# read-only tools in sandboxes that grant no writes anywhere. Process
+# substitution reads through /dev/fd, so it is the only form allowed here.
+if grep -n '<<' "$CHECK" > "$tmp/heredocs.txt"; then
+  bad "the checker uses a here-string or heredoc — a read-only sandbox cannot run it"
+  sed 's/^/       /' "$tmp/heredocs.txt"
+else
+  ok "the checker uses no here-string or heredoc"
+fi
+
 if [ "$fail" -eq 0 ]; then echo "check OK"; fi
 exit "$fail"
