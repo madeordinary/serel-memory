@@ -11,10 +11,10 @@ Your project's memory lives in version-controlled markdown you can read, diff, a
 ## Quickstart
 
 ```bash
-npx degit madeordinary/serel-memory#v0.4.0 my-project
+npx degit madeordinary/serel-memory#v0.5.0 my-project
 cd my-project
 git init
-printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.4.0", "linked": false }\n' > .serel-memory.json
+printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.5.0", "linked": false }\n' > .serel-memory.json
 ```
 
 (The last line records which Serel Memory version you started from — `sync-upstream` uses
@@ -141,10 +141,10 @@ It pays off when you return to a project across many sessions and want continuit
 ### On a new project
 
 ```bash
-npx degit madeordinary/serel-memory#v0.4.0 my-new-project
+npx degit madeordinary/serel-memory#v0.5.0 my-new-project
 cd my-new-project
 git init
-printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.4.0", "linked": false }\n' > .serel-memory.json
+printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.5.0", "linked": false }\n' > .serel-memory.json
 ```
 
 Then open the project in Claude Code or Codex. There are three paths from here depending on how formed your idea is:
@@ -162,12 +162,12 @@ If Codex shows "Select settings to import" and offers to migrate `.claude/comman
 If all you have is a PRD, make Serel Memory the starting repo and bring the PRD into it:
 
 ```bash
-npx degit madeordinary/serel-memory#v0.4.0 my-new-project
+npx degit madeordinary/serel-memory#v0.5.0 my-new-project
 cd my-new-project
 mkdir -p docs
 cp /path/to/prd.md docs/prd.md
 git init
-printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.4.0", "linked": false }\n' > .serel-memory.json
+printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.5.0", "linked": false }\n' > .serel-memory.json
 ```
 
 Then run:
@@ -180,7 +180,7 @@ Then run:
 $from-prd docs/prd.md
 ```
 
-`degit madeordinary/serel-memory#v0.4.0` uses GitHub shorthand for `https://github.com/madeordinary/serel-memory` pinned to the `v0.4.0` tag, and downloads that tag's contents without the `.git` history. It is a starter-copy step, not a future `git pull` relationship — which is why the install writes `.serel-memory.json`: it records which upstream version you started from, so `sync-upstream` can later show you precisely what changed upstream since, instead of guessing. Pin to the latest tag on the [releases page](https://github.com/madeordinary/serel-memory/releases) and put that same tag in the `ref` field. (Unpinned `npx degit madeordinary/serel-memory` works too, but then the anchor's `ref` is your best guess — if you skip the anchor entirely, `sync-upstream` will offer to reconstruct one marked `"linked": true`, meaning "exact starting version unknown".)
+`degit madeordinary/serel-memory#v0.5.0` uses GitHub shorthand for `https://github.com/madeordinary/serel-memory` pinned to the `v0.5.0` tag, and downloads that tag's contents without the `.git` history. It is a starter-copy step, not a future `git pull` relationship — which is why the install writes `.serel-memory.json`: it records which upstream version you started from, so `sync-upstream` can later show you precisely what changed upstream since, instead of guessing. Pin to the latest tag on the [releases page](https://github.com/madeordinary/serel-memory/releases) and put that same tag in the `ref` field. (Unpinned `npx degit madeordinary/serel-memory` works too, but then the anchor's `ref` is your best guess — if you skip the anchor entirely, `sync-upstream` will offer to reconstruct one marked `"linked": true`, meaning "exact starting version unknown".)
 
 A `degit` copy also brings along Serel Memory's own project metadata — `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, `.github/`, and `tests/`. These describe *Serel Memory the project*, not your project, and they aren't part of the framework. Delete them whenever you like; `sync-upstream` never touches them.
 
@@ -191,13 +191,13 @@ If the project already has code or important files, drop Serel Memory's files in
 ```bash
 cd ~/path/to/your-existing-project
 
-git clone --depth 1 --branch v0.4.0 https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
-rsync -av --ignore-existing --exclude 'settings.local.json' /tmp/serel-memory/memory-bank /tmp/serel-memory/.agents /tmp/serel-memory/.claude /tmp/serel-memory/.rules /tmp/serel-memory/AGENTS.md /tmp/serel-memory/CLAUDE.md /tmp/serel-memory/hooks /tmp/serel-memory/docs .
+git clone --depth 1 --branch v0.5.0 https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
+rsync -av --ignore-existing --exclude 'settings.local.json' /tmp/serel-memory/memory-bank /tmp/serel-memory/.agents /tmp/serel-memory/.claude /tmp/serel-memory/.rules /tmp/serel-memory/AGENTS.md /tmp/serel-memory/CLAUDE.md /tmp/serel-memory/hooks /tmp/serel-memory/bin /tmp/serel-memory/docs .
 rm -rf /tmp/serel-memory
-[ -e .serel-memory.json ] || printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.4.0", "linked": false }\n' > .serel-memory.json
+[ -e .serel-memory.json ] || printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.5.0", "linked": false }\n' > .serel-memory.json
 ```
 
-`bin/` (the drift checker) arrives with 0.5.0; once you pin a release that ships it, add `/tmp/serel-memory/bin` to that copy list. The `rsync` command is intentionally one line so shell line-continuation mistakes cannot drop the source/destination arguments. Existing files and folders, including something like `docs/prd.md`, are preserved because `--ignore-existing` skips paths that are already present.
+The `rsync` command is intentionally one line so shell line-continuation mistakes cannot drop the source/destination arguments. Existing files and folders, including something like `docs/prd.md`, are preserved because `--ignore-existing` skips paths that are already present.
 
 Do not run `degit` directly into an existing git repo with files unless you have already reviewed what it will overwrite. The `rsync --ignore-existing` path above is safer because it skips files that already exist. That also means existing `AGENTS.md`, `.rules`, `.claude/`, or `.agents/` files may need a manual merge to pick up Serel Memory's instructions and workflows.
 
@@ -382,7 +382,7 @@ One repo, several initiatives — a portfolio workspace, a product manager's dai
 Opt in by naming the parent folders that hold projects:
 
 ```json
-{ "upstream": "madeordinary/serel-memory", "ref": "v0.4.0", "linked": false,
+{ "upstream": "madeordinary/serel-memory", "ref": "v0.5.0", "linked": false,
   "scopes": ["projects/running", "projects/watching"] }
 ```
 
@@ -411,6 +411,22 @@ SHA. The cross-agent guide documents that remote-branch flow and its gate
 boundaries.
 
 See `docs/cross-agent-review.md` for the CLI preflight, loop policy, and output contract.
+
+## Serel Kit
+
+Serel Memory is the engine: the bank, its lifecycle, and the compatibility
+rules around it. [Serel Kit](https://github.com/madeordinary/serel-kit) is a
+separate, optional repository of workflow packs that follow those rules — a
+writing pack that rewrites prose to house rules and only ever proposes a diff,
+and a verify pack that keeps a written recipe and record for checking each
+feature by hand. Install a pack into a project without touching your bank:
+
+```bash
+git clone --depth 1 https://github.com/madeordinary/serel-kit.git /tmp/serel-kit
+/tmp/serel-kit/install.sh . --packs writing,verify
+```
+
+You do not need it. Nothing here depends on it.
 
 ## Why this exists
 

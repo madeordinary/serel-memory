@@ -6,6 +6,21 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [Unreleased]
 
+No changes yet.
+
+## [0.5.0] — 2026-09-09
+
+The drift check. A bank goes stale quietly: a claim written months ago keeps
+reading as fact long after the code under it moved. `bin/serel-memory check`
+answers the part of that a machine can settle — offline, read-only, and
+explicit about what it left alone. Everything else in this release came out of
+running the framework for real: the first downstream sync of 0.4.0 exposed
+three faults in `sync-upstream`, all fixed here with regression tests.
+
+Upgrade from 0.4.0: run `/sync-upstream` (or `$sync-upstream`). The checker
+arrives as `bin/serel-memory` and needs `jq`; nothing runs it for you except
+`/start` and `/update-memory`, and it blocks neither.
+
 ### Added
 
 - **Drift check.** `bin/serel-memory check [--scope <path>]` is a read-only,
@@ -254,7 +269,8 @@ remain intact. Pin it from the canonical home with
   to parity; fixed a duplicate step number in the `ask-codex`/`ask-claude` workflows.
 - Fixed the broken file-tree rendering and tightened install instructions in the README.
 
-[Unreleased]: https://github.com/madeordinary/serel-memory/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/madeordinary/serel-memory/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.5.0
 [0.4.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.4.0
 [0.3.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.3.0
 [0.2.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.2.0
