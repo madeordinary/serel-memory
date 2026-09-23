@@ -6,6 +6,15 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [Unreleased]
 
+### Added
+
+- `/analyze` and `$analyze`: a read-only memory accuracy audit with explicit
+  scope and coverage, evidence-backed findings, and separate classifications
+  for documentation drift, possible regressions, missing evidence and missing
+  durable information. It preserves intent and dated history, reports the
+  deterministic checker separately, and leaves corrections for a reviewed
+  memory update. Synthetic acceptance exercises cover both agent CLIs.
+
 ### Changed
 
 - `AGENTS.md` is the only instruction file shipped by the template. Claude

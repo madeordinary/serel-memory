@@ -69,6 +69,7 @@ The `.claude/commands/` directory contains Claude Code slash commands, and `.age
 - `/breakdown` / `$breakdown` — break a task into steps before executing
 - `/review` / `$review` — code review the current branch or diff
 - `/update-memory` / `$update-memory` — refresh the memory bank from this session's work
+- `/analyze` / `$analyze` — read-only audit of memory claims against code and evidence
 - `/weekly-update` / `$weekly-update` — stakeholder-ready weekly update from the bank and recent activity
 - `/retro` / `$retro` — sprint or weekly retrospective drawing from progress and git log
 - `/risk-review` / `$risk-review` — surface risks not yet documented in the bank

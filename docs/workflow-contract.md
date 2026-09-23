@@ -182,6 +182,31 @@ say none when there are none). This summary describes the subjects checked,
 not a certification of the whole bank. Show diffs and use the existing
 confirmation gate; reconciliation adds no separate approval step.
 
+## Accuracy audit
+
+`/analyze` and `$analyze` apply Memory accuracy as a read-only, on-demand
+audit of one effective bank. They do not replace update-memory's routine
+capture/reconciliation or the deterministic checker.
+
+An explicit topic selects its claims across the live bank and matching optional
+docs. Without a topic, coverage is current progress status, active focus,
+checkpoint and next steps, pending/accepted decisions, and current setup facts.
+Other core files supply intent; other claims remain unassessed. At a scoped
+repo's root, audit only its root bank. Never silently inspect every project.
+
+Every finding cites the bank claim or evidenced omission, its classification,
+repository or external evidence, an action, and the evidence's limits. Separate
+**documentation drift**, **possible regression**, **missing evidence**, and
+**missing durable information**. Missing proof is not a proven falsehood.
+Old verification records and source-level tests do not prove a fresh test pass.
+
+The workflow writes nothing and runs no tests, builds, recipes or secondary
+agents. It may run the read-only checker, reporting its exit code and summary
+separately; unavailable/dirty evidence stays incomplete. It reports coverage
+and unresolved decisions, never a whole-bank truth score or semantic CI gate.
+Corrections are suggestions for a separate reviewed update-memory invocation;
+possible regressions stay owner decisions rather than automatic bank rewrites.
+
 ## Clean stop
 
 When a session ends or context is about to compact, leave a state a

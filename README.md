@@ -58,7 +58,7 @@ Serel Memory is the other fix: a small, opinionated directory of markdown files 
 
 Memory banks aren't new — Serel Memory's own is adapted from [Cline's](https://github.com/nickbaumann98/cline_docs), and says so. What you can't get elsewhere is the engineering around the bank:
 
-- **Dual-CLI parity that's enforced, not promised.** Every workflow has a native Claude Code command *and* a native Codex skill — 17 of each, and CI fails if either side of a pair goes missing. Not a Claude tool with a Codex shim bolted on.
+- **Dual-CLI parity that's enforced, not promised.** Every workflow has a native Claude Code command *and* a native Codex skill — 18 of each, and CI fails if either side of a pair goes missing. Not a Claude tool with a Codex shim bolted on.
 - **Cross-agent second opinions.** Claude can shell out to Codex to review a plan, and vice versa — with a documented loop policy, and an honestly-labeled self-critique fallback when the other CLI isn't installed.
 - **Framework updates that can't touch your memory.** `sync-upstream` pulls updates through an explicit allowlist; `memory-bank/`, `.rules`, and your ADRs are structurally outside it — and a test enforces that the allowlist never grows to include them.
 - **Tested like software, because it is.** Parity, sync-allowlist, and degit-export smoke tests run in CI. The export test guarantees a fresh install ships clean templates — never someone else's project context.
@@ -87,6 +87,7 @@ your-project/
 │       ├── breakdown/
 │       ├── review/
 │       ├── update-memory/
+│       ├── analyze/
 │       ├── risk-review/
 │       ├── decision-log/
 │       ├── handoff/
@@ -106,6 +107,7 @@ your-project/
 │       ├── breakdown.md      # break down before executing
 │       ├── review.md         # code review the current branch
 │       ├── update-memory.md  # refresh the bank
+│       ├── analyze.md        # read-only memory accuracy audit
 │       ├── weekly-update.md  # stakeholder-ready weekly update
 │       ├── retro.md          # sprint or weekly retrospective
 │       ├── risk-review.md    # surface undocumented risks
@@ -348,6 +350,7 @@ Every workflow has native adapters on both sides:
 | Breakdown | `/breakdown` | `$breakdown` |
 | Review | `/review` | `$review` |
 | Update memory | `/update-memory` | `$update-memory` |
+| Audit memory accuracy | `/analyze` | `$analyze` |
 | Weekly update | `/weekly-update` | `$weekly-update` |
 | Retro | `/retro` | `$retro` |
 | Risk review | `/risk-review` | `$risk-review` |
@@ -368,8 +371,29 @@ You can also use plain English when that is more natural:
 | Initialize from code | "initialize memory from this repo" |
 | Seed from PRD | "seed memory from this PRD" |
 | Update memory | "update memory bank" |
+| Audit memory accuracy | "check the memory bank against the code" |
 | Record decision | "record this decision" |
 | Review plan with another agent | "ask Claude/Codex for a second opinion" |
+
+## Audit memory accuracy
+
+Run `/analyze` or `$analyze` to compare current memory claims with repository
+evidence without changing files. Add a topic to focus it, for example
+`/analyze exports --scope projects/running/widget`. Without a topic it checks
+current status, focus, next steps, decisions and setup facts in one bank.
+
+The report distinguishes stale documentation, possible regressions, missing
+evidence and missing durable information. A planned feature is allowed to be
+unbuilt; an old test record is allowed to remain history. Each finding cites
+the claim and evidence, recommends an action and explains its limits.
+
+It reports the deterministic checker separately and does not run tests or
+verification recipes. A clean checker result is not proof that prose is true.
+Use `/update-memory` or `$update-memory` afterward to review and apply factual
+corrections. You decide whether a mismatch against intent needs a code fix.
+
+Maintainers can reproduce the behavior exercise in
+[the analyze acceptance guide](tests/analyze-acceptance.md).
 
 ## Workflow design
 
