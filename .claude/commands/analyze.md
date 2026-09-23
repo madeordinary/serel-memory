@@ -69,6 +69,9 @@ Missing code alone does not prove a claim false; narrow the conclusion to what
 was inspected. Recheck in-scope external capability claims against a primary
 source with version/date, or mark them unassessed. Do not invent missing work
 or decisions, erase history, or recommend making intent match a possible bug.
+Keep unsupported claims unverified or request evidence; do not convert them
+into targets or decisions without owner intent. Say implemented or committed
+when that is all the evidence shows; reserve released/shipped for release evidence.
 
 ## Allowed writes and stop conditions
 
