@@ -53,17 +53,37 @@ These are load-bearing decisions. Change them only with a clear reason in the PR
 ## Running the checks
 
 ```bash
-tests/check-parity.sh                    # adapters paired
-tests/check-allowlist.sh                 # sync scope safe
-tests/check-compatibility.sh             # rename compatibility
-tests/smoke-degit.sh                     # export ships clean templates
-shellcheck hooks/*.sh tests/*.sh
-npx --yes markdownlint-cli2 "**/*.md"    # markdown hygiene (config: .markdownlint-cli2.jsonc)
+bash tests/ci.sh           # ShellCheck, every check/smoke suite, Markdown lint
+bash tests/ci.sh checks    # ShellCheck and Bash suites only
+bash tests/ci.sh docs      # Markdown lint only
 ```
 
-CI runs the same set plus a link check (`lychee`, config in `lychee.toml`). It
-runs only on `madeordinary/serel-memory` and self-disables in unrelated forks
-and copies.
+Use a full Git checkout with release tags (`git fetch --unshallow --tags` for
+a shallow clone, otherwise `git fetch origin --tags`), Bash, and `jq`.
+Markdown lint requires the Node version in `.github/ci/node-version` and its
+bundled npm. These are maintainer tools, not framework runtime dependencies.
+
+The runner uses ShellCheck **0.11.0**. If that exact version is not on PATH,
+it downloads the official Linux/macOS Intel/ARM binary into a temporary
+directory and verifies its SHA256; `curl`, `tar`, and `shasum` are required
+for that bootstrap. Markdown lint installs **0.23.3** and its locked
+dependencies from `.github/ci/package-lock.json` into a temporary directory.
+Downloads require network access and fail the check if unavailable. Nothing
+is installed globally or left in the repository.
+
+GitHub runs these same commands, plus a required external link check with
+lychee **0.24.2** and `lychee.toml`. The local command does not run the link
+check; to reproduce it separately with that version installed, run
+`lychee --config lychee.toml --no-progress './**/*.md'`.
+CI runs only on `madeordinary/serel-memory` and self-disables in unrelated
+forks and copies. The fixture suites read committed `HEAD` for archives and
+clones, so final validation must also run after committing the candidate.
+
+Update tool pins deliberately: change `.github/ci/shellcheck.sh` and its
+official archive checksums together; update the Markdown manifest and lockfile
+from `.github/ci/`; update `.github/ci/node-version` for Node. Keep action
+commit pins and lychee's version in the workflow current through reviewed
+changes. Rerun the complete preflight and GitHub checks after each update.
 
 ## Style
 
