@@ -4,7 +4,10 @@ set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
 [ "$#" -eq 1 ] || { echo "usage: $0 <new-directory>" >&2; exit 1; }
 target="$1"
-[ ! -e "$target" ] && [ ! -L "$target" ] || { echo "target must not exist" >&2; exit 1; }
+if [ -e "$target" ] || [ -L "$target" ]; then
+  echo "target must not exist" >&2
+  exit 1
+fi
 mkdir -p "$target"
 target="$(cd "$target" && pwd -P)"
 mkdir -p "$target/.claude" "$target/.agents" "$target/docs" "$target/bin" "$target/tests" "$target/memory-bank/verification"
