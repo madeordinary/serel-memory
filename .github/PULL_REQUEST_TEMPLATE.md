@@ -12,8 +12,7 @@
 
 - [ ] If I added/changed a workflow, I updated **both** adapters (`.claude/commands/<name>.md` and `.agents/skills/<name>/SKILL.md` + `agents/openai.yaml`)
 - [ ] I updated the workflow table in `README.md` and the workflow list in `AGENTS.md` if I added a workflow
-- [ ] `tests/check-parity.sh`, `tests/check-allowlist.sh`, and `tests/smoke-degit.sh` pass
-- [ ] `shellcheck hooks/*.sh tests/*.sh` is clean (if I touched shell)
-- [ ] `npx --yes markdownlint-cli2 "**/*.md"` is clean (if I touched markdown)
+- [ ] `bash tests/ci.sh` passes with the pinned tools (all Bash suites and Markdown lint)
+- [ ] GitHub's required `checks` and `docs` jobs pass, including the external link check
 - [ ] The change keeps Serel Memory small — no build step, no runtime dependency, no namespace creep
 - [ ] I added a `CHANGELOG.md` entry under `[Unreleased]`/`[0.1.0]` if user-facing

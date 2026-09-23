@@ -15,65 +15,35 @@ jobs:
     # memory bank), so the job self-disables outside the canonical repo. Downstream
     # users can safely delete .github/ after install.
     if: github.repository == 'madeordinary/serel-memory'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
-      - name: Make scripts executable
-        run: chmod +x tests/*.sh hooks/*.sh hooks/lib/*.sh bin/serel-memory
-
-      - name: ShellCheck hooks, tests, and bin
-        run: shellcheck hooks/*.sh hooks/lib/*.sh tests/*.sh bin/serel-memory
-
-      - name: Adapter parity (Claude commands <-> Codex skills)
-        run: tests/check-parity.sh
-
-      - name: Sync allowlist never includes user memory
-        run: tests/check-allowlist.sh
-
-      - name: Identifier cutover guard (no retired v0.x identifiers)
-        run: tests/check-compatibility.sh
-
-      - name: degit export ships clean templates
-        run: tests/smoke-degit.sh
-
-      - name: Session read list agrees across AGENTS.md, /start, $start, hook
-        run: tests/check-readlist.sh
-
-      - name: sync-upstream template-mode procedure works end to end
-        run: tests/smoke-sync.sh
-
-      - name: v0.2 to v0.3 downstream migration path works end to end
-        run: tests/smoke-migrate-v02-v03.sh
-
-      - name: Retention helper selects lossless rotations per the contract
-        run: tests/smoke-retention.sh
-
-      - name: Scoped banks resolve one bank per invocation; hooks unchanged without scopes
-        run: tests/smoke-scopes.sh
-
-      # The checker is never run against this repo's own bank: the tracked
-      # templates are intentionally blank and the maintainer bank is gitignored.
-      # Synthetic fixtures only.
-      - name: Drift checker reports every finding kind with the documented exit codes
-        run: tests/smoke-check.sh
+      - name: Pinned ShellCheck and all framework suites
+        run: bash tests/ci.sh checks
 
   docs:
     # Markdown hygiene for the prompt files themselves. Same repo guard as above —
     # downstream projects own their docs and shouldn't inherit these checks.
     if: github.repository == 'madeordinary/serel-memory'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: Markdown lint
-        run: npx --yes markdownlint-cli2 "**/*.md"
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .github/ci/node-version
+          package-manager-cache: false
+
+      - name: Locked Markdown lint
+        run: bash tests/ci.sh docs
 
       - name: Link check
-        uses: lycheeverse/lychee-action@v2
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2
         with:
+          lycheeVersion: v0.24.2
           args: --config lychee.toml --no-progress './**/*.md'
           fail: true
         env:
