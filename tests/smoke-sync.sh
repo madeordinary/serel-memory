@@ -50,12 +50,57 @@ RESOLVE_SNIPPET="$(awk '/^[[:space:]]*# Anchor resolve:/,/anchor does not resolv
 [ "$RESOLVE_SNIPPET" = "$(awk '/^[[:space:]]*# Anchor resolve:/,/anchor does not resolve"$/' .agents/skills/sync-upstream/SKILL.md | sed 's/^[[:space:]]*//')" ] \
   || { echo "FAIL: anchor-resolve snippet differs between command and skill adapters"; exit 1; }
 [ -n "$CREATE_SNIPPET" ] || { echo "FAIL: could not extract the anchor-create snippet from sync-upstream.md"; exit 1; }
+SHIM_SNIPPET="$(extract .claude/commands/sync-upstream.md '# Legacy shim check:')"
+[ -n "$SHIM_SNIPPET" ] || { echo "FAIL: missing legacy-shim check"; exit 1; }
+[ "$SHIM_SNIPPET" = "$(extract .agents/skills/sync-upstream/SKILL.md '# Legacy shim check:')" ] \
+  || { echo "FAIL: legacy-shim checks differ between adapters"; exit 1; }
+
+# Exercise the documented discovery predicate; it must never mutate files.
+mkdir "$tmp/shims"
+(
+  cd "$tmp/shims"
+  check_shim() {
+    local expected="$1" before after out
+    before="$(git hash-object CLAUDE.md 2>/dev/null || true)"
+    out="$(bash -c "$SHIM_SNIPPET")"
+    case "$out" in
+      "LEGACY SHIM: $expected"*) ;;
+      *) echo "FAIL: shim case expected $expected: $out"; exit 1 ;;
+    esac
+    after="$(git hash-object CLAUDE.md 2>/dev/null || true)"
+    [ "$before" = "$after" ] || { echo "FAIL: discovery changed the shim"; exit 1; }
+  }
+  check_shim preserve
+  printf '# Claude Code instructions\n\n@AGENTS.md\n' > CLAUDE.md
+  check_shim unchanged
+  cp CLAUDE.md original
+  echo 'Keep my instructions' >> CLAUDE.md
+  check_shim preserve
+  cp original CLAUDE.md
+  mkdir .claude
+  touch .claude/CLAUDE.md
+  check_shim preserve
+  rm .claude/CLAUDE.md
+  touch CLAUDE.local.md
+  check_shim preserve
+  rm CLAUDE.local.md
+  ln -s absent .claude/CLAUDE.md
+  check_shim preserve
+  rm .claude/CLAUDE.md CLAUDE.md
+  ln -s original CLAUDE.md
+  check_shim preserve
+  [ -L CLAUDE.md ] || { echo "FAIL: discovery replaced the symlink"; exit 1; }
+)
 
 # --- Build the "upstream" repo: a clone of this repo at HEAD ---------------
 git clone --quiet "$ROOT" "$tmp/upstream"
 # CI checkouts are detached HEADs, so the clone may lack a main branch — the
 # sync procedure fetches upstream main, so pin one at HEAD.
 git -C "$tmp/upstream" checkout --quiet -B main
+# The old install includes a shim and a framework file removed by the next sync.
+printf '# Claude Code instructions\n\n@AGENTS.md\n' > "$tmp/upstream/CLAUDE.md"
+echo "# Retired fixture workflow" > "$tmp/upstream/.claude/commands/retired-fixture.md"
+(cd "$tmp/upstream" && $GIT add -A && $GIT commit --quiet -m "legacy install fixture")
 # The install anchor is a TAG, as the README tells users to write it. Tags are
 # not fetched by `git fetch upstream main`, which is exactly the bug the
 # documented resolve step exists for.
@@ -65,7 +110,7 @@ ANCHOR_SHA="$(git -C "$tmp/upstream" rev-parse HEAD)"
 
 # --- Scaffold the downstream project (degit-style: tracked tree, no history)
 mkdir "$tmp/project"
-git archive --format=tar HEAD | tar -x -C "$tmp/project"
+git -C "$tmp/upstream" archive --format=tar HEAD | tar -x -C "$tmp/project"
 cd "$tmp/project"
 $GIT init --quiet
 $GIT add -A
@@ -83,6 +128,10 @@ mkdir -p projects/widget
 echo "## Current focus: shipping the downstream widget" >> memory-bank/activeContext.md
 echo "- USER LEARNING: keep this line" >> .rules
 echo "# /custom — downstream-only command" > .claude/commands/custom.md
+echo "Keep my Claude instructions" >> CLAUDE.md
+echo "Keep my retired workflow changes" >> .claude/commands/retired-fixture.md
+cp CLAUDE.md "$tmp/custom-claude"
+cp .claude/commands/retired-fixture.md "$tmp/custom-retired"
 # ... and deletes an allowlisted framework doc that will NOT change upstream.
 git rm -q docs/cross-agent-review.md
 $GIT add -A
@@ -94,6 +143,7 @@ $GIT commit --quiet -m "user content"
   echo "UPSTREAM-CHANGE-MARKER" >> .claude/commands/ship.md
   echo "# /new-workflow — added upstream" > .claude/commands/new-workflow.md
   echo "<!-- upstream template tweak — must NOT reach downstream via sync -->" >> memory-bank/activeContext.md
+  git rm -q CLAUDE.md .claude/commands/retired-fixture.md
   $GIT add -A
   $GIT commit --quiet -m "upstream framework update + template tweak"
 )
@@ -122,7 +172,8 @@ $GIT tag -l | grep -qx "$ANCHOR_REF" && { echo "FAIL: resolve step polluted the 
 ANCHOR="refs/serel-memory/anchor"
 
 # Step 5: precise report since the anchor, plus files the project no longer has.
-changed="$($GIT diff --name-only "$ANCHOR" upstream/main -- "${ALLOWLIST[@]}")"
+changed="$($GIT diff --name-only --diff-filter=d "$ANCHOR" upstream/main -- "${ALLOWLIST[@]}")"
+removed="$($GIT diff --name-only --diff-filter=D "$ANCHOR" upstream/main -- "${ALLOWLIST[@]}")"
 absent="$($GIT diff --name-only --diff-filter=A HEAD upstream/main -- "${ALLOWLIST[@]}")"
 
 # Step 9: restore INDIVIDUAL files from both lists — never directories.
@@ -163,6 +214,15 @@ grep -q "USER LEARNING: keep this line" .rules \
   || { echo "FAIL: user .rules content was lost"; fail=1; }
 [ -f .claude/commands/custom.md ] \
   || { echo "FAIL: downstream custom command was deleted (directory restore?)"; fail=1; }
+cmp -s CLAUDE.md "$tmp/custom-claude" \
+  || { echo "FAIL: sync changed customized Claude instructions"; fail=1; }
+cmp -s .claude/commands/retired-fixture.md "$tmp/custom-retired" \
+  || { echo "FAIL: upstream deletion changed a downstream workflow without review"; fail=1; }
+printf '%s\n' "$removed" | grep -qx '.claude/commands/retired-fixture.md' \
+  || { echo "FAIL: upstream deletion was not reported separately"; fail=1; }
+if printf '%s\n%s\n%s\n' "$changed" "$absent" "$removed" | grep -qx CLAUDE.md; then
+  echo "FAIL: project-owned CLAUDE.md appeared in framework sync discovery"; fail=1
+fi
 
 [ "$(jq -r .ref .serel-memory.json)" = "$($GIT rev-parse upstream/main)" ] \
   || { echo "FAIL: anchor was not advanced to the synced upstream commit"; fail=1; }

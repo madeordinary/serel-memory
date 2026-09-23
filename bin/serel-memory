@@ -35,7 +35,7 @@ SELF="serel-memory"
 # The sync-upstream framework allowlist (see .claude/commands/sync-upstream.md).
 # Baseline comparison is bounded to these paths: everything else in a repo is
 # the user's own project.
-FRAMEWORK_PATHS=(.agents/skills/ .claude/commands/ AGENTS.md CLAUDE.md \
+FRAMEWORK_PATHS=(.agents/skills/ .claude/commands/ AGENTS.md \
   docs/workflow-contract.md docs/cross-agent-review.md hooks/ bin/serel-memory)
 
 CORE_FILES=(projectbrief productContext systemPatterns techContext decisionLog activeContext progress)

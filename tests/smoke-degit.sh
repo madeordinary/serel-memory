@@ -12,6 +12,11 @@ git archive --format=tar HEAD | tar -x -C "$tmp"
 
 fail=0
 
+# The shared instructions ship directly; the optional compatibility shim does not.
+if [ ! -f "$tmp/AGENTS.md" ] || [ -e "$tmp/CLAUDE.md" ]; then
+  echo "INSTRUCTIONS: export must ship AGENTS.md without CLAUDE.md"; fail=1
+fi
+
 # 1. The maintainer's private bank must never ship.
 if [ -e "$tmp/memory-bank.local" ]; then
   echo "LEAK: memory-bank.local/ is present in the degit export"; fail=1

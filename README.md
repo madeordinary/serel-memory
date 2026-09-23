@@ -21,6 +21,12 @@ printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.5.0", "linked": fa
 it later to show you exactly what changed upstream since. Skip it and `sync-upstream`
 will offer to reconstruct it.)
 
+The examples install the published v0.5.0 release, which still includes a
+`CLAUDE.md` import shim. The unreleased template uses `AGENTS.md` directly;
+see [agent compatibility](#works-with-both-claude-and-codex) before removing an
+existing shim, and the [Unreleased upgrade note](CHANGELOG.md#unreleased)
+before the first sync from v0.5.0 or earlier.
+
 > **Renamed from Basecamp:** the v0.x compatibility contract ended with
 > Serel Memory 0.3.0 — the provenance anchor is now `.serel-memory.json` and
 > `SEREL_MEMORY_HOOKS=off` is the only hook kill switch. Migrating a v0.x
@@ -62,7 +68,6 @@ Memory banks aren't new — Serel Memory's own is adapted from [Cline's](https:/
 ```text
 your-project/
 ├── AGENTS.md               # bootstrap — how to read the bank + make changes
-├── CLAUDE.md               # @AGENTS.md import for Claude Code
 ├── .serel-memory.json      # provenance anchor — which upstream version you started from
 ├── .rules                  # learning journal — patterns & preferences
 ├── memory-bank/
@@ -201,6 +206,12 @@ The `rsync` command is intentionally one line so shell line-continuation mistake
 
 Do not run `degit` directly into an existing git repo with files unless you have already reviewed what it will overwrite. The `rsync --ignore-existing` path above is safer because it skips files that already exist. That also means existing `AGENTS.md`, `.rules`, `.claude/`, or `.agents/` files may need a manual merge to pick up Serel Memory's instructions and workflows.
 
+The command above intentionally copies v0.5.0's shim because its checker and
+sync workflow still expect it. Newer templates omit it. If the project already
+has its own `CLAUDE.md`, preserve its instructions and add `@AGENTS.md` if it
+does not already import the shared file. See the compatibility notes below
+for other Claude instruction files that can suppress automatic loading.
+
 Then — and this is the part most people miss — *don't fill the memory bank by hand.* Open Claude Code and run `/init-memory`, or open Codex and invoke `$init-memory`. The agent reads your codebase, your README, and your dependencies, then proposes contents for each memory bank file. Review the drafts, edit anything that's off, approve, and the agent writes them. This is faster than filling templates from blank and catches things you'd forget to write down.
 
 After that, run `/start` or invoke `$start` to verify the bootstrap works.
@@ -299,7 +310,25 @@ Enable hooks on projects where memory continuity matters and you'd rather not ty
 
 ## Works with both Claude and Codex
 
-The trick is that `AGENTS.md` is the canonical bootstrap and `CLAUDE.md` is a one-line file that imports it. Codex CLI auto-reads `AGENTS.md`. Claude Code auto-reads `CLAUDE.md` and follows the `@AGENTS.md` import. Same source of truth, both tools.
+`AGENTS.md` is the shared bootstrap. The unreleased template no longer ships
+`CLAUDE.md`. Codex reads `AGENTS.md` directly; Claude Code added fallback
+loading in [v2.1.277](https://github.com/anthropics/claude-code/releases/tag/v2.1.277)
+when the project has no Claude-specific instruction file. That release does
+not enable this support on Bedrock, Vertex, or Foundry.
+
+In supported Claude Code installations, keep **Project instructions** in
+`/config` set to a mode that loads `AGENTS.md`. Existing project `CLAUDE.md`,
+`.claude/CLAUDE.md`, or `CLAUDE.local.md` files can suppress the default
+fallback. Preserve those files and either import the shared instructions or
+select the mode that loads both. See Anthropic's
+[instruction-file behavior](https://github.com/anthropics/claude-code/blob/main/mods/agents-md/README.md).
+
+For an older or unsupported installation, use a project-owned `CLAUDE.md`
+containing `@AGENTS.md`. Add that line to existing instructions rather than
+overwriting them (`.claude/CLAUDE.md` uses `@../AGENTS.md`). This is an optional
+compatibility file; current sync workflows leave it alone. Retire only an
+unchanged Serel Memory shim after confirming every Claude setup used on the
+project loads `AGENTS.md` without it.
 
 The adapters are native to each tool:
 

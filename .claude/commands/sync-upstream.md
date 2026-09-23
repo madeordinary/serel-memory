@@ -22,7 +22,6 @@ Only framework files should be synced. Never auto-merge project-specific files.
 - `.agents/skills/` — Codex skill definitions
 - `.claude/commands/` — Claude Code slash commands
 - `AGENTS.md` — agent instructions
-- `CLAUDE.md` — top-level Claude Code config
 - `docs/workflow-contract.md` — workflow design contract
 - `docs/cross-agent-review.md` — second-opinion loop policy
 - `hooks/` — optional automation scripts
@@ -68,8 +67,43 @@ read — it triggers the fail-fast guard in step 1 until the user renames it.
 Only these paths are eligible for sync. Use this exact list in all git commands:
 
 ```text
-.agents/skills/ .claude/commands/ AGENTS.md CLAUDE.md docs/workflow-contract.md docs/cross-agent-review.md hooks/ bin/serel-memory
+.agents/skills/ .claude/commands/ AGENTS.md docs/workflow-contract.md docs/cross-agent-review.md hooks/ bin/serel-memory
 ```
+
+## Legacy Claude import shim
+
+`CLAUDE.md` is project-owned and outside the allowlist. Never restore it
+from an old anchor or upstream version. Before the sync summary, check only
+whether it matches the original shipped shim:
+
+```bash
+# Legacy shim check: discovery only; never deletes a file.
+if [ -f CLAUDE.md ] && [ ! -L CLAUDE.md ] &&
+   [ ! -e .claude/CLAUDE.md ] && [ ! -L .claude/CLAUDE.md ] &&
+   [ ! -e CLAUDE.local.md ] && [ ! -L CLAUDE.local.md ] &&
+   cmp -s CLAUDE.md <(printf '# Claude Code instructions\n\n@AGENTS.md\n'); then
+  echo "LEGACY SHIM: unchanged; compatibility confirmation required before removal"
+else
+  echo "LEGACY SHIM: preserve (absent, customized, symlinked, or fallback suppressed)"
+fi
+```
+
+An unchanged shim is only a candidate. Confirm that every Claude setup used
+on the project supports `AGENTS.md` loading: Claude Code v2.1.277 or later
+on a supported provider, with the AGENTS fallback/both mode enabled in
+**Project instructions**. The v2.1.277 release excludes Bedrock, Vertex, and
+Foundry. A local CLI version alone does not establish provider or project-wide
+compatibility; if it cannot be checked, require the user's explicit
+confirmation or keep the file. See
+[release support](https://github.com/anthropics/claude-code/releases/tag/v2.1.277)
+and [loading modes](https://github.com/anthropics/claude-code/blob/main/mods/agents-md/README.md).
+
+If compatible, show the deletion diff and offer retirement separately from
+"pull all safe changes." Remove only after the user selects it, then re-check
+the fingerprint and suppression files immediately before removal. A customized,
+symlinked, or suppressed shim is preserved; do not strip imports or merge its
+instructions automatically. An approved retirement stays uncommitted, like
+the restored framework files.
 
 ## Workflow
 
@@ -77,7 +111,7 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
 
    ```bash
    cd "$(git rev-parse --show-toplevel)"  # sync is repo-root anchored: framework files and the anchor live at the root, never in a scope folder
-   git status --porcelain -- .agents/skills/ .claude/commands/ AGENTS.md CLAUDE.md docs/workflow-contract.md docs/cross-agent-review.md hooks/ bin/serel-memory
+   git status --porcelain -- .agents/skills/ .claude/commands/ AGENTS.md docs/workflow-contract.md docs/cross-agent-review.md hooks/ bin/serel-memory
    # Legacy-anchor guard: fail fast, never treat as unanchored, never reconstruct.
    if [ ! -f .serel-memory.json ] && [ -f .basecamp.json ]; then  # legacy anchor present
      echo "MIGRATION REQUIRED: this project still has a legacy .basecamp.json anchor."
@@ -157,6 +191,13 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
 
    Keep using the direct `HEAD`-vs-`upstream/main` file diff for conflict detection (the project's local edits aren't in upstream history) **and for files the project no longer has**: an allowlisted file deleted downstream that did not change upstream never appears in the anchor diff, so list it from `git diff --name-only --diff-filter=A HEAD upstream/main -- <allowlist>` and offer it back under NEW FILES. If the anchor has `"linked": true`, remind the user that anchor-based diffs may include changes their copy already has.
 
+   Separate upstream deletions (`--diff-filter=D`) from restorable changes
+   (`--diff-filter=d`, lowercase excludes deletions). Report removed paths for
+   review; never pass a path absent from `upstream/main` to `git restore`, and
+   never infer that a downstream-only custom file should be deleted. A removed
+   upstream file is preserved unless the user explicitly reviews and selects
+   its deletion. The legacy shim is handled separately above.
+
    **No anchor?** Offer to reconstruct one now, marked as linked. Derive `upstream` from the actual remote — don't hardcode it:
 
    ```bash
@@ -194,6 +235,8 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
    
    NEW FILES:
    - [files that don't exist locally yet]
+   REMOVED UPSTREAM (review only): [paths, excluding downstream-only files]
+   LEGACY SHIM: [preserve / unchanged candidate; compatibility and choice pending]
    ```
 
 8. **Offer options.** Let the user choose:
@@ -206,6 +249,9 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
    Do not offer cherry-pick by commit — upstream commits may touch both framework and project files.
 
 9. **Execute the chosen strategy.** Restore **individual files** from the upstream-changed list (anchor diff plus the absent-locally list from step 5) — never a whole allowlisted directory (e.g. `git restore --source=upstream/main -- .claude/commands/`), which would also delete any custom commands or skills the downstream project added. The directory allowlist is for diff *discovery*, not for restore.
+
+   Exclude upstream deletions from the restore list (`--diff-filter=d`);
+   handle reviewed deletions and shim retirement separately.
 
    For safe files, use restore from upstream:
 
@@ -222,6 +268,10 @@ Only these paths are eligible for sync. Use this exact list in all git commands:
    ```
 
 10. **After syncing, update the anchor and summarize.** Advance `.serel-memory.json` to the upstream commit you just synced from, so the next sync reports only what's newer. **Only if at least one file was restored, or the user explicitly chose to skip everything** — an empty restore (an unresolved anchor, a mis-parsed list) must never move the anchor, or the next sync silently loses those changes. Update the two provenance keys in place — the anchor may carry other keys (such as `scopes`) that must survive — then drop the private ref (`git update-ref -d refs/serel-memory/anchor`):
+
+    An explicitly approved deletion or shim retirement also counts as an
+    applied change, but does not waive review of skipped framework changes
+    below. Never advance for discovery alone or a failed operation.
 
     ```bash
     # Anchor update: keep every other key (e.g. "scopes"); never rewrite the file blind.
