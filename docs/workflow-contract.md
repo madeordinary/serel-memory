@@ -140,6 +140,48 @@ Use this promotion path:
 Do not turn the memory bank into a journal. A line should survive because it helps
 the next session make a better decision.
 
+## Memory accuracy
+
+Every `/update-memory` or `$update-memory` proposal includes two passes over
+the selected effective bank, bounded to subjects changed or discovered in the
+session. This is routine reconciliation, not a full repository audit.
+
+- **Capture:** compare session decisions and observations with relevant git
+  history, staged and unstaged diffs, and relevant new files. Identify durable
+  changes missing from the bank: completed work, changed constraints, accepted
+  or superseded decisions, reusable learnings, unresolved problems, and the
+  next action. A decision may have no code diff. Do not claim a test or manual
+  verification ran without an observed result; distinguish committed work,
+  uncommitted work, and released behavior.
+- **Reconcile:** search the live bank and its own `.rules` for existing claims
+  about those subjects. Read optional docs only when they match. Update current
+  status, next steps, and obsolete blockers together; completing a feature also
+  retires its pending task. Correct or remove stale facts in stable files even
+  when product intent has not changed. Prefer one authoritative home for a
+  volatile fact (release/completion status in `progress.md`, immediate work in
+  `activeContext.md`) and references elsewhere over repeated status claims.
+
+Classify discrepancies before proposing a correction: **current fact**,
+**durable decision**, **intended future**, or **open question**. Code and
+observed results establish current behavior; they do not supersede accepted
+intent. If behavior violates a decision, report a possible regression for the
+owner to resolve. Missing evidence means unassessed or unresolved, not false.
+For external capability claims, record the source and applicable version or
+verification date; re-check the source when relying on a changeable claim, or
+say it could not be checked. The offline drift checker cannot do this.
+
+Decisions are superseded with links, never silently deleted. Dated historical
+entries, including recent changes and milestones, stay verbatim and rotate
+under Retention; an old release mentioned as history is not a stale claim.
+Never cross scopes to reconcile another bank or write inherited root rules.
+
+Before the proposed diffs, give a compact coverage summary: **Captured** (new
+durable information and its evidence), **Reconciled** (old claims corrected
+and their locations), and **Unresolved** (missing evidence or owner decisions;
+say none when there are none). This summary describes the subjects checked,
+not a certification of the whole bank. Show diffs and use the existing
+confirmation gate; reconciliation adds no separate approval step.
+
 ## Clean stop
 
 When a session ends or context is about to compact, leave a state a

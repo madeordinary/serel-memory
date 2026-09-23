@@ -13,16 +13,33 @@ Use this skill to update the memory bank from the current session. Always show p
 
 ## Workflow
 
-1. Read every file in `memory-bank/` (skip `memory-bank/archive/` - rotated history, read only when a task needs it) and `.rules`.
-2. Review what changed this session: built, decided, learned, deferred, or discovered.
+1. Read the seven core files in the effective bank, its `.rules`, and the
+   contract's **Memory accuracy** section. Read optional docs only for relevant
+   subjects; skip `archive/` unless this task needs that history.
+2. **Capture and reconcile (required).** Follow both passes in "Memory accuracy":
+   compare session decisions and observed results with relevant git history,
+   staged/unstaged changes, and new files for missing durable information;
+   search the live bank and its rules for old claims about changed subjects.
+   Reconcile current status, next steps, and blockers together. Preserve dated
+   history and accepted intent; flag possible regressions and missing evidence.
+   Before the diffs, summarize **Captured**, **Reconciled**, and **Unresolved**
+   with evidence/locations and the bounds of what was checked.
 3. Propose updates, focusing on:
    - `memory-bank/activeContext.md` - current focus, recent changes, next steps, open questions
    - `memory-bank/progress.md` - what works, in progress, known issues, phase
-4. Touch other files only if needed:
-   - `systemPatterns.md` for real architectural decisions
-   - `techContext.md` for dependencies, environment variables, runtime, or operational constraints
-   - `decisionLog.md` for durable architectural, product, workflow, or operational decisions. If a past decision changed, **supersede, don't delete**: append "SUPERSEDED by … (date)" and move it to the Superseded section.
-   - `productContext.md` or `projectbrief.md` only if product intent changed
+4. Touch other files only if needed, including correcting or removing stale
+   current-fact claims even when intent has not changed. Keep volatile status
+   in its owning file rather than duplicating it across the bank:
+   - `systemPatterns.md` — architectural changes or evidenced corrections to
+     the description of current architecture
+   - `techContext.md` — stack, environment, or operational changes, including
+     evidenced corrections to existing setup instructions and factual claims
+   - `decisionLog.md` — durable decisions or dated factual annotations to
+     existing entries. Preserve the original rationale and history. If a past
+     decision changed, **supersede, don't delete**: append "SUPERSEDED by …
+     (date)" and move it to the Superseded section.
+   - `productContext.md` or `projectbrief.md` for changed intent or obsolete
+     factual content; preserve still-valid goals and user needs
 5. Append to `.rules` only for non-obvious reusable learnings. If the entry is a repeat, or the same correction has recurred, first ask why the existing guidance did not take, then propose a test or hook check instead of a second line (contract "Memory writes" item 5). Then **prune** it: if it's over ~40 lines or holds stale lines, drop what's no longer true and promote stabilized conventions into `systemPatterns.md`.
 6. **Retention (required).** Write the proposed `activeContext.md` and `progress.md` to a temp location and run the read-only helper on each - it measures the file *as it would be after this update*:
 
@@ -65,8 +82,9 @@ the session wasn't trivial (docs-only or a tiny diff), offer once:
 
 If accepted:
 
-1. Write a prompt file containing the proposed diff blocks, a 2–3 line session
-   summary, the instructions below, and a read-only instruction (do not edit
+1. Write a prompt file containing the proposed diff blocks, the coverage
+   summary and relevant evidence, the selected effective bank path, the
+   instructions below, and a read-only instruction (do not edit
    files or run write operations), then run Claude read-only — synchronous
    form, `docs/cross-agent-review.md` has the canonical invocation:
 
@@ -74,17 +92,20 @@ If accepted:
    claude -p --permission-mode plan < "$PROMPT_FILE"
    ```
 
-2. Ask Claude to classify each claim in the proposed updates as **current
-   fact**, **durable decision**, **intended future**, or **open question** —
-   and to flag only *current-fact* claims the code, tests, or git history
+2. Ask Claude to read the relevant live bank sections alongside the proposed
+   diffs, looking for old claims about the changed subjects that the proposal
+   leaves behind. Classify claims as **current fact**, **durable decision**,
+   **intended future**, or **open question**. Flag only *current-fact* claims
+   the code, tests, or git history
    don't support. Intent is allowed to lead the code; facts are not. When a
    claim is ambiguous between fact and intent (present-tense statements in
    `projectbrief.md`, `productContext.md`, or `systemPatterns.md` often
    describe planned state), classify it as intent unless it asserts
    observable build/test/runtime status.
-3. Also ask it to scan the session's diff/log for durable changes the draft
-   missed — new dependencies, schema changes, pattern shifts that belong in
-   `decisionLog.md` or `techContext.md`.
+3. Also ask it to compare session decisions and observed results with the
+   relevant diff/log for durable changes the draft missed — including decisions
+   without code changes. Preserve historical entries and accepted intent; flag
+   possible regressions rather than rewriting goals to match implementation.
 4. Fold accepted findings into the proposed diffs, mark which lines changed
    because of the audit, and show the revised diffs.
 

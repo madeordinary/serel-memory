@@ -22,7 +22,7 @@ Only sync framework files. Never auto-merge project-specific files.
 
 - `.agents/skills/` — Codex skill definitions
 - `.claude/commands/` — Claude Code slash commands
-- `AGENTS.md`, `CLAUDE.md` — agent instructions
+- `AGENTS.md` — shared agent instructions
 - `docs/workflow-contract.md`, `docs/cross-agent-review.md` — framework docs
 - `hooks/` — optional automation scripts
 - `bin/serel-memory` — the read-only drift checker
@@ -67,8 +67,43 @@ read — it triggers the fail-fast guard in step 1 until the user renames it.
 Use this exact list in all git commands:
 
 ```text
-.agents/skills/ .claude/commands/ AGENTS.md CLAUDE.md docs/workflow-contract.md docs/cross-agent-review.md hooks/ bin/serel-memory
+.agents/skills/ .claude/commands/ AGENTS.md docs/workflow-contract.md docs/cross-agent-review.md hooks/ bin/serel-memory
 ```
+
+## Legacy Claude import shim
+
+`CLAUDE.md` is project-owned and outside the allowlist. Never restore it
+from an old anchor or upstream version. Before the sync summary, check only
+whether it matches the original shipped shim:
+
+```bash
+# Legacy shim check: discovery only; never deletes a file.
+if [ -f CLAUDE.md ] && [ ! -L CLAUDE.md ] &&
+   [ ! -e .claude/CLAUDE.md ] && [ ! -L .claude/CLAUDE.md ] &&
+   [ ! -e CLAUDE.local.md ] && [ ! -L CLAUDE.local.md ] &&
+   cmp -s CLAUDE.md <(printf '# Claude Code instructions\n\n@AGENTS.md\n'); then
+  echo "LEGACY SHIM: unchanged; compatibility confirmation required before removal"
+else
+  echo "LEGACY SHIM: preserve (absent, customized, symlinked, or fallback suppressed)"
+fi
+```
+
+An unchanged shim is only a candidate. Confirm that every Claude setup used
+on the project supports `AGENTS.md` loading: Claude Code v2.1.277 or later
+on a supported provider, with the AGENTS fallback/both mode enabled in
+**Project instructions**. The v2.1.277 release excludes Bedrock, Vertex, and
+Foundry. A local CLI version alone does not establish provider or project-wide
+compatibility; if it cannot be checked, require the user's explicit
+confirmation or keep the file. See
+[release support](https://github.com/anthropics/claude-code/releases/tag/v2.1.277)
+and [loading modes](https://github.com/anthropics/claude-code/blob/main/mods/agents-md/README.md).
+
+If compatible, show the deletion diff and offer retirement separately from
+"pull all safe changes." Remove only after the user selects it, then re-check
+the fingerprint and suppression files immediately before removal. A customized,
+symlinked, or suppressed shim is preserved; do not strip imports or merge its
+instructions automatically. An approved retirement stays uncommitted, like
+the restored framework files.
 
 ## Workflow
 
@@ -133,6 +168,13 @@ Use this exact list in all git commands:
 
    Keep the direct `HEAD`-vs-`upstream/main` file diff for conflict detection **and for files the project no longer has** (`git diff --name-only --diff-filter=A HEAD upstream/main -- <allowlist>`; offer them under NEW FILES — an allowlisted file deleted downstream that did not change upstream never appears in the anchor diff). If `"linked": true`, remind the user anchor-based diffs may include changes their copy already has.
 
+   Separate upstream deletions (`--diff-filter=D`) from restorable changes
+   (`--diff-filter=d`, lowercase excludes deletions). Report removed paths for
+   review; never pass a path absent from `upstream/main` to `git restore`, and
+   never infer that a downstream-only custom file should be deleted. A removed
+   upstream file is preserved unless the user explicitly reviews and selects
+   its deletion. The legacy shim is handled separately above.
+
    **No anchor?** Offer to reconstruct one, marked as linked (baseline starts today; exact original version unknown). Derive `upstream` from the actual remote — don't hardcode it:
 
    ```bash
@@ -154,6 +196,8 @@ Use this exact list in all git commands:
    CONFLICT RISK: [files changed on both sides]
    SAFE TO PULL: [files only changed upstream]
    NEW FILES: [files that don't exist locally]
+   REMOVED UPSTREAM (review only): [paths, excluding downstream-only files]
+   LEGACY SHIM: [preserve / unchanged candidate; compatibility and choice pending]
    ```
 
 8. **Let the user choose:**
@@ -167,6 +211,10 @@ Use this exact list in all git commands:
 9. **Execute** using `git restore --source=upstream/main -- <path>` for safe files, **one file at a time** from the upstream-changed list (anchor diff plus the absent-locally list from step 5) — never a whole allowlisted directory, which would delete any custom commands/skills the project added. The directory allowlist is for diff discovery, not restore. For conflicting files, show the diff and let the user decide per-file.
 
 10. **After syncing, update the anchor**, then summarize. **Only if at least one file was restored, or the user explicitly chose to skip everything** — an empty restore must never move the anchor. Update the two provenance keys in place — the anchor may carry other keys (such as `scopes`) that must survive — then drop the private ref (`git update-ref -d refs/serel-memory/anchor`):
+
+    An explicitly approved deletion or shim retirement also counts as an
+    applied change, but does not waive review of skipped framework changes
+    below. Never advance for discovery alone or a failed operation.
 
     ```bash
     # Anchor update: keep every other key (e.g. "scopes"); never rewrite the file blind.

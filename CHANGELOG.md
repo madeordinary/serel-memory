@@ -6,6 +6,30 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [Unreleased]
 
+### Changed
+
+- `AGENTS.md` is the only instruction file shipped by the template. Claude
+  Code's AGENTS fallback requires v2.1.277 or later on a supported provider
+  with instruction-file loading enabled. Older versions and unsupported
+  providers can keep a project-owned `CLAUDE.md` import. See README compatibility
+  notes for existing Claude instruction files that suppress fallback.
+- `sync-upstream` and the drift checker no longer manage `CLAUDE.md`.
+  Updated sync workflows offer removal only for the unchanged legacy shim,
+  after compatibility is confirmed; customized files are preserved. Upstream
+  deletions are reported separately and never passed to `git restore`.
+- `/update-memory` and `$update-memory` now require a capture and reconciliation
+  pass: inspect session evidence for missing durable information, then reconcile
+  live claims about changed subjects across the selected bank. Stable files may
+  have stale facts corrected without a product-intent change. Decisions and
+  dated history are preserved; unsupported claims and possible regressions are
+  reported explicitly. The optional independent audit remains optional.
+
+**First sync from v0.5.0 or earlier:** the installed sync workflow still
+includes `CLAUDE.md` in its allowlist. Skip that upstream deletion; do not run
+`git restore` on it or delete a customized file. Pull the updated sync workflow
+and checker first, then invoke sync again to review shim retirement with the
+new safeguards. The published v0.5.0 install examples still ship the shim.
+
 ### Fixed
 
 - The drift check no longer reads a documented marker as a broken one. A bank

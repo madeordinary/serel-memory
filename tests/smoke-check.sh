@@ -139,7 +139,6 @@ build_fixture() { # dir
   cp "$ROOT/hooks/lib/resolve-scope.sh" "$ROOT/hooks/lib/rotate-check.sh" "$d/hooks/lib/"
   cp "$CHECK" "$d/bin/serel-memory"
   echo "# Agents" > "$d/AGENTS.md"
-  echo "# Claude" > "$d/CLAUDE.md"
   echo "# Workflow contract" > "$d/docs/workflow-contract.md"
   echo "# Cross-agent review" > "$d/docs/cross-agent-review.md"
   echo "# demo command" > "$d/.claude/commands/demo.md"
@@ -436,10 +435,28 @@ assert_has "^INCOMPLETE repo scopes: " "a resolver warning is INCOMPLETE"
 # =============================================================================
 B="$tmp/baseline"
 build_fixture "$B"
+# A pre-retirement baseline includes the shim; removing or customizing it is
+# no longer framework drift. Other missing framework files must still fail.
+printf '# Claude Code instructions\n\n@AGENTS.md\n' > "$B/CLAUDE.md"
+(cd "$B" && $GIT add CLAUDE.md && $GIT commit --quiet -m "legacy shim")
 git -C "$B" update-ref refs/serel-memory/anchor HEAD
 run --root "$B"
 assert_rc 0 "baseline available and identical"
 [ "$(baseline_field)" = "refs/serel-memory/anchor" ] && ok "baseline names the ref it compared" || bad "baseline field is '$(baseline_field)'"
+
+rm "$B/CLAUDE.md"
+run --root "$B"
+assert_rc 0 "retired shim absent from a legacy baseline"
+assert_not '^(DRIFT|INFO) CLAUDE.md' "retired shim is outside the framework baseline"
+echo "# Project-owned Claude instructions" > "$B/CLAUDE.md"
+run --root "$B"
+assert_rc 0 "customized compatibility instructions are project-owned"
+assert_not '^(DRIFT|INFO) CLAUDE.md' "customized shim is not a framework change"
+rm "$B/AGENTS.md"
+run --root "$B"
+assert_rc 1 "shared AGENTS instructions remain required"
+assert_has '^DRIFT AGENTS.md framework file missing' "missing AGENTS is still drift"
+git -C "$B" restore AGENTS.md
 
 echo "# Agents (customized)" > "$B/AGENTS.md"
 rm "$B/docs/cross-agent-review.md"

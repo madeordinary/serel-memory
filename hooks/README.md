@@ -61,7 +61,7 @@ Keep them off for:
 
 Claude Code and Codex both let you run shell commands at specific lifecycle events. Output from the session-start hook is added to the model's context.
 
-- `session-start.sh` runs once per Claude Code session, just after the agent boots. Its stdout becomes additional context the agent sees alongside `CLAUDE.md`.
+- `session-start.sh` runs once per Claude Code session, just after the agent boots. Its stdout becomes additional context alongside the project's agent instructions (`AGENTS.md`, or a compatibility import; see the root README).
 - `pre-compact.sh` runs before context compaction (which happens automatically when context fills up or when the user runs `/compact`). Its stdout becomes the instruction the agent acts on during compaction.
 
 The scripts read `$CLAUDE_PROJECT_DIR` when Claude Code sets it. If it's not set, they fall back to `$PWD`; the Codex installer runs the hook from the git root so the same script works there too.
