@@ -199,6 +199,8 @@ repository or external evidence, an action, and the evidence's limits. Separate
 **documentation drift**, **possible regression**, **missing evidence**, and
 **missing durable information**. Missing proof is not a proven falsehood.
 Old verification records and source-level tests do not prove a fresh test pass.
+Keep unsupported claims unverified; turning one into a target requires owner
+intent. Implementation or commit evidence alone does not establish a release.
 
 The workflow writes nothing and runs no tests, builds, recipes or secondary
 agents. It may run the read-only checker, reporting its exit code and summary
