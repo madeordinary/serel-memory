@@ -190,8 +190,10 @@ grep -q "$($GIT rev-parse upstream/main)" .serel-memory.json \
 
 cmd_count="$(find .claude/commands -name '*.md' | wc -l | tr -d ' ')"
 skill_count="$(find .agents/skills -name SKILL.md | wc -l | tr -d ' ')"
-[ "$cmd_count" -eq 17 ] || { echo "FAIL: expected 17 commands after migration, found $cmd_count"; fail=1; }
-[ "$skill_count" -eq 17 ] || { echo "FAIL: expected 17 skills after migration, found $skill_count"; fail=1; }
+expected_cmd_count="$(find "$tmp/v030/.claude/commands" -name '*.md' | wc -l | tr -d ' ')"
+expected_skill_count="$(find "$tmp/v030/.agents/skills" -name SKILL.md | wc -l | tr -d ' ')"
+[ "$cmd_count" -eq "$expected_cmd_count" ] || { echo "FAIL: expected $expected_cmd_count commands after migration, found $cmd_count"; fail=1; }
+[ "$skill_count" -eq "$expected_skill_count" ] || { echo "FAIL: expected $expected_skill_count skills after migration, found $skill_count"; fail=1; }
 
 grep -q "shipping the downstream widget" memory-bank/activeContext.md \
   || { echo "FAIL: user memory bank content was lost"; fail=1; }
