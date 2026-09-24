@@ -6,6 +6,29 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [Unreleased]
 
+No changes yet.
+
+## [0.6.0] — 2026-09-23
+
+Memory accuracy. The 0.5.0 drift check settles what a repository can prove;
+this release covers the judgment around it. `/analyze` audits a bank against
+the code and reports documentation drift, possible regressions, and missing
+evidence or information, without editing anything. `/update-memory` now runs
+a required capture-and-reconcile pass: it records durable information the bank
+is missing and corrects stale claims about what changed, stable files
+included. The template also stops shipping the `CLAUDE.md` shim: `AGENTS.md`
+is its one instruction file.
+
+Upgrade from 0.5.0 or earlier: run `/sync-upstream` (or `$sync-upstream`)
+twice. The installed sync workflow still lists `CLAUDE.md` in its allowlist,
+so on the first run skip that upstream deletion; do not run `git restore` on
+it or delete a customized file. That run pulls the updated sync workflow and
+checker; review and commit what it restored, because sync needs clean
+framework files to start. The second run reviews retiring the shim with the
+new safeguards.
+Loading `AGENTS.md` without the shim needs Claude Code v2.1.277 or later on a
+supported provider; see the README compatibility notes.
+
 ### Added
 
 - `/analyze` and `$analyze`: a read-only memory accuracy audit with explicit
@@ -32,12 +55,9 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
   have stale facts corrected without a product-intent change. Decisions and
   dated history are preserved; unsupported claims and possible regressions are
   reported explicitly. The optional independent audit remains optional.
-
-**First sync from v0.5.0 or earlier:** the installed sync workflow still
-includes `CLAUDE.md` in its allowlist. Skip that upstream deletion; do not run
-`git restore` on it or delete a customized file. Pull the updated sync workflow
-and checker first, then invoke sync again to review shim retirement with the
-new safeguards. The published v0.5.0 install examples still ship the shim.
+- Contributors run `bash tests/ci.sh`, the same preflight GitHub Actions runs:
+  pinned ShellCheck, every Bash suite, and locked Markdown lint. See
+  `CONTRIBUTING.md`.
 
 ### Fixed
 
@@ -308,7 +328,8 @@ remain intact. Pin it from the canonical home with
   to parity; fixed a duplicate step number in the `ask-codex`/`ask-claude` workflows.
 - Fixed the broken file-tree rendering and tightened install instructions in the README.
 
-[Unreleased]: https://github.com/madeordinary/serel-memory/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/madeordinary/serel-memory/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.6.0
 [0.5.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.5.0
 [0.4.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.4.0
 [0.3.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.3.0

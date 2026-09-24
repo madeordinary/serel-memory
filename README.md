@@ -11,21 +11,21 @@ Your project's memory lives in version-controlled markdown you can read, diff, a
 ## Quickstart
 
 ```bash
-npx degit madeordinary/serel-memory#v0.5.0 my-project
+npx degit madeordinary/serel-memory#v0.6.0 my-project
 cd my-project
 git init
-printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.5.0", "linked": false }\n' > .serel-memory.json
+printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.6.0", "linked": false }\n' > .serel-memory.json
 ```
 
 (The last line records which Serel Memory version you started from — `sync-upstream` uses
 it later to show you exactly what changed upstream since. Skip it and `sync-upstream`
 will offer to reconstruct it.)
 
-The examples install the published v0.5.0 release, which still includes a
-`CLAUDE.md` import shim. The unreleased template uses `AGENTS.md` directly;
-see [agent compatibility](#works-with-both-claude-and-codex) before removing an
-existing shim, and the [Unreleased upgrade note](CHANGELOG.md#unreleased)
-before the first sync from v0.5.0 or earlier.
+The template uses `AGENTS.md` directly and no longer ships a `CLAUDE.md`
+import shim. See [agent compatibility](#works-with-both-claude-and-codex)
+before removing an existing shim, and the
+[0.6.0 upgrade note](CHANGELOG.md#060--2026-09-23) before the first sync from
+v0.5.0 or earlier.
 
 > **Renamed from Basecamp:** the v0.x compatibility contract ended with
 > Serel Memory 0.3.0 — the provenance anchor is now `.serel-memory.json` and
@@ -148,10 +148,10 @@ It pays off when you return to a project across many sessions and want continuit
 ### On a new project
 
 ```bash
-npx degit madeordinary/serel-memory#v0.5.0 my-new-project
+npx degit madeordinary/serel-memory#v0.6.0 my-new-project
 cd my-new-project
 git init
-printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.5.0", "linked": false }\n' > .serel-memory.json
+printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.6.0", "linked": false }\n' > .serel-memory.json
 ```
 
 Then open the project in Claude Code or Codex. There are three paths from here depending on how formed your idea is:
@@ -169,12 +169,12 @@ If Codex shows "Select settings to import" and offers to migrate `.claude/comman
 If all you have is a PRD, make Serel Memory the starting repo and bring the PRD into it:
 
 ```bash
-npx degit madeordinary/serel-memory#v0.5.0 my-new-project
+npx degit madeordinary/serel-memory#v0.6.0 my-new-project
 cd my-new-project
 mkdir -p docs
 cp /path/to/prd.md docs/prd.md
 git init
-printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.5.0", "linked": false }\n' > .serel-memory.json
+printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.6.0", "linked": false }\n' > .serel-memory.json
 ```
 
 Then run:
@@ -187,7 +187,7 @@ Then run:
 $from-prd docs/prd.md
 ```
 
-`degit madeordinary/serel-memory#v0.5.0` uses GitHub shorthand for `https://github.com/madeordinary/serel-memory` pinned to the `v0.5.0` tag, and downloads that tag's contents without the `.git` history. It is a starter-copy step, not a future `git pull` relationship — which is why the install writes `.serel-memory.json`: it records which upstream version you started from, so `sync-upstream` can later show you precisely what changed upstream since, instead of guessing. Pin to the latest tag on the [releases page](https://github.com/madeordinary/serel-memory/releases) and put that same tag in the `ref` field. (Unpinned `npx degit madeordinary/serel-memory` works too, but then the anchor's `ref` is your best guess — if you skip the anchor entirely, `sync-upstream` will offer to reconstruct one marked `"linked": true`, meaning "exact starting version unknown".)
+`degit madeordinary/serel-memory#v0.6.0` uses GitHub shorthand for `https://github.com/madeordinary/serel-memory` pinned to the `v0.6.0` tag, and downloads that tag's contents without the `.git` history. It is a starter-copy step, not a future `git pull` relationship — which is why the install writes `.serel-memory.json`: it records which upstream version you started from, so `sync-upstream` can later show you precisely what changed upstream since, instead of guessing. Pin to the latest tag on the [releases page](https://github.com/madeordinary/serel-memory/releases) and put that same tag in the `ref` field. (Unpinned `npx degit madeordinary/serel-memory` works too, but then the anchor's `ref` is your best guess — if you skip the anchor entirely, `sync-upstream` will offer to reconstruct one marked `"linked": true`, meaning "exact starting version unknown".)
 
 A `degit` copy also brings along Serel Memory's own project metadata — `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, `.github/`, and `tests/`. These describe *Serel Memory the project*, not your project, and they aren't part of the framework. Delete them whenever you like; `sync-upstream` never touches them.
 
@@ -198,21 +198,20 @@ If the project already has code or important files, drop Serel Memory's files in
 ```bash
 cd ~/path/to/your-existing-project
 
-git clone --depth 1 --branch v0.5.0 https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
-rsync -av --ignore-existing --exclude 'settings.local.json' /tmp/serel-memory/memory-bank /tmp/serel-memory/.agents /tmp/serel-memory/.claude /tmp/serel-memory/.rules /tmp/serel-memory/AGENTS.md /tmp/serel-memory/CLAUDE.md /tmp/serel-memory/hooks /tmp/serel-memory/bin /tmp/serel-memory/docs .
+git clone --depth 1 --branch v0.6.0 https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
+rsync -av --ignore-existing --exclude 'settings.local.json' /tmp/serel-memory/memory-bank /tmp/serel-memory/.agents /tmp/serel-memory/.claude /tmp/serel-memory/.rules /tmp/serel-memory/AGENTS.md /tmp/serel-memory/hooks /tmp/serel-memory/bin /tmp/serel-memory/docs .
 rm -rf /tmp/serel-memory
-[ -e .serel-memory.json ] || printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.5.0", "linked": false }\n' > .serel-memory.json
+[ -e .serel-memory.json ] || printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.6.0", "linked": false }\n' > .serel-memory.json
 ```
 
 The `rsync` command is intentionally one line so shell line-continuation mistakes cannot drop the source/destination arguments. Existing files and folders, including something like `docs/prd.md`, are preserved because `--ignore-existing` skips paths that are already present.
 
 Do not run `degit` directly into an existing git repo with files unless you have already reviewed what it will overwrite. The `rsync --ignore-existing` path above is safer because it skips files that already exist. That also means existing `AGENTS.md`, `.rules`, `.claude/`, or `.agents/` files may need a manual merge to pick up Serel Memory's instructions and workflows.
 
-The command above intentionally copies v0.5.0's shim because its checker and
-sync workflow still expect it. Newer templates omit it. If the project already
-has its own `CLAUDE.md`, preserve its instructions and add `@AGENTS.md` if it
-does not already import the shared file. See the compatibility notes below
-for other Claude instruction files that can suppress automatic loading.
+If the project already has its own `CLAUDE.md`, preserve its instructions and
+add `@AGENTS.md` if it does not already import the shared file. See the
+compatibility notes below for other Claude instruction files that can suppress
+automatic loading.
 
 Then — and this is the part most people miss — *don't fill the memory bank by hand.* Open Claude Code and run `/init-memory`, or open Codex and invoke `$init-memory`. The agent reads your codebase, your README, and your dependencies, then proposes contents for each memory bank file. Review the drafts, edit anything that's off, approve, and the agent writes them. This is faster than filling templates from blank and catches things you'd forget to write down.
 
@@ -312,7 +311,7 @@ Enable hooks on projects where memory continuity matters and you'd rather not ty
 
 ## Works with both Claude and Codex
 
-`AGENTS.md` is the shared bootstrap. The unreleased template no longer ships
+`AGENTS.md` is the shared bootstrap. Since 0.6.0 the template no longer ships
 `CLAUDE.md`. Codex reads `AGENTS.md` directly; Claude Code added fallback
 loading in [v2.1.277](https://github.com/anthropics/claude-code/releases/tag/v2.1.277)
 when the project has no Claude-specific instruction file. That release does
@@ -435,7 +434,7 @@ One repo, several initiatives — a portfolio workspace, a product manager's dai
 Opt in by naming the parent folders that hold projects:
 
 ```json
-{ "upstream": "madeordinary/serel-memory", "ref": "v0.5.0", "linked": false,
+{ "upstream": "madeordinary/serel-memory", "ref": "v0.6.0", "linked": false,
   "scopes": ["projects/running", "projects/watching"] }
 ```
 
