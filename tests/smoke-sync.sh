@@ -92,6 +92,83 @@ mkdir "$tmp/shims"
   [ -L CLAUDE.md ] || { echo "FAIL: discovery replaced the symlink"; exit 1; }
 )
 
+# The local-install guard: a Git-excluded Memory file stops sync even after
+# the anchor's own exclusion is removed; a tracked install passes, and so does
+# one beside another tool's local files. It checks the checker's own list.
+LOCAL_SNIPPET="$(extract .claude/commands/sync-upstream.md '# Local-install guard:')"
+[ -n "$LOCAL_SNIPPET" ] || { echo "FAIL: missing local-install guard"; exit 1; }
+[ "$LOCAL_SNIPPET" = "$(extract .agents/skills/sync-upstream/SKILL.md '# Local-install guard:')" ] \
+  || { echo "FAIL: local-install guards differ between adapters"; exit 1; }
+ENTRYPOINTS="$(awk -F'[()]' '/^MEMORY_ENTRYPOINTS=\(/ { print $2 }' bin/serel-memory)"
+case "$LOCAL_SNIPPET" in
+  *"--exclude-standard -- $ENTRYPOINTS)"*) [ -n "$ENTRYPOINTS" ] || { echo "FAIL: no MEMORY_ENTRYPOINTS in bin/serel-memory"; exit 1; } ;;
+  *) echo "FAIL: the local-install guard does not check the checker's MEMORY_ENTRYPOINTS ($ENTRYPOINTS)"; exit 1 ;;
+esac
+guard() { # snippet want-exit label
+  local rc=0
+  bash -c "$1" >/dev/null 2>&1 || rc=$?
+  [ "$rc" = "$2" ] || { echo "FAIL: $3: exit $rc, want $2"; exit 1; }
+}
+mkdir "$tmp/local-guard"
+(
+  cd "$tmp/local-guard"
+  $GIT init --quiet
+  mkdir -p bin .claude/commands
+  echo "# start" > .claude/commands/start.md
+  echo "checker" > bin/serel-memory
+  echo '{ "upstream": "local/serel-memory", "ref": "v9.9.9", "linked": false }' > .serel-memory.json
+  $GIT add -A
+  $GIT commit --quiet -m "tracked install"
+  guard "$LOCAL_SNIPPET" 0 "local-install guard, tracked install"
+  mkdir -p .agents/skills/polish
+  echo "# polish" > .agents/skills/polish/SKILL.md
+  echo "# polish" > .claude/commands/polish.md
+  printf '/.agents/skills/polish/SKILL.md\n/.claude/commands/polish.md\n' >> .git/info/exclude
+  guard "$LOCAL_SNIPPET" 0 "local-install guard, tracked install beside a local Kit pack"
+  $GIT rm --cached --quiet -r bin .claude .serel-memory.json
+  printf '/bin/serel-memory\n/.claude/commands/start.md\n/.serel-memory.json\n' >> .git/info/exclude
+  guard "$LOCAL_SNIPPET" 1 "local-install guard, local install"
+  sed -i.bak '/serel-memory\.json/d' .git/info/exclude
+  guard "$LOCAL_SNIPPET" 1 "local-install guard, anchor exclusion removed, framework still excluded"
+  $GIT add .serel-memory.json
+  guard "$LOCAL_SNIPPET" 1 "local-install guard, anchor tracked, framework still excluded"
+)
+
+# The restore guard: once upstream is fetched, a path upstream ships that is
+# untracked or Git-excluded here stops sync, since a restore would replace it.
+# Local files upstream does not ship — a Kit pack, a custom command — do not.
+RESTORE_SNIPPET="$(extract .claude/commands/sync-upstream.md '# Restore guard:')"
+[ -n "$RESTORE_SNIPPET" ] || { echo "FAIL: missing restore guard"; exit 1; }
+[ "$RESTORE_SNIPPET" = "$(extract .agents/skills/sync-upstream/SKILL.md '# Restore guard:')" ] \
+  || { echo "FAIL: restore guards differ between adapters"; exit 1; }
+mkdir "$tmp/restore-guard"
+(
+  cd "$tmp/restore-guard"
+  $GIT init --quiet
+  mkdir -p bin .claude/commands .agents/skills/polish
+  echo "# start" > .claude/commands/start.md
+  echo "checker" > bin/serel-memory
+  $GIT add -A
+  $GIT commit --quiet -m "tracked install"
+  echo "# new" > .claude/commands/new-workflow.md
+  $GIT add -A
+  $GIT commit --quiet -m "upstream adds a workflow"
+  $GIT update-ref refs/remotes/upstream/main HEAD
+  $GIT reset --quiet --hard HEAD~1
+  guard "$RESTORE_SNIPPET" 0 "restore guard, tracked install"
+  echo "# polish" > .agents/skills/polish/SKILL.md
+  echo '/.agents/skills/polish/' >> .git/info/exclude
+  echo "# custom" > .claude/commands/custom.md
+  guard "$RESTORE_SNIPPET" 0 "restore guard, local files upstream does not ship"
+  echo "# mine" > .claude/commands/new-workflow.md
+  guard "$RESTORE_SNIPPET" 1 "restore guard, an untracked file upstream ships"
+  echo '/.claude/commands/new-workflow.md' >> .git/info/exclude
+  guard "$RESTORE_SNIPPET" 1 "restore guard, a Git-excluded file upstream ships"
+  rm .claude/commands/new-workflow.md
+  $GIT update-ref -d refs/remotes/upstream/main
+  guard "$RESTORE_SNIPPET" 1 "restore guard, upstream/main unreadable"
+)
+
 # --- Build the "upstream" repo: a clone of this repo at HEAD ---------------
 git clone --quiet "$ROOT" "$tmp/upstream"
 # CI checkouts are detached HEADs, so the clone may lack a main branch — the
@@ -151,6 +228,7 @@ $GIT commit --quiet -m "user content"
 # --- Run the documented template-mode sync ---------------------------------
 $GIT remote add upstream "$tmp/upstream"
 $GIT fetch --quiet upstream main
+guard "$RESTORE_SNIPPET" 0 "restore guard, tracked degit-style install"
 
 # Step 4: no merge base => template mode (degit installs have no shared history).
 if $GIT merge-base HEAD upstream/main >/dev/null 2>&1; then

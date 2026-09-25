@@ -9,6 +9,10 @@ docs/research/ export-ignore
 # installs — each install writes its own anchor at scaffold time.
 .serel-memory.json export-ignore
 
+# The local installer runs from a Serel Memory checkout; it is tooling, not
+# part of the framework a project receives.
+install.sh export-ignore
+
 # Self-exclusion: without this, downstream degit/ZIP installs would inherit
 # these export-ignore rules and exclude THEIR OWN .serel-memory.json and
 # docs/research/ from any future archives they produce.

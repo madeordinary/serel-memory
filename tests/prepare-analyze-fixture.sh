@@ -15,7 +15,7 @@ cp "$root/AGENTS.md" "$target/"
 cp -R "$root/.claude/commands" "$target/.claude/"
 cp -R "$root/.agents/skills" "$target/.agents/"
 cp -R "$root/hooks" "$target/"
-cp "$root/docs/workflow-contract.md" "$root/docs/cross-agent-review.md" "$target/docs/"
+cp "$root/docs/workflow-contract.md" "$root/docs/cross-agent-review.md" "$root/docs/serel-setup.md" "$target/docs/"
 cp "$root/bin/serel-memory" "$target/bin/"
 cd "$target"
 git -c core.hooksPath=/dev/null init -q

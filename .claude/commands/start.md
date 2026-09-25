@@ -1,5 +1,5 @@
 ---
-description: "Read the memory bank, summarize state, ask where to pick up. Use: /start (quick) or /start full (rich dashboard)"
+description: "Read the memory bank, summarize state, ask where to pick up. Use: /start (quick), /start full (rich dashboard), or /start setup (guided setup)"
 ---
 
 # /start
@@ -10,8 +10,19 @@ You are starting a new session on this project. Your memory has reset; the memor
 
 - If empty, `quick`, or `brief` → use **Quick mode** (compact output; both modes read the same inputs).
 - If `full`, `onboard`, or `dashboard` → use **Full mode** (rich onboarding dashboard).
+- If `setup` → use **Setup mode** (guided setup routing, `docs/serel-setup.md`).
 
 Also check `$ARGUMENTS` for `--scope <path>` (scoped banks only — see "Resolving scope" in `docs/workflow-contract.md`). `--scope .` is the root; a path equal to a project root selects that project's bank; anything else: stop and list the valid selectors (`hooks/lib/resolve-scope.sh --list`). Without it, resolve by the current directory, then the root. Never read more than one bank in a pass.
+
+**Local install at a project scope.** After resolving the scope, and only when it is not the root, check from the repository root whether Serel Memory is installed locally (the test in "Setup routing" in `docs/workflow-contract.md`):
+
+```bash
+top="$(git rev-parse --show-toplevel)"
+if [ -n "$(git -C "$top" ls-files --others --ignored --exclude-standard -- bin/serel-memory docs/workflow-contract.md hooks/lib/resolve-scope.sh)" ] ||
+  git -C "$top" check-ignore -q .serel-memory.json; then echo "LOCAL INSTALL"; fi
+```
+
+A local install holds the root bank only: it excludes the root `memory-bank/` and `.rules`, and `scopes` listed later do not extend that, so a bank seeded at this scope would be visible to Git. If it prints `LOCAL INSTALL` and this run would use Setup mode or offer to fill blank files (Step 1), do neither: stop before any plan or write. Say why in one or two sentences, write nothing, leave any existing files at this scope, the exclusions, `.gitignore` and instruction files as they are, and offer the supported choices: the root bank (`/start --scope .`) or a shared, committed install, where scoped banks work. Never un-ignore, untrack or force-add anything.
 
 ---
 
@@ -43,7 +54,7 @@ Do these in order, before anything else:
 
    Report its findings and summary line as they are — it never blocks the session. If the file is absent, say `checker absent`.
 
-If any memory bank file is empty, missing, or still only template placeholders, surface it as `BLANK` or `UNINITIALIZED` and ask the user whether to initialize it before proceeding.
+If any memory bank file is empty, missing, or still only template placeholders, surface it as `BLANK` or `UNINITIALIZED`. If the mode is `setup`, or the effective bank is missing or no core file has real content, use **Setup mode** instead of Step 2 (at a project scope of a local install, stop as described above instead). Otherwise, when some files are blank (a partial bank), continue with Step 2 and offer to fill them: on yes, choose the seed workflow as Setup mode does; it proposes only the blank files and keeps the others exactly as they are.
 
 ---
 
@@ -137,6 +148,28 @@ Present 3–4 options clearly:
 - **Option D:** Something else
 
 End with: **"Which direction would you like to take for this session?"** Then wait.
+
+### Setup mode (`/start setup`, or a missing or blank bank)
+
+Follow `docs/serel-setup.md` "The flow" for the resolved scope, and stay read-only until the user approves. Serel Memory is already installed here, so installation is skipped; choosing capabilities is not. An initialized bank is kept exactly as it is.
+
+1. Orient in the resolved scope: product code (Serel Memory's own files and code in another scope do not count), a PRD or spec, instruction files, how Serel Memory is installed (a tracked `.serel-memory.json` is shared; the local-install test above printing `LOCAL INSTALL` means local), the bank's state, and Serel Kit (`.serel-kit.json`).
+2. Ask only what you could not detect and the user has not already said: one short question per message, waiting for each answer, at most four in total.
+3. Produce:
+
+```text
+SETUP PLAN:
+- Scope: [`.` or the selected project root]
+- Bank: [missing / blank / partial / initialized]
+- Install: [shared, committed / local, Git-excluded]
+- Stage: [idea / spec, no code / code / code + spec] (evidence: [paths])
+- Capabilities: [Serel Memory / Serel Memory + Kit packs <names> / Kit packs only]
+- Requires: [none / verify: an initialized bank, so seed first]
+- Instructions: [AGENTS.md and any Claude instruction files found]
+NEXT: [/discover | /from-prd <path> | /init-memory | /init-memory naming the spec] [--scope <path> when not the root] / add Kit packs <names> / resume
+```
+
+End with **"Continue with <next>?"** Then wait, unless the user has already told you to go ahead with this plan. A seed workflow runs in this session by following `.claude/commands/<workflow>.md`, carrying the answers you already have; its proposals and approval come before any bank write, and in a partial bank it fills only the blank files. For code plus a spec, the code describes what exists and the spec stays planned intent. Kit packs come from Serel Kit's own installer, previewed before anything is written (`docs/serel-setup.md` "Serel Kit"); packs keep Kit's own requirements even when chosen alone: `writing` leaves the bank as it is; `verify` needs an initialized bank, so beside a missing, blank or partial one `Requires` and `NEXT` name the seed workflow, which keeps its own approval. An initialized bank is never re-seeded: when no Kit packs are wanted, end with **"Where do you want to pick up?"** instead.
 
 ---
 

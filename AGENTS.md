@@ -19,7 +19,7 @@ Then read the last 5–10 git commits for recent context.
 
 If the task clearly touches a specific feature, integration, deployment path, testing strategy, or API, look for relevant optional docs under `memory-bank/` and read only the ones that apply. `memory-bank/archive/` holds rotated history — never part of the session read; open it only when a task needs that history.
 
-If any memory bank file is missing, empty, or still only template placeholders, note it and ask the user before proceeding. On a fresh install the bank *starts* blank by design — seed it with `/discover` (no code yet), `/init-memory` (code exists), or `/from-prd` (a spec exists) before relying on it.
+If any memory bank file is missing, empty, or still only template placeholders, note it and ask the user before proceeding. On a fresh install the bank *starts* blank by design — seed it with `/discover` (no code yet), `/from-prd` (a spec, no code yet), or `/init-memory` (code exists, with or without a spec) before relying on it. `/start` routes a missing or blank bank there; guided setup, including a local Git-excluded install, is in `docs/serel-setup.md`.
 
 Tip: `bash hooks/enable-hooks.sh` registers an optional SessionStart hook that auto-loads the bank so you don't need `/start` every session (see `hooks/README.md`).
 
@@ -62,7 +62,7 @@ Refresh every file in `memory-bank/`. Focus especially on `activeContext.md`, `p
 
 The `.claude/commands/` directory contains Claude Code slash commands, and `.agents/skills/` contains Codex-native skills for core Serel Memory workflows:
 
-- `/start` / `$start` — read the bank, summarize state, ask where to pick up (compact; use `/start full` for rich onboarding dashboard)
+- `/start` / `$start` — read the bank, summarize state, ask where to pick up (compact; use `/start full` for rich onboarding dashboard, `/start setup` for guided setup)
 - `/discover` / `$discover` — help the user define a project from a rough idea; produces initial memory bank (use when starting fresh with no code yet)
 - `/from-prd` / `$from-prd` — seed the memory bank from an existing PRD, product brief, spec, or requirements doc
 - `/init-memory` / `$init-memory` — analyze the codebase and propose initial memory bank contents (use when bank is empty but code already exists)

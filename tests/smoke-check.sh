@@ -469,6 +469,53 @@ assert_has "^INFO AGENTS.md differs from anchor baseline" "a customized framewor
 assert_not "^DRIFT src/widget.js" "baseline comparison is bounded to the framework allowlist"
 assert_not "^INFO src/widget.js" "baseline comparison is bounded to the framework allowlist"
 
+# A local install keeps the framework Git-excluded, so `git diff` cannot read
+# it. Here the anchor ref resolves to a commit without framework files (as a
+# project's own tag of the same name would): a diff would come back empty and
+# vouch for files it never examined. Memory's own excluded entrypoints mark the
+# install local even with the anchor tracked; the baseline is skipped instead.
+BL="$tmp/baseline-local"
+build_fixture "$BL"
+(cd "$BL" && $GIT rm -r --cached --quiet .agents .claude AGENTS.md docs hooks bin && $GIT commit --quiet -m "framework kept local")
+printf '/.agents/skills/demo/SKILL.md\n/.claude/commands/demo.md\n/AGENTS.md\n/docs/\n/hooks/\n/bin/\n' >> "$BL/.git/info/exclude"
+git -C "$BL" tag v1.0.0
+echo "# Agents (edited locally)" > "$BL/AGENTS.md"
+run --root "$BL"
+assert_rc 0 "Git-excluded framework files"
+assert_has "^INFO repo framework files are Git-excluded here" "a local install says its framework files went uncompared"
+assert_not "differs from anchor baseline" "no comparison is claimed for Git-excluded framework files"
+[ "$(baseline_field)" = "unavailable" ] && ok "Git-excluded framework files leave the baseline unavailable" \
+  || bad "baseline field is '$(baseline_field)', want unavailable"
+
+# A shared (tracked) Memory install beside another tool's local files — a
+# Serel Kit pack installed with --local — is still compared: the baseline does
+# not ship those files, so their exclusion says nothing about Memory's bytes.
+BK="$tmp/baseline-kit"
+build_fixture "$BK"
+git -C "$BK" update-ref refs/serel-memory/anchor HEAD
+mkdir -p "$BK/.agents/skills/polish"
+echo "# polish rules" > "$BK/.agents/skills/polish/RULES.md"
+echo "# polish" > "$BK/.claude/commands/polish.md"
+printf '/.agents/skills/polish/RULES.md\n/.claude/commands/polish.md\n' >> "$BK/.git/info/exclude"
+echo "# Agents (customized)" > "$BK/AGENTS.md"
+run --root "$BK"
+assert_rc 0 "shared Memory beside a local Kit pack"
+[ "$(baseline_field)" = "refs/serel-memory/anchor" ] && ok "another tool's Git-excluded files leave the baseline compared" \
+  || bad "baseline field is '$(baseline_field)', want refs/serel-memory/anchor"
+assert_has "^INFO AGENTS.md differs from anchor baseline" "shared Memory files are still compared beside a local Kit pack"
+assert_not "Git-excluded" "another tool's local files are not a local Memory install"
+assert_not "polish" "files outside the baseline are not reported"
+
+# A file the baseline does ship, kept Git-excluded, still stops the comparison.
+(cd "$BK" && $GIT rm --cached --quiet .claude/commands/demo.md)
+echo '/.claude/commands/demo.md' >> "$BK/.git/info/exclude"
+run --root "$BK"
+assert_rc 0 "a Git-excluded file the baseline ships"
+assert_has "^INFO repo framework files are Git-excluded here (first: .claude/commands/demo.md" "an excluded baseline file is named"
+assert_not "differs from anchor baseline" "no comparison is claimed beside an excluded baseline file"
+[ "$(baseline_field)" = "unavailable" ] && ok "an excluded baseline file leaves the baseline unavailable" \
+  || bad "baseline field is '$(baseline_field)', want unavailable"
+
 # =============================================================================
 # 9. The documented shape of a real report: two fresh markers, one stale
 # =============================================================================

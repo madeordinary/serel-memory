@@ -6,7 +6,75 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [Unreleased]
 
-No changes yet.
+Guided setup and a local, Git-excluded install. None of this is in 0.6.0.
+
+### Added
+
+- `docs/serel-setup.md`, the canonical setup guide (named so it does not
+  collide with a project's own `docs/setup.md`), and a copyable setup prompt
+  near the top of the README. The agent resolves the scope and looks before it
+  asks, then asks only what it could not detect, one question at a time and at
+  most four (stage; Serel Memory, Serel Kit packs, or both; agents; what stays
+  out of Git). It shows one plan with every path and whether Git sees it, and
+  waits for approval unless it was already given. Serel Memory's own files
+  are never mistaken for the project's code. Seeding keeps its own approval
+  step. Kit packs keep Kit's requirements: `writing` alone seeds nothing;
+  `verify` needs Serel Memory and an initialized bank, so the plan shows the
+  install or seed it needs, each with its own approval. The guide carries a
+  file-ownership table and the Memory/Kit shared and local combinations.
+- `install.sh <target-repo> --local [--apply]`: installs the framework and the
+  starter bank into one clone and keeps them out of Git through the
+  repository's own `info/exclude` (shared by linked worktrees), with exact
+  lines per framework file and `/memory-bank/` as the one owned subtree.
+  Exclusions are written and verified before any file is copied. It never
+  edits, stages or untracks tracked files; refuses tracked or differing
+  destinations (tracked names compared without case, so a tracked `.RULES`
+  stops it), existing names that differ only in case, symlinks, hard links,
+  nested repositories and ignore negations before writing anything, including
+  one that keeps the `memory-bank/` folder visible while each template is
+  ignored; checks that folder itself again after copying; leaves an existing
+  `AGENTS.md` alone; rolls back an ordinary failure, exclusions included; and
+  is safe to re-run. It holds the root bank only: at a project scope of a
+  local install, start's setup and the seed workflows stop before writing,
+  because scopes listed later are not excluded. The anchor names a clean
+  release tag (`vX.Y.Z[-pre]`), otherwise the clean commit's SHA, or, for
+  uncommitted source changes, the commit with `"linked": true`. The installer
+  runs from a checkout and is not copied into projects.
+- `/start setup` and `$start setup` enter setup whatever the bank's state;
+  both start adapters also route a missing or blank bank there, scope-aware.
+  An initialized bank is never re-seeded, but setup can still add Kit packs
+  beside it; `verify` beside a blank or partial bank brings the seed workflow
+  into the plan. An initialized bank's plain `start` is unchanged.
+- `tests/smoke-install.sh` (preview, apply, idempotence, collisions, case-only
+  names, existing instructions, negations, linked worktrees, source/target
+  safety, rollback, provenance) and a fresh-session acceptance guide for the
+  agent CLIs, `tests/local-setup-acceptance.md`.
+
+### Changed
+
+- `/discover`, `/from-prd` and `/init-memory` (both adapters) reuse answers
+  already given during setup and share one partial-bank rule: files with real
+  content are kept exactly as they are and read as given, only the missing,
+  empty or template-only files are proposed, and a fully initialized bank is
+  not re-seeded. A hand-written `projectbrief.md` no longer turns `/discover`
+  away. Code plus a spec routes to `/init-memory`: the code describes what
+  exists, the spec stays planned intent. The code check runs in the selected
+  scope, after scope resolution.
+- `docs/serel-setup.md` joins the sync allowlist and the drift checker's
+  framework baseline; `tests/check-allowlist.sh` keeps the checker's and
+  installer's copies of the list equal to the allowlist.
+- `sync-upstream` stops while any of Serel Memory's own framework files is
+  Git-excluded, not only when the anchor is: Git cannot see local edits to
+  excluded files, so a restore could overwrite them. Updating a local install
+  is not supported yet. Another tool's Git-excluded files in the same
+  folders, such as Kit packs installed with `--local`, do not stop it.
+- The drift checker skips its framework baseline comparison, with an `INFO`
+  line and `baseline: unavailable`, when Serel Memory's own framework files
+  are Git-excluded, instead of vouching for bytes `git diff` never read.
+  Another tool's excluded files there do not trigger the skip.
+- The README's existing-project install copies only the two framework docs
+  into `docs/`, so Serel Memory's research notes and decision records no
+  longer land in the project.
 
 ## [0.6.0] — 2026-09-23
 
