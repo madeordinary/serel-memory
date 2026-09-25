@@ -6,11 +6,12 @@ Thanks for wanting to improve Serel Memory. It's a small, opinionated kit, so co
 
 ## The shape of the repo
 
-Serel Memory has three kinds of files:
+Serel Memory has four kinds of files:
 
 - **Synced framework files** — the workflows (Claude commands + Codex skills), the hooks, and the framework docs. `sync-upstream` keeps these in step with the upstream repo. The exact allowlist lives in `.claude/commands/sync-upstream.md`.
 - **Shipped-once content** — the `memory-bank/` templates and `.rules`. Copied in at install, then **owned by the downstream project** and never synced — so a sync can't overwrite a user's context.
 - **Project metadata** — `docs/decisions/` and the OSS files above (`CONTRIBUTING`, `SECURITY`, `.github/`, …). The downstream project's to keep or delete.
+- **Installer tooling** — `install.sh` runs from a Serel Memory checkout to make a local, Git-excluded install. It copies the synced framework files plus the shipped-once templates, is never copied into a project, and is export-ignored. Its framework list must match the sync allowlist (`tests/check-allowlist.sh`); `tests/smoke-install.sh` covers it.
 
 When you add or change something, know which kind it is.
 

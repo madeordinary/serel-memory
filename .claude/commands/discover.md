@@ -8,11 +8,25 @@ Use this at the start of a brand-new project, when the user has an idea but hasn
 
 This is the inverse of `/init-memory`. That command analyzes existing code. This one helps shape a project that doesn't exist yet.
 
-First, check whether the project already has substantive memory bank content. If `memory-bank/projectbrief.md` has real content beyond the template placeholders, this is the wrong command — point the user toward `/breakdown` or `/start` instead. Otherwise, proceed.
-
-**Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), it is the working bank — the check above and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
+**Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), it is the working bank — the bank check below and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
 **Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
+
+**Local install at a project scope:** after resolving the scope, and only when it is not the root, check from the repository root whether Serel Memory is installed locally (the test in "Setup routing" in `docs/workflow-contract.md`):
+
+```bash
+top="$(git rev-parse --show-toplevel)"
+if [ -n "$(git -C "$top" ls-files --others --ignored --exclude-standard -- bin/serel-memory docs/workflow-contract.md hooks/lib/resolve-scope.sh)" ] ||
+  git -C "$top" check-ignore -q .serel-memory.json; then echo "LOCAL INSTALL"; fi
+```
+
+If it prints `LOCAL INSTALL`, stop before any other step. A local install holds the root bank only: it excludes the root `memory-bank/` and `.rules`, and `scopes` listed later do not extend that, so a bank seeded at this scope would be visible to Git. Say so, write nothing, leave any existing files at this scope, the exclusions, `.gitignore` and instruction files as they are, and offer the supported choices: the root bank (`--scope .`) or a shared, committed install, where scoped banks work. Never un-ignore, untrack or force-add anything.
+
+**Setup context:** if setup already ran in this session (`docs/serel-setup.md`, or start's setup mode), treat its answers as given — skip the open prompt when the idea is already described and mark those items clear in Phase 2 — and ask only about what is still missing. The proposal and approval steps below are unchanged.
+
+**Existing bank content:** check each core file in the effective bank. If every one has real content beyond the template placeholders, this is the wrong command — point the user toward `/breakdown` or `/start` instead. If only some do (a partial bank, such as a `projectbrief.md` the user wrote), keep those files exactly as they are and treat them as the user's answers: skip the open prompt when they already describe the idea, mark what they cover as clear in Phase 2, and propose only the files that are missing, empty, or template-only.
+
+**Stage:** in the selected scope, if there is meaningful product code — not counting Serel Memory's own files (its workflows, `hooks/`, `bin/serel-memory`, framework docs, bank templates, and the `tests/` and `.github/` a degit copy brings) or code in another scope — recommend `/init-memory` instead (it can read a spec too); if there is a PRD or spec but no code, recommend `/from-prd`. Otherwise, proceed.
 
 ## Phase 1 — Open prompt
 
@@ -50,7 +64,7 @@ Good questions are CONCRETE. Examples:
 
 ## Phase 3 — Synthesize
 
-Once you have enough, draft proposals for:
+Once you have enough, draft proposals for these files (in a partial bank, only the ones still missing, empty, or template-only):
 
 - `memory-bank/projectbrief.md` — what, why, success, anti-scope, constraints
 - `memory-bank/productContext.md` — user, job, today's solution, UX principles

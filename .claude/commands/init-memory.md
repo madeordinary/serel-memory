@@ -10,6 +10,20 @@ Use this when Serel Memory has just been dropped into an existing project and th
 
 **Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
 
+**Local install at a project scope:** after resolving the scope, and only when it is not the root, check from the repository root whether Serel Memory is installed locally (the test in "Setup routing" in `docs/workflow-contract.md`):
+
+```bash
+top="$(git rev-parse --show-toplevel)"
+if [ -n "$(git -C "$top" ls-files --others --ignored --exclude-standard -- bin/serel-memory docs/workflow-contract.md hooks/lib/resolve-scope.sh)" ] ||
+  git -C "$top" check-ignore -q .serel-memory.json; then echo "LOCAL INSTALL"; fi
+```
+
+If it prints `LOCAL INSTALL`, stop before any other step. A local install holds the root bank only: it excludes the root `memory-bank/` and `.rules`, and `scopes` listed later do not extend that, so a bank seeded at this scope would be visible to Git. Say so, write nothing, leave any existing files at this scope, the exclusions, `.gitignore` and instruction files as they are, and offer the supported choices: the root bank (`--scope .`) or a shared, committed install, where scoped banks work. Never un-ignore, untrack or force-add anything.
+
+**Existing bank content:** check each core file in the effective bank. If every one has real content beyond the template placeholders, the bank is initialized: do not re-seed it; point to `/start` to resume or `/update-memory` to correct it. If only some do (a partial bank, such as a `projectbrief.md` the user wrote), keep those files exactly as they are, read them first as given, and propose only the files that are missing, empty, or template-only; where the code disagrees with an existing file, say so instead of rewriting it.
+
+**Setup context:** if setup already ran in this session (`docs/serel-setup.md`, or start's setup mode), treat its answers as given (stage, spec path, users) and ask only about what is still missing. The proposal and approval steps below are unchanged.
+
 Steps:
 
 1. Read the repo structure. Use `ls` and `find` to map the top-level layout. Skip `node_modules/`, `.git/`, `dist/`, `build/`.
@@ -17,8 +31,9 @@ Steps:
 3. Read the package manifest (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `Gemfile`, etc.) for stack, dependencies, and scripts.
 4. Skim the source tree to understand component boundaries. Don't read every file — sample enough to see the architecture.
 5. Run `git log --oneline -20` for recent history and `git branch -a` to see active branches.
+6. If the user named a PRD or spec, or setup found one, read it after the code. The code, tests, and docs about current behavior say what exists; the spec supplies intent and planned scope. Put spec-only items in the brief and product context, and in activeContext/progress as planned or not built yet, citing the spec; never record a spec requirement as working without evidence in the code.
 
-Then propose contents for each memory bank file, in this order:
+Then propose contents for each memory bank file (in a partial bank, only the files still missing, empty, or template-only), in this order:
 
 - **projectbrief.md** — what this project is, why it exists, success criteria. Infer from README, repo description, and code.
 - **productContext.md** — user problem and UX goals. Often the hardest to infer from code alone; flag what needs user input.

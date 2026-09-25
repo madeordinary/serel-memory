@@ -36,7 +36,12 @@ SELF="serel-memory"
 # Baseline comparison is bounded to these paths: everything else in a repo is
 # the user's own project.
 FRAMEWORK_PATHS=(.agents/skills/ .claude/commands/ AGENTS.md \
-  docs/workflow-contract.md docs/cross-agent-review.md hooks/ bin/serel-memory)
+  docs/workflow-contract.md docs/cross-agent-review.md docs/serel-setup.md hooks/ bin/serel-memory)
+
+# Files only Serel Memory installs, outside the folders other tools share.
+# install.sh --local Git-excludes each of them; the sync-upstream local-install
+# guard uses the same list (tests/smoke-sync.sh keeps the two equal).
+MEMORY_ENTRYPOINTS=(bin/serel-memory docs/workflow-contract.md hooks/lib/resolve-scope.sh)
 
 CORE_FILES=(projectbrief productContext systemPatterns techContext decisionLog activeContext progress)
 
@@ -527,12 +532,26 @@ check_unmarked() {
 # already resolves locally — a clone or fork that carries the upstream tags, or
 # a private `refs/serel-memory/anchor` left by an interrupted sync. No fetch.
 check_baseline() {
-  local git_ok="$1" ref base="" cand f changed rc=0 st ref_rc=0
+  local git_ok="$1" ref base="" cand f changed rc=0 st ref_rc=0 excluded ex_rc=0 owned own_rc=0 hit=""
   [ "$git_ok" -eq 1 ] || return 0
   if [ ! -f "$ROOT/.serel-memory.json" ]; then
     # check_anchor has already reported the missing anchor; say plainly that
     # the framework files went uncompared rather than implying they matched.
     finding INFO repo "no anchor: the framework files were not compared against a baseline"
+    return 0
+  fi
+  # A local install (install.sh --local) keeps framework files Git-excluded.
+  # `git diff` never reads their bytes, so a comparison would vouch for files
+  # it did not examine: skip it and say so. Only Memory's own entrypoints say
+  # "local install" — another tool's local files in the shared folders (a
+  # Serel Kit pack in .agents/skills/, say) do not.
+  excluded="$(gitc ls-files --others --ignored --exclude-standard -- "${MEMORY_ENTRYPOINTS[@]}" 2>/dev/null)" || ex_rc=$?
+  if [ "$ex_rc" -ne 0 ]; then
+    finding INCOMPLETE repo "could not list Git-excluded framework files (git status $ex_rc)"
+    return 0
+  fi
+  if [ -n "$excluded" ]; then
+    finding INFO repo "framework files are Git-excluded here (local install; first: $(first_line "$excluded")): their bytes were not compared against a baseline"
     return 0
   fi
   ref="$(jq -r 'if type == "object" and (.ref | type) == "string" then .ref else "" end' "$ROOT/.serel-memory.json" 2>/dev/null)" || ref_rc=$?
@@ -553,6 +572,29 @@ check_baseline() {
   if [ -z "$base" ]; then
     finding INFO repo "no local baseline${ref:+ for $ref}; run sync-upstream to compare framework files"
     return 0
+  fi
+  # Any other Git-excluded file matters only if the baseline ships it: those
+  # bytes would go unread too. Files the baseline does not have are not Memory's.
+  ex_rc=0
+  excluded="$(gitc ls-files --others --ignored --exclude-standard -- "${FRAMEWORK_PATHS[@]}" 2>/dev/null)" || ex_rc=$?
+  if [ "$ex_rc" -ne 0 ]; then
+    finding INCOMPLETE repo "could not list Git-excluded framework files (git status $ex_rc)"
+    return 0
+  fi
+  if [ -n "$excluded" ]; then
+    owned="$(gitc ls-tree -r --name-only "$base" -- "${FRAMEWORK_PATHS[@]}" 2>/dev/null)" || own_rc=$?
+    if [ "$own_rc" -ne 0 ]; then
+      finding INCOMPLETE repo "could not list the framework files in $base (git status $own_rc)"
+      return 0
+    fi
+    while IFS= read -r f; do
+      [ -n "$f" ] || continue
+      case $'\n'"$owned"$'\n' in *$'\n'"$f"$'\n'*) hit="$f"; break ;; esac
+    done < <(printf '%s\n' "$excluded")
+    if [ -n "$hit" ]; then
+      finding INFO repo "framework files are Git-excluded here (first: $hit, present in $base): their bytes were not compared against a baseline"
+      return 0
+    fi
   fi
   changed="$(gitc diff --name-only "$base" -- "${FRAMEWORK_PATHS[@]}" 2>&1)" || rc=$?
   if [ "$rc" -ne 0 ]; then

@@ -30,8 +30,9 @@ Opt in by listing the parent folders that hold projects in
 
 Every immediate child folder of a scope root is a **project root**. Its bank
 is `<project root>/memory-bank/`; a project root without one is valid but
-*uninitialized* — `/init-memory`, `/from-prd`, and `/discover` may create it;
-every other workflow stops with the usual uninitialized message.
+*uninitialized* — `/init-memory`, `/from-prd`, and `/discover` may create it
+(in a shared install; a local install holds the root bank only, see "Setup
+routing"); every other workflow stops with the usual uninitialized message.
 
 **One rule, everywhere.** Each invocation resolves exactly one scope, and it
 never remembers a previous choice:
@@ -80,6 +81,62 @@ lists tools, data sources, and access. A project whose spec lives in an
 external system of record keeps `projectbrief.md` as a declared mirror.
 Project-specific preflights (a warehouse connectivity probe, say) belong in a
 project-local command, never in `start.md`, so `sync-upstream` stays clean.
+
+## Setup routing
+
+`docs/serel-setup.md` is the canonical setup guide. Both start adapters enter
+setup mode when asked for `setup`, whatever the bank's state, and on their own
+when the resolved bank is missing or no core file has real content. Setup is
+read-only until its plan is approved: it orients in the resolved scope first
+(Serel Memory's own files, and code in another scope, are not the project's
+code), asks only what it could not detect, one question per message and at
+most four, then shows one plan with one next action. Capabilities are Serel
+Memory, Serel Kit packs, or both. Kit's `writing` pack needs no bank and no
+seeding; `verify` needs Serel Memory to install and an initialized bank to
+run, so a missing install or seed appears in the approved plan. Answers and
+approvals already given are not asked for again, and answers carry into
+seeding, which keeps each workflow's own approval gate. With code plus a spec,
+the code describes what exists and the spec stays planned intent.
+
+The bank's state picks the route. A missing or blank bank is seeded. A partial
+bank (some core files with real content) goes through the same seed
+workflows, which propose only the missing, empty or template-only files and
+keep the others exactly as they are. An initialized bank is never re-seeded:
+`start` resumes it, `update-memory` corrects it, and `start setup` can still
+add Kit packs beside it.
+
+A local install (`install.sh --local`) keeps the files Git-excluded; the
+effective bank is unchanged by it. `sync-upstream` stops while any of Serel
+Memory's own framework files is Git-excluded, and the drift checker does not
+compare such files against a baseline: Git cannot see their bytes. Kit packs
+or unrelated workflows Git-excluded beside a shared install trigger neither.
+
+Serel Memory is installed locally when its anchor or one of the files only it
+installs is Git-excluded, the same test sync-upstream's local-install guard
+runs. From the repository root:
+
+```bash
+top="$(git rev-parse --show-toplevel)"
+if [ -n "$(git -C "$top" ls-files --others --ignored --exclude-standard -- bin/serel-memory docs/workflow-contract.md hooks/lib/resolve-scope.sh)" ] ||
+  git -C "$top" check-ignore -q .serel-memory.json; then echo "LOCAL INSTALL"; fi
+```
+
+Git-excluded Kit packs or other workflows, and the maintainer overlay, do not
+make an install local.
+
+**A local install holds the root bank only.** It excludes the root
+`memory-bank/` and `.rules`, nothing under a scope root, and listing `scopes`
+in the anchor later does not extend those exclusions: a project bank seeded
+there would be visible to Git. So after resolving the scope, and before any
+write, a workflow that would seed a project scope stops when the install is
+local: start's setup mode (asked for, or entered on its own) and its offer to
+fill a partial bank, and `discover`, `from-prd` and `init-memory` invoked
+directly. It writes nothing, leaves any existing files there, the exclusions,
+`.gitignore` and instruction files as they are, and offers the supported
+choices: the root bank (`--scope .`), or a shared (committed) install, where
+scoped banks work as described above. Never un-ignore, untrack or force-add
+anything to get past it. The root scope, and every scope in a shared install,
+are unaffected.
 
 ## Resolving the effective bank
 
@@ -300,7 +357,8 @@ finding:
   `HEAD`, evidence dirty in the worktree, a degraded scope resolver.
 - `WARN` — a soft target is exceeded (retention). Exit-neutral.
 - `INFO` — context, never a verdict: overlay gaps, unmarked bullets, framework
-  files that differ from the baseline, no local baseline to compare against.
+  files that differ from the baseline, no local baseline to compare against,
+  Git-excluded framework files that went uncompared.
 
 Then exactly one summary line:
 `serel-memory check: <d> drift, <s> stale, <i> incomplete, <w> warn, <f> fresh,
@@ -337,7 +395,14 @@ assessed: the framework baseline is compared only when the anchor's `ref`
 already resolves locally (a clone or fork carrying the upstream tags, or a
 private `refs/serel-memory/anchor` left behind by an interrupted sync — a
 completed `sync-upstream` deletes that ref). Otherwise the summary says
-`baseline: unavailable` rather than quietly skipping the comparison.
+`baseline: unavailable` rather than quietly skipping the comparison. The same
+holds for a local install — one of the files only Serel Memory installs
+(`bin/serel-memory`, `docs/workflow-contract.md`,
+`hooks/lib/resolve-scope.sh`) is Git-excluded — and when a file the baseline
+ships is: `git diff` cannot read those bytes, so the comparison is skipped
+with an `INFO` line instead of vouching for them. Another tool's Git-excluded
+files in the shared folders (a Serel Kit pack in `.agents/skills/`, say) are
+not in the baseline and leave the comparison on.
 
 **A failed check is never a clean one.** Every subprocess status is checked; a
 command that fails becomes `INCOMPLETE`, and the summary line prints even when

@@ -8,6 +8,27 @@ Created and maintained by [Gus Feliciano](https://github.com/gusfeliciano) throu
 
 Your project's memory lives in version-controlled markdown you can read, diff, and review — not a proprietary store that gets deprecated, stays on one machine, or locks you to a single IDE.
 
+## Guided setup
+
+Paste this into Claude Code or Codex, opened in your project:
+
+```text
+Set up Serel Memory in this repository. Clone
+https://github.com/madeordinary/serel-memory into a temporary folder outside
+this project and follow its docs/serel-setup.md. Look around before asking,
+then ask me only what you could not find out: one short question at a time,
+at most four. Recommend the smallest setup. Serel Kit
+(https://github.com/madeordinary/serel-kit) is optional; suggest it only if I
+need it. Show me every path you will write and whether Git will see it, and
+wait for my approval before changing anything.
+```
+
+The agent settles with you what to install (Serel Memory, Serel Kit packs, or
+both) and whether each is committed for everyone or kept in your clone only
+(Git-excluded), then seeds the bank through the usual workflow and its own
+approval step. Guided setup and the local install are unreleased: v0.6.0 does
+not include them. Details: [docs/serel-setup.md](docs/serel-setup.md).
+
 ## Quickstart
 
 ```bash
@@ -37,8 +58,8 @@ Open the project in Claude Code or Codex, then seed the memory bank based on wha
 
 | You have… | Run (Claude / Codex) |
 |-----------|----------------------|
-| Existing code | `/init-memory` / `$init-memory` |
-| A PRD or brief | `/from-prd docs/prd.md` / `$from-prd docs/prd.md` |
+| Existing code, with or without a PRD | `/init-memory` / `$init-memory` |
+| A PRD or brief, no code yet | `/from-prd docs/prd.md` / `$from-prd docs/prd.md` |
 | Just a rough idea | `/discover` / `$discover` |
 | A clear idea in your head | paste it into `memory-bank/projectbrief.md` |
 
@@ -128,7 +149,8 @@ your-project/
 │   └── serel-memory          # read-only drift check over the bank
 └── docs/
     ├── workflow-contract.md  # how workflows should be shaped
-    └── cross-agent-review.md # second-opinion loop policy
+    ├── cross-agent-review.md # second-opinion loop policy
+    └── serel-setup.md        # guided setup and the local install
 ```
 
 That's the framework — markdown files in folders, and the agent does the work. (A `degit` copy also brings Serel Memory's own project metadata — `CONTRIBUTING.md`, `SECURITY.md`, `.github/`, `tests/`, and so on — which isn't part of the framework; delete it after install. See [Install](#install).)
@@ -199,12 +221,13 @@ If the project already has code or important files, drop Serel Memory's files in
 cd ~/path/to/your-existing-project
 
 git clone --depth 1 --branch v0.6.0 https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
-rsync -av --ignore-existing --exclude 'settings.local.json' /tmp/serel-memory/memory-bank /tmp/serel-memory/.agents /tmp/serel-memory/.claude /tmp/serel-memory/.rules /tmp/serel-memory/AGENTS.md /tmp/serel-memory/hooks /tmp/serel-memory/bin /tmp/serel-memory/docs .
+rsync -av --ignore-existing --exclude 'settings.local.json' /tmp/serel-memory/memory-bank /tmp/serel-memory/.agents /tmp/serel-memory/.claude /tmp/serel-memory/.rules /tmp/serel-memory/AGENTS.md /tmp/serel-memory/hooks /tmp/serel-memory/bin .
+mkdir -p docs && rsync -av --ignore-existing /tmp/serel-memory/docs/workflow-contract.md /tmp/serel-memory/docs/cross-agent-review.md docs/
 rm -rf /tmp/serel-memory
 [ -e .serel-memory.json ] || printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.6.0", "linked": false }\n' > .serel-memory.json
 ```
 
-The `rsync` command is intentionally one line so shell line-continuation mistakes cannot drop the source/destination arguments. Existing files and folders, including something like `docs/prd.md`, are preserved because `--ignore-existing` skips paths that are already present.
+Each `rsync` command is intentionally one line so shell line-continuation mistakes cannot drop the source/destination arguments. Existing files and folders, including something like `docs/prd.md`, are preserved because `--ignore-existing` skips paths that are already present. Only the two framework docs are copied into `docs/`; Serel Memory's own research notes and decision records stay out of your project.
 
 Do not run `degit` directly into an existing git repo with files unless you have already reviewed what it will overwrite. The `rsync --ignore-existing` path above is safer because it skips files that already exist. That also means existing `AGENTS.md`, `.rules`, `.claude/`, or `.agents/` files may need a manual merge to pick up Serel Memory's instructions and workflows.
 
@@ -216,6 +239,27 @@ automatic loading.
 Then — and this is the part most people miss — *don't fill the memory bank by hand.* Open Claude Code and run `/init-memory`, or open Codex and invoke `$init-memory`. The agent reads your codebase, your README, and your dependencies, then proposes contents for each memory bank file. Review the drafts, edit anything that's off, approve, and the agent writes them. This is faster than filling templates from blank and catches things you'd forget to write down.
 
 After that, run `/start` or invoke `$start` to verify the bootstrap works.
+
+### Local only (not committed)
+
+To use Serel Memory in a repository without committing it — someone else's
+project, or a team that has not adopted it — install it into your clone only:
+
+```bash
+git clone https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
+bash /tmp/serel-memory/install.sh ~/path/to/your-project --local          # preview, writes nothing
+bash /tmp/serel-memory/install.sh ~/path/to/your-project --local --apply  # install
+```
+
+The installer writes exact entries to the repository's `info/exclude` first,
+then copies the framework and a blank bank. Tracked files, the index and your
+existing work are untouched, an existing `AGENTS.md` is left alone, and a
+tracked or conflicting destination stops the run before anything is written.
+The files live only in that clone: Git does not back them up, `git clean -x`
+deletes them, and `git add -f` can still commit them. It holds the root bank
+only: scoped project banks need a shared install. Updating a local install,
+and `sync-upstream` on one, are not supported yet. This is unreleased: v0.6.0
+does not include it. Full rules: [docs/serel-setup.md](docs/serel-setup.md).
 
 ## A 5-minute tour
 

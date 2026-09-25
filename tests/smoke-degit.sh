@@ -34,6 +34,11 @@ if [ -e "$tmp/.serel-memory.json" ]; then
   echo "LEAK: .serel-memory.json is present in the degit export (anchor must be install-written)"; fail=1
 fi
 
+# 1d. The local installer is checkout tooling; it must not land in a project.
+if [ -e "$tmp/install.sh" ]; then
+  echo "LEAK: install.sh is present in the degit export (export-ignore broken)"; fail=1
+fi
+
 # 2. No Serel Memory/Basecamp-specific live dev content in the shipped bank or .rules.
 if grep -rniE '17/17|skill parity|(basecamp|serel memory) framework is at|cherry-pick by commit in sync' \
      "$tmp/memory-bank" "$tmp/.rules" 2>/dev/null; then

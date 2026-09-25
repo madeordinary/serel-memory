@@ -37,7 +37,7 @@ for f in .claude/commands/sync-upstream.md .agents/skills/sync-upstream/SKILL.md
   # second line (or the other adapter) that dropped a path.
   while IFS= read -r line; do
     [ -n "$line" ] || continue
-    for required in bin/serel-memory hooks/ AGENTS.md; do
+    for required in bin/serel-memory hooks/ AGENTS.md docs/serel-setup.md; do
       case "$line" in
         *"$required"*) ;;
         *) echo "MISSING: an allowlist line in $f does not include $required:"
@@ -46,6 +46,18 @@ for f in .claude/commands/sync-upstream.md .agents/skills/sync-upstream/SKILL.md
       esac
     done
   done <<<"$matches"
+done
+
+# The drift checker's baseline and the local installer's payload are copies of
+# the same list: a path added to one and not the others is either never
+# compared or never installed.
+canonical="$(grep -m1 '^\.agents/skills/ ' .claude/commands/sync-upstream.md || true)"
+for f in bin/serel-memory install.sh; do
+  copy="$(awk '/^FRAMEWORK_PATHS=\(/,/\)$/' "$f" | tr -d '\\()' | sed 's/^FRAMEWORK_PATHS=//' | tr -s ' \n' '  ' | sed 's/^ //; s/ $//')"
+  if [ -z "$canonical" ] || [ "$copy" != "$canonical" ]; then
+    echo "DRIFT: FRAMEWORK_PATHS in $f is '$copy', expected the sync allowlist '$canonical'"
+    fail=1
+  fi
 done
 
 if [ "$fail" -eq 0 ]; then

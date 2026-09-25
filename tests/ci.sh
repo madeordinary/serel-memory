@@ -26,7 +26,7 @@ checks() {
   shellcheck_bin="$(bash .github/ci/shellcheck.sh "$tmp")"
   printf 'ShellCheck: %s\n' "$shellcheck_bin"
   "$shellcheck_bin" --version
-  "$shellcheck_bin" hooks/*.sh hooks/lib/*.sh tests/*.sh bin/serel-memory .github/ci/*.sh
+  "$shellcheck_bin" install.sh hooks/*.sh hooks/lib/*.sh tests/*.sh bin/serel-memory .github/ci/*.sh
   for suite in tests/check-*.sh tests/smoke-*.sh; do
     printf '\n==> %s\n' "$suite"
     bash "$suite"

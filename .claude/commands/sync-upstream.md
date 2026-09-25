@@ -12,6 +12,7 @@ Check the upstream Serel Memory repo for new framework updates (skills, commands
 
 - Git must be available.
 - The repo must have started from Serel Memory (formerly Basecamp) — copied in via `degit`, cloned, or forked. (Template mode in step 4 handles the `degit` case, where there's no shared git history.)
+- The framework files must be tracked. A local install (`install.sh --local`, see `docs/serel-setup.md`) keeps them Git-excluded, so Git cannot show local edits and a restore would overwrite them without a trace. The preflight's local-install guard stops when Memory's own files or the anchor are Git-excluded — removing the anchor's exclusion does not make a local install syncable — and the restore guard in step 3 stops on any untracked or Git-excluded file that upstream ships. Updating a local install is not supported yet. Another tool's local files in the shared folders (such as Serel Kit packs installed with `--local`) do not stop sync: upstream does not ship them, so no restore touches them.
 
 ## Framework vs Project Files
 
@@ -24,6 +25,7 @@ Only framework files should be synced. Never auto-merge project-specific files.
 - `AGENTS.md` — agent instructions
 - `docs/workflow-contract.md` — workflow design contract
 - `docs/cross-agent-review.md` — second-opinion loop policy
+- `docs/serel-setup.md` — guided setup and the local install
 - `hooks/` — optional automation scripts
 - `bin/serel-memory` — the read-only drift checker
 
@@ -67,7 +69,7 @@ read — it triggers the fail-fast guard in step 1 until the user renames it.
 Only these paths are eligible for sync. Use this exact list in all git commands:
 
 ```text
-.agents/skills/ .claude/commands/ AGENTS.md docs/workflow-contract.md docs/cross-agent-review.md hooks/ bin/serel-memory
+.agents/skills/ .claude/commands/ AGENTS.md docs/workflow-contract.md docs/cross-agent-review.md docs/serel-setup.md hooks/ bin/serel-memory
 ```
 
 ## Legacy Claude import shim
@@ -111,7 +113,14 @@ the restored framework files.
 
    ```bash
    cd "$(git rev-parse --show-toplevel)"  # sync is repo-root anchored: framework files and the anchor live at the root, never in a scope folder
-   git status --porcelain -- .agents/skills/ .claude/commands/ AGENTS.md docs/workflow-contract.md docs/cross-agent-review.md hooks/ bin/serel-memory
+   # Local-install guard: sync reads and restores through Git, so Memory's own files and the anchor may not be Git-excluded.
+   excluded="$(git ls-files --others --ignored --exclude-standard -- bin/serel-memory docs/workflow-contract.md hooks/lib/resolve-scope.sh)"
+   if [ -n "$excluded" ] || git check-ignore -q .serel-memory.json; then
+     echo "LOCAL INSTALL: Git-excluded Serel Memory files or anchor; updating a local install is not supported yet."
+     printf '%s\n' "$excluded"
+     exit 1
+   fi
+   git status --porcelain -- .agents/skills/ .claude/commands/ AGENTS.md docs/workflow-contract.md docs/cross-agent-review.md docs/serel-setup.md hooks/ bin/serel-memory
    # Legacy-anchor guard: fail fast, never treat as unanchored, never reconstruct.
    if [ ! -f .serel-memory.json ] && [ -f .basecamp.json ]; then  # legacy anchor present
      echo "MIGRATION REQUIRED: this project still has a legacy .basecamp.json anchor."
@@ -122,6 +131,8 @@ the restored framework files.
    ```
 
    If any framework files have uncommitted changes, warn the user and ask them to commit or stash before syncing. `git restore` from upstream would silently overwrite their edits.
+
+   **Stop on a local install.** If the local-install guard fired, STOP before any other step and show the files it listed. Say that sync compares and restores through Git, which cannot see edits to Git-excluded files, so updating a local install is not supported yet. Never untrack, force-add, or un-exclude files to get past it. It checks only files Serel Memory alone installs, so another tool's local files in the shared folders (such as Serel Kit packs installed with `--local`) do not fire it.
 
    **Fail fast on a legacy-only anchor.** If the guard above fired, STOP: the project is still anchored to a pre-0.3.0 install. Tell the user to migrate by renaming the legacy `.basecamp.json` to `.serel-memory.json` (same schema; advance `ref` on the next successful sync). Never treat the project as unanchored and never reconstruct a baseline while a legacy `.basecamp.json` is present — and never create a second anchor alongside it.
 
@@ -158,6 +169,22 @@ the restored framework files.
    ```
 
    The tag (or commit) is fetched into a private ref, never into the project's own tags — a downstream `v0.3.0` must not collide with upstream's. Use `$ANCHOR` wherever the steps below say `<ref>`. If it does not resolve, say so and fall back to the direct `HEAD`-vs-`upstream/main` diff only.
+
+   Then check that no restore would replace a file Git has no copy of:
+
+   ```bash
+   # Restore guard: a file upstream ships must not be untracked or Git-excluded here; a restore would replace it without a trace.
+   untracked="$(git ls-files --others -- .agents/skills/ .claude/commands/ AGENTS.md docs/workflow-contract.md docs/cross-agent-review.md docs/serel-setup.md hooks/ bin/serel-memory)" || exit 1
+   shipped="$(git ls-tree -r --name-only upstream/main -- .agents/skills/ .claude/commands/ AGENTS.md docs/workflow-contract.md docs/cross-agent-review.md docs/serel-setup.md hooks/ bin/serel-memory)" || exit 1
+   replaced="$(comm -12 <(printf '%s\n' "$untracked" | sort) <(printf '%s\n' "$shipped" | sort))"
+   if [ -n "$replaced" ]; then
+     echo "UNTRACKED FRAMEWORK FILES: upstream ships these paths, and a restore would replace the local files without a trace."
+     printf '%s\n' "$replaced"
+     exit 1
+   fi
+   ```
+
+   **Stop before replacing untracked files.** If the restore guard fired (or Git could not list the files), STOP before any other step and show what it printed. Upstream ships those paths, but here Git does not track them, so a restore would replace them and Git keeps no copy. If they belong to a local install, updating it is not supported yet; a file of the user's own can be committed or moved first. Never force-add, untrack, or un-exclude files to get past it. Local files upstream does not ship — a downstream custom command, or a Serel Kit pack installed with `--local` — never fire it.
 
 4. **Detect sync mode.**
 
