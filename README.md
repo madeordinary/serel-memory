@@ -29,6 +29,24 @@ both) and whether each is committed for everyone or kept in your clone only
 approval step. Guided setup and the local install are unreleased: v0.6.0 does
 not include them. Details: [docs/serel-setup.md](docs/serel-setup.md).
 
+## Update an existing installation
+
+Paste this into Claude Code or Codex opened at your project root.
+
+```text
+Update this project's Serel Memory framework. This project is the target; a fresh clone only supplies instructions.
+
+1. Inspect first, changing nothing: Git status, .serel-memory.json, legacy installation metadata, Git-excluded Memory files, and .serel-kit.json. If Memory is missing, stop; do not install it.
+2. Clone https://github.com/madeordinary/serel-memory into a temporary directory outside this project. Follow its sync-upstream workflow (.claude/commands/sync-upstream.md for Claude Code, .agents/skills/sync-upstream/SKILL.md for Codex), CHANGELOG, and referenced docs, not the installed copy.
+3. Run its preflights and prepare the proposed sync. If a safeguard stops it, explain and stop; never un-ignore, force-add, or untrack files. Leave missing, legacy, or unknown baselines to the workflow; never invent one.
+4. You may fetch upstream and create the remote and temporary refs required by the workflow to prepare the review. Before editing project files or the anchor, show me the installed baseline, the proposed upstream commit and whether it is released, its benefits, diffs, and conflicts. Wait for approval, then apply only the approved changes through that workflow.
+5. Never reset, reseed, or overwrite memory-bank/, .rules, or project docs. Preserve customizations in any proposed AGENTS.md, command, or skill update. Keep my Git sharing choices.
+6. Do not commit or push. Offer a memory bank audit or refresh as a separate step. If Serel Kit is installed, offer its upgrade separately.
+```
+
+Sync targets upstream `main` and cannot select a release tag. Local,
+Git-excluded installs cannot be updated yet.
+
 ## Quickstart
 
 ```bash
