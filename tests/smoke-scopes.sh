@@ -4,7 +4,8 @@
 # Builds a fixture repo with a root bank and three project roots, then drives
 # hooks/lib/resolve-scope.sh through every documented case and checks both
 # hooks: with scopes they list project selectors and read no project bank;
-# without scopes SessionStart output is identical to the v0.3.0 hook and
+# without scopes SessionStart output is identical to the v0.3.0 hook (apart
+# from its guidance paragraph) and
 # PreCompact differs only by the documented retention step.
 # shellcheck disable=SC2015,SC2016  # ok/bad never fail (plain either/or); backticks in grep patterns are literal
 # Hook output is always captured into a variable before grep -q: with pipefail,
@@ -142,9 +143,11 @@ printf '%s\n' "$pc" | grep -q 'effective bank `projects/watching/thing/memory-ba
 printf '%s\n' "$pc" | grep -q 'never remembered' && ok "pre-compact: no remembered scope" || bad "pre-compact: remembered-scope wording"
 printf '%s\n' "$pc" | grep -qi 'selected a different' && bad "pre-compact still tells the agent to reuse an earlier --scope" || ok "pre-compact: no earlier-scope override"
 
-# Without scopes: byte-identical to the v0.3.0 hooks on the same fixture.
+# Without scopes: byte-identical to the v0.3.0 hooks on the same fixture,
+# except the guidance paragraph under the heading (lines 3 through the next
+# blank line), whose wording evolves with the contract.
 anchor_without
-new_ss="$(bash "$ROOT/hooks/session-start.sh")"; old_ss="$(bash "$tmp/old-session-start.sh")"
+new_ss="$(bash "$ROOT/hooks/session-start.sh" | sed '3,/^$/d')"; old_ss="$(bash "$tmp/old-session-start.sh" | sed '3,/^$/d')"
 [ "$new_ss" = "$old_ss" ] && ok "session-start without scopes is identical to v0.3.0" || { bad "session-start drifted from v0.3.0"; diff <(printf '%s\n' "$old_ss") <(printf '%s\n' "$new_ss") | head -20; }
 # pre-compact's wording evolves with the contract, so the scope guarantee is
 # checked directly: on the same fixture, the hook prints exactly the same text

@@ -14,7 +14,7 @@ Steps:
 2. Run `git diff main...HEAD` (or `git diff` for uncommitted changes) to see what changed. If `main` doesn't exist, find the likely base branch or state the fallback.
 3. Launch the cross-agent pass in the background if it qualifies (see below) — before drafting any findings of your own.
 4. Read modified files in full when context matters — not just the diff.
-5. Check the change against the memory bank: does it match `projectbrief.md` goals, `systemPatterns.md` architecture, and `decisionLog.md` decisions?
+5. Check the change against the memory bank: does it match `projectbrief.md` goals, `systemPatterns.md` architecture, and `decisionLog.md` decisions? Classify a mismatch per contract "Memory accuracy": a change that breaks an accepted decision is a possible-regression finding; a stale bank fact is a memory conflict for `/update-memory`, not a code defect; a proposed decision is not a requirement.
 
 ## Cross-agent pass (opportunistic)
 
@@ -67,9 +67,15 @@ LOW (nice to have):
 
 QUESTIONS:
 - [anything you couldn't determine from the code]
+
+MEMORY USED:
+- [bank path § section] → [the finding it produced or changed] (or: none)
+
+MEMORY CONFLICTS:
+- [bank path § section] [current fact | durable decision | intended future | open question]: [conflict] → [action] (or: none)
 ```
 
-Omit the provenance tags when the review was single-model.
+Omit the provenance tags when the review was single-model. `MEMORY USED` lists only entries that produced or changed a finding, not everything read.
 
 At minimum, check for:
 

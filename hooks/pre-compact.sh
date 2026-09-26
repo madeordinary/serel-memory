@@ -58,10 +58,13 @@ effective bank — apply all of the updates below to `memory-bank.local/` and it
    - Update the phase if it changed
 
 3. Update `memory-bank/decisionLog.md` if a durable architectural, product,
-   workflow, or operational decision was made.
+   workflow, or operational decision was made. Record one the user did not
+   direct or approve as proposed.
 
-4. If anything non-obvious was learned this session — a user preference, a
-   gotcha, a rejected approach worth remembering — append it to `.rules`.
+4. If a lesson learned this session — a user preference, a gotcha, a rejected
+   approach — clears the lesson bar (non-obvious, reusable, costly to
+   rediscover, not already in code, tests, comments, or docs; see
+   `docs/workflow-contract.md` "Memory writes"), append it to `.rules`.
 
 5. Apply the update-memory retention step: run
    `hooks/lib/rotate-check.sh` on the proposed `activeContext.md` and

@@ -29,6 +29,8 @@ Use this skill to record a durable decision. Significant decisions should get an
 
 Proposed | Accepted | Deprecated | Superseded by [NNN]
 
+[Who decided: proposed by <who>, or user-directed / user-approved — source and date when known.]
+
 ## Context
 
 [Situation, constraints, and why this decision exists.]
@@ -68,6 +70,6 @@ Proposed | Accepted | Deprecated | Superseded by [NNN]
 ## Rules
 
 - ADRs are for decisions with meaningful alternatives or future consequences.
-- Use `Proposed` unless the decision is already in effect.
+- Use `Proposed` unless the user directed or already approved the decision; being implemented is not approval. Only the user makes it `Accepted` — never accept your own suggestion, and do not ask again for approval already given (a user who changes a `Proposed` draft to `Accepted` in review has approved it). Record who decided in the ADR and the index entry (contract "Memory writes").
 - Consequences should be balanced.
 - Do not silently overwrite existing ADRs.

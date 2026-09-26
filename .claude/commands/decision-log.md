@@ -26,6 +26,8 @@ Use this structure:
 
 Proposed | Accepted | Deprecated | Superseded by [NNN]
 
+[Who decided: proposed by <who>, or user-directed / user-approved — source and date when known.]
+
 ## Context
 
 [What's the situation that's forcing this decision? What constraints are in play? Be specific about what's actually true today.]
@@ -64,7 +66,7 @@ After writing, ask the user whether `memory-bank/systemPatterns.md` should be up
 Rules:
 
 - ADRs are for *real* decisions — ones with alternatives that were genuinely considered. Don't ADR trivial things ("we use 2-space indents").
-- Status starts as "Proposed" unless the decision is already in effect. The user updates to "Accepted" when they're confident.
+- Status starts as "Proposed" unless the user directed or already approved the decision; being implemented is not approval. Only the user makes it "Accepted" — never accept your own suggestion, and don't ask again for approval already given (a user who changes a Proposed draft to Accepted in review has approved it). Record who decided in the ADR and the index entry (contract "Memory writes").
 - Alternatives section should be honest. If you didn't seriously consider others, say so — that's also useful context.
 - Consequences should be balanced. If you can't think of negatives, you probably haven't thought hard enough about the decision.
 - Do not silently overwrite an existing ADR or decision-log entry.

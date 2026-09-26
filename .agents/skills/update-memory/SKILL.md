@@ -35,12 +35,15 @@ Use this skill to update the memory bank from the current session. Always show p
    - `techContext.md` — stack, environment, or operational changes, including
      evidenced corrections to existing setup instructions and factual claims
    - `decisionLog.md` — durable decisions or dated factual annotations to
-     existing entries. Preserve the original rationale and history. If a past
+     existing entries, with who decided (contract "Memory writes"): a
+     suggestion the user did not direct or approve is recorded as proposed,
+     and an accepted entry lacking provenance stays accepted.
+     Preserve the original rationale and history. If a past
      decision changed, **supersede, don't delete**: append "SUPERSEDED by …
      (date)" and move it to the Superseded section.
    - `productContext.md` or `projectbrief.md` for changed intent or obsolete
      factual content; preserve still-valid goals and user needs
-5. Append to `.rules` only for non-obvious reusable learnings. If the entry is a repeat, or the same correction has recurred, first ask why the existing guidance did not take, then propose a test or hook check instead of a second line (contract "Memory writes" item 5). Then **prune** it: if it's over ~40 lines or holds stale lines, drop what's no longer true and promote stabilized conventions into `systemPatterns.md`.
+5. Append to `.rules` a lesson learned this session — a user preference, a gotcha, a rejected approach — only if it clears the contract's "Lesson bar": non-obvious, reusable, costly to rediscover, and not already captured in code, tests, comments, or docs. Do not edit product code to capture one. Name any candidate you skipped, and why, under **Captured**. If the entry is a repeat, or the same correction has recurred, first ask why the existing guidance did not take, then propose a test or hook check instead of a second line (contract "Memory writes" item 5). Then **prune** it: if it's over ~40 lines or holds stale lines, drop what's no longer true and promote stabilized conventions into `systemPatterns.md`.
 6. **Retention (required).** Write the proposed `activeContext.md` and `progress.md` to a temp location and run the read-only helper on each - it measures the file *as it would be after this update*:
 
    ```bash

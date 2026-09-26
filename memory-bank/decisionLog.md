@@ -11,7 +11,7 @@
 
 ## Active decisions
 
-<!-- Entry shape: **decision** (date) — why; evidence: <pointer>; result: <outcome | pending>. -->
+<!-- Entry shape: **decision** (date) — why; status: <proposed | accepted> (proposed by <who>, user-directed, or user-approved — source and date when known; provenance unknown on an older entry); evidence: <pointer>; result: <outcome | pending>. -->
 
 <!-- Format: **[decision]**: [what was decided] — [why] (alternatives: [A], [B]). -->
 

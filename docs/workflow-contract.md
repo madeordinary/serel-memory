@@ -186,6 +186,13 @@ Use this promotion path:
    An entry says *decision / why / evidence / result* and keeps its date,
    status, and supersession link; an accepted-but-unbuilt decision records
    `result: pending`. ADRs still carry alternatives and consequences.
+   Say in plain prose who decided: *proposed* (a suggestion, the agent's
+   included) or *user-directed* / *user-approved*, with the source and date
+   when known. Only the user accepts a decision: an agent cannot accept its
+   own suggestion, and implementation alone is not approval. Explicit
+   approval already given suffices, including a reviewed decision the user
+   approved in a shown diff; do not ask again. An existing accepted entry
+   without provenance stays accepted: mark provenance unknown, never demote it.
 5. Reusable patterns and gotchas go in `.rules`. When a `.rules` entry is
    about to be written a second time, or a correction recurs, first ask why
    the existing guidance did not take (did it trigger? was it already there?
@@ -193,6 +200,15 @@ Use this promotion path:
    check, a CI step. Keep the prose rule until the mechanism exists and works;
    judgment rules stay prose with a concrete failure example.
 6. Stable architecture goes in `memory-bank/systemPatterns.md`.
+
+**Lesson bar.** A lesson (a gotcha, pattern, preference, or rejected
+approach) is written to `.rules`, `systemPatterns.md`, or an optional doc
+only when it is non-obvious, reusable beyond the current task, materially
+costly or risky to rediscover, and not already adequately captured in code,
+tests, comments, or docs. An artifact that already carries it makes bank
+prose unnecessary. `update-memory` does not edit product code; it may suggest
+a comment or test instead. The bar applies to lessons only: session state,
+progress, status, and decisions are captured as usual.
 
 Do not turn the memory bank into a journal. A line should survive because it helps
 the next session make a better decision.
@@ -205,11 +221,12 @@ session. This is routine reconciliation, not a full repository audit.
 
 - **Capture:** compare session decisions and observations with relevant git
   history, staged and unstaged diffs, and relevant new files. Identify durable
-  changes missing from the bank: completed work, changed constraints, accepted
-  or superseded decisions, reusable learnings, unresolved problems, and the
-  next action. A decision may have no code diff. Do not claim a test or manual
-  verification ran without an observed result; distinguish committed work,
-  uncommitted work, and released behavior.
+  changes missing from the bank: completed work, changed constraints, accepted,
+  proposed or superseded decisions with their provenance, learnings that clear
+  the lesson bar, unresolved problems, and the next action. A decision may
+  have no code diff. Do not claim a test or manual verification ran without
+  an observed result; distinguish committed work, uncommitted work, and
+  released behavior.
 - **Reconcile:** search the live bank and its own `.rules` for existing claims
   about those subjects. Read optional docs only when they match. Update current
   status, next steps, and obsolete blockers together; completing a feature also
@@ -222,10 +239,19 @@ Classify discrepancies before proposing a correction: **current fact**,
 **durable decision**, **intended future**, or **open question**. Code and
 observed results establish current behavior; they do not supersede accepted
 intent. If behavior violates a decision, report a possible regression for the
-owner to resolve. Missing evidence means unassessed or unresolved, not false.
+owner to resolve. A proposed decision is not accepted intent yet: treat it as
+an open question, not a constraint. Missing evidence means unassessed or
+unresolved, not false.
 For external capability claims, record the source and applicable version or
 verification date; re-check the source when relying on a changeable claim, or
-say it could not be checked. The offline drift checker cannot do this.
+say it could not be checked. A workaround for an external limitation may
+also state, in plain language, the condition that would retire it (say, the
+upstream fix it waits for), with the primary source and version or date when
+applicable. The condition is optional. Meeting it is a reason to investigate
+a safe removal within the existing scope and approvals, not proof that the
+workaround, its explanation or accepted intent is stale: while the workaround
+remains, an accurate explanation stays. Not meeting it does not by itself
+prove the workaround correct. The offline drift checker evaluates neither.
 
 Decisions are superseded with links, never silently deleted. Dated historical
 entries, including recent changes and milestones, stay verbatim and rotate
@@ -233,9 +259,10 @@ under Retention; an old release mentioned as history is not a stale claim.
 Never cross scopes to reconcile another bank or write inherited root rules.
 
 Before the proposed diffs, give a compact coverage summary: **Captured** (new
-durable information and its evidence), **Reconciled** (old claims corrected
-and their locations), and **Unresolved** (missing evidence or owner decisions;
-say none when there are none). This summary describes the subjects checked,
+durable information and its evidence; any candidate lesson skipped under the
+lesson bar, with the reason, when there were candidates), **Reconciled** (old
+claims corrected and their locations), and **Unresolved** (missing evidence or
+owner decisions; say none when there are none). This summary describes the subjects checked,
 not a certification of the whole bank. Show diffs and use the existing
 confirmation gate; reconciliation adds no separate approval step.
 
@@ -258,6 +285,15 @@ repository or external evidence, an action, and the evidence's limits. Separate
 Old verification records and source-level tests do not prove a fresh test pass.
 Keep unsupported claims unverified; turning one into a target requires owner
 intent. Implementation or commit evidence alone does not establish a release.
+A workaround's recorded retirement condition is reported in coverage as met,
+not met, or unverifiable, with its evidence. The outcome alone is not a
+finding: use one of those kinds only for a discrepancy the evidence supports
+(say, the bank calls the upstream fix unreleased when its primary source shows
+it released). Met is a reason to investigate a safe removal within existing
+scope and approvals; the fix may be released but not installed here, and an
+accurate explanation of a workaround that still exists is not drift. Not met
+does not prove the workaround still correct; unverifiable, including an
+external source that could not be reached, is unassessed, not false.
 
 The workflow writes nothing and runs no tests, builds, recipes or secondary
 agents. It may run the read-only checker, reporting its exit code and summary

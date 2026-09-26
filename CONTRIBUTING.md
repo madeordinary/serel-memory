@@ -60,7 +60,8 @@ bash tests/ci.sh docs      # Markdown lint only
 ```
 
 Use a full Git checkout with release tags (`git fetch --unshallow --tags` for
-a shallow clone, otherwise `git fetch origin --tags`), Bash, and `jq`.
+a shallow clone, otherwise `git fetch origin --tags`), Bash, `jq`, and
+Python 3 (the memory-use fixture builds a synthetic Python project).
 Markdown lint requires the Node version in `.github/ci/node-version` and its
 bundled npm. These are maintainer tools, not framework runtime dependencies.
 
@@ -85,6 +86,17 @@ official archive checksums together; update the Markdown manifest and lockfile
 from `.github/ci/`; update `.github/ci/node-version` for Node. Keep action
 commit pins and lychee's version in the workflow current through reviewed
 changes. Rerun the complete preflight and GitHub checks after each update.
+
+## Behavior exercises
+
+The checks prove structure and mechanics, not what an agent does with a
+prompt. When a change is meant to alter agent behavior, run the matching
+manual exercise in fresh CLI sessions and record what you observed:
+`tests/analyze-acceptance.md` (`/analyze`), `tests/local-setup-acceptance.md`
+(local installs and setup routing), and `tests/memory-use-acceptance.md` (how
+`breakdown`, `review`, and `update-memory` use and write memory). Their
+builders create synthetic repositories outside any Git work tree. They are
+contributor tools, in neither the sync allowlist nor the installer's payload.
 
 ## Style
 
