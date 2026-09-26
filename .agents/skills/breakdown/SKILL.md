@@ -82,5 +82,5 @@ Then end with: **"Want me to proceed, or change something first?"** and wait.
 - Say material assumptions explicitly.
 - If the request has more than one reasonable interpretation, lay them out and ask which one — don't silently pick.
 - If the memory bank is blank, stale, or contradictory, say what is missing before guessing.
-- `MEMORY USED` lists only entries that changed the plan, not everything read. In `MEMORY CONFLICTS`, classify per the contract's "Memory accuracy": plan a stale current fact against the code and flag it for `$update-memory`; take a request or code that breaks an accepted decision to the user; a proposed decision is an open question, not a constraint.
+- `MEMORY USED` lists only entries that changed the plan, not everything read. That relevance applies to the whole plan: don't raise risks, questions, or follow-ups from bank entries unrelated to the request, or infer components the task lacks from them — but keep real unknowns and applicable accepted decisions visible. In `MEMORY CONFLICTS`, classify per the contract's "Memory accuracy": plan a stale current fact against the code and flag it for `$update-memory`; take a request or code that breaks an accepted decision to the user; a proposed decision is an open question, not a constraint.
 - Do not start implementation until the user confirms.
