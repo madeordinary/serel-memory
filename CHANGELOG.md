@@ -11,6 +11,11 @@ bar, and memory use shown in plans and reviews. None of this is in 0.6.0.
 
 ### Added
 
+- A copyable update prompt for existing installations in the README. It
+  reads fresh upstream sync instructions, explains proposed changes and
+  release status before approval, and keeps framework updates separate from
+  project memory and optional Kit upgrades. Local Memory upgrades remain
+  unsupported.
 - `docs/serel-setup.md`, the canonical setup guide (named so it does not
   collide with a project's own `docs/setup.md`), and a copyable setup prompt
   near the top of the README. The agent resolves the scope and looks before it
