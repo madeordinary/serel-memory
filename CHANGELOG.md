@@ -6,7 +6,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [Unreleased]
 
-Guided setup and a local, Git-excluded install. None of this is in 0.6.0.
+Guided setup and a local, Git-excluded install; decision provenance, a lesson
+bar, and memory use shown in plans and reviews. None of this is in 0.6.0.
 
 ### Added
 
@@ -49,8 +50,38 @@ Guided setup and a local, Git-excluded install. None of this is in 0.6.0.
   names, existing instructions, negations, linked worktrees, source/target
   safety, rollback, provenance) and a fresh-session acceptance guide for the
   agent CLIs, `tests/local-setup-acceptance.md`.
+- `breakdown` and `review` (both adapters) end with **Memory used** (the bank
+  entries that changed a step or finding, or none) and **Memory conflicts**
+  (classified as current fact, durable decision, intended future, or open
+  question, or none). Their required reads are unchanged.
+- `tests/memory-use-acceptance.md` and `tests/prepare-memory-use-fixture.sh`:
+  a manual, paired exercise for breakdown, review and update-memory. The
+  control omits only the target lesson, and nothing in a workspace names its
+  variant. `tests/smoke-memory-use-fixture.sh` checks the builder's pairing,
+  isolation and refusals, not agent judgment.
 
 ### Changed
+
+- `AGENTS.md` and the SessionStart hook no longer say the code is correct
+  whenever it conflicts with the bank. A stale current fact is corrected; code
+  that breaks an accepted decision is a possible regression for the user.
+- Decisions say who decided, in plain prose: proposed, user-directed or
+  user-approved, with source and date when known. Only the user accepts a
+  decision, implementation is not approval, approval already given is not
+  asked for again, and accepted entries without provenance stay accepted.
+  `/decision-log` no longer starts a decision as Accepted because it is
+  already in effect; the starter `decisionLog.md` entry shape shows status
+  and provenance.
+- A lesson bar for `.rules`, `systemPatterns.md` and optional docs:
+  non-obvious, reusable, costly to rediscover, and not already captured in
+  code, tests, comments or docs. Status, progress and decisions are captured
+  as before. `update-memory` names skipped candidate lessons under Captured
+  and does not edit product code.
+- A workaround may carry a plain-language retirement condition with its
+  source. `/analyze` reports it met, not met or unverifiable with its
+  evidence, raising an existing finding kind only for a discrepancy the
+  evidence supports; a met condition prompts investigating a safe removal,
+  not rewriting an accurate explanation. The offline checker is unchanged.
 
 - `/discover`, `/from-prd` and `/init-memory` (both adapters) reuse answers
   already given during setup and share one partial-bank rule: files with real

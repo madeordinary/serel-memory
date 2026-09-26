@@ -34,7 +34,7 @@ Use this skill to review code or a proposed change. Take a code-review stance: f
    - Simplicity — overcomplication, speculative abstractions, or config that was not requested
    - Security and secret leakage
    - Performance pitfalls
-   - Alignment with memory-bank intent and decisions
+   - Alignment with memory-bank intent and decisions, classified per the contract's "Memory accuracy": a change that breaks an accepted decision is a possible-regression finding; a stale bank fact is a memory conflict for `$update-memory`, not a code defect; a proposed decision is not a requirement
 
 ## Cross-agent pass (opportunistic)
 
@@ -87,8 +87,14 @@ LOW (nice to have):
 
 QUESTIONS:
 - [anything you could not determine from code]
+
+MEMORY USED:
+- [bank path § section] -> [the finding it produced or changed] (or: none)
+
+MEMORY CONFLICTS:
+- [bank path § section] [current fact | durable decision | intended future | open question]: [conflict] -> [action] (or: none)
 ```
 
-Omit the provenance tags when the review was single-model.
+Omit the provenance tags when the review was single-model. `MEMORY USED` lists only entries that produced or changed a finding, not everything read.
 
 If there are no findings, say so clearly and mention any remaining test gaps or residual risk.

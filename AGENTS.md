@@ -41,9 +41,9 @@ Downstream projects never have this directory; everything else in this file refe
 
 - Keep `activeContext.md` honest as the focus shifts during the session.
 - For work that spans sessions, keep a `## Checkpoint` section in `activeContext.md` current: one resumable state (branch, what's done, the exact next step). Overwrite it, don't append; clear it when the work ships.
-- When you discover a non-obvious pattern or user preference, append it to `.rules`.
+- When you discover a lesson that clears the bar — a non-obvious, reusable pattern, preference, or gotcha that would be costly to rediscover and isn't already captured in code, tests, comments, or docs — append it to `.rules` ("Lesson bar" in `docs/workflow-contract.md`).
 - Before significant work, propose a plan and wait for confirmation. Once a plan or scope is approved, work autonomously inside that lane — no per-file re-asking; still stop for destructive actions, scope changes, outward-facing actions, and any approval gate a workflow itself defines (show-diffs-before-writing, per-file proposals).
-- The memory bank is the source of truth for intent. If it conflicts with the actual code, the code is correct and the bank needs updating — flag this so the user can decide.
+- The memory bank is the source of truth for intent; code and observed results are the source of truth for current behavior. When they conflict, classify before acting ("Memory accuracy" in `docs/workflow-contract.md`): a stale current fact means the bank needs updating; code that breaks an accepted decision or intent is a possible regression. Flag either so the user can decide — never rewrite accepted intent to match the code.
 
 ## Making changes
 
@@ -56,7 +56,7 @@ How code gets written in a session, not just how the bank is kept. For non-trivi
 
 ## When the user says "update memory bank"
 
-Refresh every file in `memory-bank/`. Focus especially on `activeContext.md`, `progress.md`, and `decisionLog.md` when decisions changed. Show diffs before writing.
+Refresh every file in `memory-bank/`. Focus especially on `activeContext.md`, `progress.md`, and `decisionLog.md` when decisions changed — a decision the user did not direct or approve is recorded as proposed. Show diffs before writing.
 
 ## Available workflows
 

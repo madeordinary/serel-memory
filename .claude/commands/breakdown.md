@@ -20,6 +20,8 @@ Then produce a plan that contains, in this order:
 3. **Steps** — 3–7 concrete steps, each starting with a verb (add, refactor, test, document, deploy) and ending with `→ verify: [how you'll know it worked]`. Reframe imperative steps as verifiable goals — "add validation" becomes "write tests for invalid inputs, then make them pass".
 4. **Risks & unknowns** — what could go wrong, what you'd need to verify first, what assumptions you're making.
 5. **Out of scope** — things you'll deliberately NOT do, in case the user wants them too.
+6. **Memory used** — each bank entry that changed the plan: its path and section, and the step, constraint, or verify check it changed. List only entries that changed something, not everything you read; write "none" if nothing did.
+7. **Memory conflicts** — where the bank disagrees with the code, the request, or itself, classified as current fact, durable decision, intended future, or open question (contract "Memory accuracy"), and what the plan does about it: plan a stale current fact against the code and flag it for `/update-memory`; take a request or code that breaks an accepted decision to the user; a proposed decision is an open question, not a constraint. Write "none" if there are none.
 
 ## Cross-agent review (recommended for high-impact plans)
 

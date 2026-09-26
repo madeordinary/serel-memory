@@ -63,13 +63,23 @@ Apply **Memory accuracy**: classify each disputed claim as current fact,
 durable decision, intended future, or open question before recommending action.
 Code can establish a current implementation without overruling accepted intent.
 An unbuilt plan and a dated historical statement are not stale current facts.
+A proposed decision is an open question, not accepted intent, even once
+implemented; an accepted entry without provenance stays accepted, with
+provenance unknown.
 
 Report evidence-backed findings as **documentation drift**, **possible
 regression**, **missing evidence**, or **missing durable information**.
 Missing code alone does not prove a claim false; narrow the conclusion to what
 was inspected. Recheck in-scope external capability claims against a primary
-source with version/date, or mark them unassessed. Do not invent missing work
-or decisions, erase history, or recommend making intent match a possible bug.
+source with version/date, or mark them unassessed. Report a workaround's
+recorded retirement condition as met, not met, or unverifiable, with its
+evidence, in coverage (contract **Accuracy audit**). Use a finding kind only
+for a discrepancy the evidence supports. Met means investigate a safe removal
+within existing scope and approvals, not that the workaround or its accurate
+explanation is stale; not met does not prove it correct; an unavailable lookup
+is unassessed, not false. Do not
+invent missing work or decisions, erase history, or recommend making intent
+match a possible bug.
 Keep unsupported claims unverified or request evidence; do not convert them
 into targets or decisions without owner intent. Say implemented or committed
 when that is all the evidence shows; reserve released/shipped for release evidence.

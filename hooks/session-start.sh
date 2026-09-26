@@ -44,8 +44,10 @@ cat <<'HEADER'
 
 You are starting a session on a project using the Serel Memory bank pattern.
 The contents below were read automatically at session start. Treat the memory
-bank as the source of truth for project intent. If it conflicts with the actual
-code, the code is correct and the bank needs updating — flag this to the user.
+bank as the source of truth for project intent and the code as the source of
+truth for current behavior. If they conflict, a stale fact in the bank needs
+updating, but code that breaks an accepted decision may be a regression — flag
+either to the user rather than rewriting intent to match the code.
 
 HEADER
 
