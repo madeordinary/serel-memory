@@ -2,32 +2,88 @@
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) ![Works with Claude Code + Codex](https://img.shields.io/badge/works%20with-Claude%20Code%20%2B%20Codex-5436DA) ![No dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
 
-A portable memory bank and workflow kit for AI coding agents. Works with Claude Code and Codex out of the box. Formerly known as **Basecamp**.
+A portable memory bank with workflows for setting up, planning, reviewing, and maintaining AI-assisted projects. Works with Claude Code and Codex. Memory works without Serel Kit. Formerly known as **Basecamp**.
 
 Created and maintained by [Gus Feliciano](https://github.com/gusfeliciano) through [Made Ordinary](https://github.com/madeordinary).
 
 Your project's memory lives in version-controlled markdown you can read, diff, and review — not a proprietary store that gets deprecated, stays on one machine, or locks you to a single IDE.
 
+## Start here
+
+**Memory** keeps your project's purpose, decisions, progress, and lessons,
+with core workflows to use and maintain them. **[Kit](https://github.com/madeordinary/serel-kit)**
+adds optional writing and manual-verification workflows; it does not include
+or install Memory.
+
+Open the project you want to work on in Claude Code or Codex. Choose by what
+is installed, whether the project is a new idea or already has code:
+
+| Your situation | Prompt to copy |
+|---|---|
+| You want Memory and Kit together, including when one is already installed | [Set up both](#set-up-memory-and-kit-together) |
+| You want to add Memory only | [Memory setup](#memory-only) |
+| You want to add Kit packs only | [Kit setup](https://github.com/madeordinary/serel-kit#guided-setup) |
+| Memory is installed, and you want newer tooling | [Memory update](#update-an-existing-installation) |
+| Kit is installed, and you want newer versions of its packs | [Kit update](https://github.com/madeordinary/serel-kit#update-an-existing-installation) |
+
+Want continuity and extra workflows? Choose **Set up both**. One conversation
+handles ideas, specs, or existing code, adds what is missing, and helps you
+choose useful Kit packs. Once complete, you do not need a second setup prompt.
+Memory-only setup is available too. If you only want writing polish, you can
+start directly with Kit; its verification pack needs Memory and an initialized
+bank.
+
+When updating both, Memory then Kit is the recommended order. They remain
+separate updates; Kit's writing pack does not require a Memory upgrade.
+Upgrading tooling does not require reinitializing your project memory.
+Git-excluded Memory installations do not support upgrades yet; their update
+prompt will stop and explain the limitation.
+
+For ordinary sessions, use `/start` (`$start` in Codex) to resume and
+`/update-memory` (`$update-memory`) to save project context. **Updating project
+memory and upgrading Serel's tools are different tasks.**
+
 ## Guided setup
 
-Paste this into Claude Code or Codex, opened in your project:
+Open your project in Claude Code or Codex and copy one prompt.
+
+### Set up Memory and Kit together
+
+Use this for a new or existing project when you want Serel Memory plus only the Serel Kit packs you need. One conversation uses Memory's guided setup to coordinate both tools.
 
 ```text
-Set up Serel Memory in this repository. Clone
-https://github.com/madeordinary/serel-memory into a temporary folder outside
-this project and follow its docs/serel-setup.md. Look around before asking,
-then ask me only what you could not find out: one short question at a time,
-at most four. Recommend the smallest setup. Serel Kit
-(https://github.com/madeordinary/serel-kit) is optional; suggest it only if I
-need it. Show me every path you will write and whether Git will see it, and
-wait for my approval before changing anything.
+Set up Serel Memory and Serel Kit together in this repository. Clone
+https://github.com/madeordinary/serel-memory fresh into a temporary folder
+outside this project and follow its docs/serel-setup.md. For Kit, use the
+current README at https://github.com/madeordinary/serel-kit. Look around
+first, including what is already installed, then ask me only what you could
+not find out: one short question at a time, at most four. Recommend only the
+Kit packs I need, and for each tool explain whether its files would be shared
+in Git or kept local to this clone. Preserve existing installations and
+populated memory. Add only missing tools or selected packs; do not reset,
+reinstall, or upgrade existing ones. Show me every path you will write and
+whether Git will see it, and wait for my approval before changing anything.
 ```
 
-The agent settles with you what to install (Serel Memory, Serel Kit packs, or
-both) and whether each is committed for everyone or kept in your clone only
-(Git-excluded), then seeds the bank through the usual workflow and its own
-approval step. Guided setup and the local install are unreleased: v0.6.0 does
-not include them. Details: [docs/serel-setup.md](docs/serel-setup.md).
+Keep setup and seeding in one conversation so your answers and approvals carry forward; seeding still shows its own proposal and waits for approval before writing.
+
+### Memory only
+
+```text
+Set up only Serel Memory in this repository; do not install Serel Kit. Clone
+https://github.com/madeordinary/serel-memory fresh into a temporary folder
+outside this project and follow its docs/serel-setup.md, choosing Memory only.
+Look around before asking, then ask me only what you could not find out: one
+short question at a time, at most four. Recommend the smallest setup.
+Preserve existing installations, populated memory, and Kit files. Follow the
+guide to fill only missing or blank memory files. Show me every path you will
+write and whether Git will see it, and wait for my approval before changing
+anything.
+```
+
+Both choices use the same [setup guide](docs/serel-setup.md). Guided setup
+and local installation are available on `main` but unreleased; v0.6.0 does
+not include them. The agent follows the fresh guide in the same conversation.
 
 ## Update an existing installation
 
