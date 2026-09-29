@@ -69,6 +69,31 @@ bar, and memory use shown in plans and reviews. None of this is in 0.6.0.
   control omits only the target lesson, and nothing in a workspace names its
   variant. `tests/smoke-memory-use-fixture.sh` checks the builder's pairing,
   isolation and refusals, not agent judgment.
+- Setup compares workflows by purpose, not only by path
+  (`docs/serel-setup.md` "Overlapping workflows"). The installers protect
+  paths, so a project's own session opener, memory refresh or verification
+  workflow under another name could install cleanly beside `/start`,
+  `/update-memory` or Kit's `/verify-map` and then compete with it. The setup
+  plan now reports workflows that do the same job, including a project's own
+  file at an incoming path and overlaps already installed when setup is
+  rerun, with the rules to preserve, the primary entry point and a
+  disposition, settled within the existing questions and approval. An
+  unresolved overlap pauses the whole affected capability. A chosen
+  coexistence is recorded in the project's docs and respected while it still
+  applies. Retiring or merging a workflow is a separate migration with shown
+  diffs and explicit approval; uncommitted originals are backed up outside
+  the discoverable workflow folders first. Start's setup mode, `sync-upstream`
+  (for new and changed upstream workflows, before approval), the workflow
+  contract and the README setup prompts apply the same review, in both
+  adapters. It is an agent-guided review, not a guarantee; the installers are
+  unchanged.
+- `tests/workflow-overlap-acceptance.md` and `tests/prepare-overlap-fixture.sh`:
+  a manual exercise in synthetic workspaces covering differently named and
+  same-path overlaps before an install, Kit-only overlaps, an existing
+  duplicate, a recorded coexistence, specialized workflows that are not
+  duplicates, and an update that adds an overlapping workflow.
+  `tests/smoke-overlap-fixture.sh` checks the builder's inputs, isolation and
+  refusals, not agent judgment.
 
 ### Changed
 

@@ -153,7 +153,7 @@ End with: **"Which direction would you like to take for this session?"** Then wa
 
 Follow `docs/serel-setup.md` "The flow" for the resolved scope, and stay read-only until the user approves. Serel Memory is already installed here, so installation is skipped; choosing capabilities is not. An initialized bank is kept exactly as it is.
 
-1. Orient in the resolved scope: product code (Serel Memory's own files and code in another scope do not count), a PRD or spec, instruction files, how Serel Memory is installed (a tracked `.serel-memory.json` is shared; the local-install test above printing `LOCAL INSTALL` means local), the bank's state, and Serel Kit (`.serel-kit.json`).
+1. Orient in the resolved scope: product code (Serel Memory's own files and code in another scope do not count), a PRD or spec, instruction files, how Serel Memory is installed (a tracked `.serel-memory.json` is shared; the local-install test above printing `LOCAL INSTALL` means local), the bank's state, Serel Kit (`.serel-kit.json`), and the workflows each CLI discovers (including `.claude/commands/`, `.claude/skills/` and `.agents/skills/` when present) by purpose, whatever their names: those already installed, and those a chosen Kit pack would add (`docs/serel-setup.md` "Overlapping workflows").
 2. Ask only what you could not detect and the user has not already said: one short question per message, waiting for each answer, at most four in total.
 3. Produce:
 
@@ -166,10 +166,13 @@ SETUP PLAN:
 - Capabilities: [Serel Memory / Serel Memory + Kit packs <names> / Kit packs only]
 - Requires: [none / verify: an initialized bank, so seed first]
 - Instructions: [AGENTS.md and any Claude instruction files found]
+- Overlaps: [none found / existing path ↔ other or incoming path: rules to preserve; primary: <entry>; kept both, recorded in <doc> / migrate, diffs shown / paused]
 NEXT: [/discover | /from-prd <path> | /init-memory | /init-memory naming the spec] [--scope <path> when not the root] / add Kit packs <names> / resume
 ```
 
-End with **"Continue with <next>?"** Then wait, unless the user has already told you to go ahead with this plan. A seed workflow runs in this session by following `.claude/commands/<workflow>.md`, carrying the answers you already have; its proposals and approval come before any bank write, and in a partial bank it fills only the blank files. For code plus a spec, the code describes what exists and the spec stays planned intent. Kit packs come from Serel Kit's own installer, previewed before anything is written (`docs/serel-setup.md` "Serel Kit"); packs keep Kit's own requirements even when chosen alone: `writing` leaves the bank as it is; `verify` needs an initialized bank, so beside a missing, blank or partial one `Requires` and `NEXT` name the seed workflow, which keeps its own approval. An initialized bank is never re-seeded: when no Kit packs are wanted, end with **"Where do you want to pick up?"** instead.
+End with **"Continue with <next>?"** Then wait, unless the user has already told you to go ahead with this plan. A seed workflow runs in this session by following `.claude/commands/<workflow>.md`, carrying the answers you already have; its proposals and approval come before any bank write, and in a partial bank it fills only the blank files. For code plus a spec, the code describes what exists and the spec stays planned intent. Kit packs come from Serel Kit's own installer, previewed before anything is written (`docs/serel-setup.md` "Serel Kit"); packs keep Kit's own requirements even when chosen alone: `writing` leaves the bank as it is; `verify` needs an initialized bank, so beside a missing, blank or partial one `Requires` and `NEXT` name the seed workflow, which keeps its own approval. An initialized bank is never re-seeded: when no Kit packs are wanted and no overlap choice or migration remains, end with **"Where do you want to pick up?"** instead.
+
+`Overlaps` covers workflows already installed here, such as a custom session opener beside `/start`, even when nothing new would be added. A resembling name, the Claude/Codex pair of one workflow, or a specialized workflow with a different job is not a finding, and a coexistence recorded in the project's docs is respected while it still applies. Settle a finding within the questions above and this plan's approval, never per file; an unresolved one pauses its whole capability (a Kit pack is not installed in part). Retiring or merging a workflow is a separate migration shown as diffs and approved explicitly; setup alone deletes and disables nothing. If an overlap remains unresolved, NEXT names the choice or migration review needed; it must not name installation of that capability.
 
 ---
 

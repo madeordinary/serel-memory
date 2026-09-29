@@ -98,6 +98,20 @@ approvals already given are not asked for again, and answers carry into
 seeding, which keeps each workflow's own approval gate. With code plus a spec,
 the code describes what exists and the spec stays planned intent.
 
+Setup also compares workflows by purpose, not only by path ("Overlapping
+workflows" in `docs/serel-setup.md`), and `sync-upstream` does the same for
+new and changed workflows before approval. Existing and incoming workflows
+that do the same job, whatever their names, or a project's own file at an
+incoming path, are reported in the plan with the rules to preserve, the
+primary entry point and a disposition. A resembling name, the Claude/Codex
+pair of one workflow, or a specialized workflow with a different job is not a
+finding. An unresolved overlap pauses the affected capability as a whole. A
+coexistence the user chose is recorded in the project's workflow or
+instruction docs and respected while it applies. Retiring or merging a
+workflow is a separate migration with its own shown diffs and explicit
+approval; installing authorizes none of it. This review is agent-guided, not
+a guarantee: the installers protect only paths.
+
 The bank's state picks the route. A missing or blank bank is seeded. A partial
 bank (some core files with real content) goes through the same seed
 workflows, which propose only the missing, empty or template-only files and

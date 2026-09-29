@@ -264,7 +264,10 @@ the restored framework files.
    - [files that don't exist locally yet]
    REMOVED UPSTREAM (review only): [paths, excluding downstream-only files]
    LEGACY SHIM: [preserve / unchanged candidate; compatibility and choice pending]
+   OVERLAPS: [none found / upstream workflow ↔ project workflow: rules to preserve; choice pending]
    ```
+
+   **Review new and changed workflows by purpose.** Before offering options, compare each new or changed upstream workflow in `.claude/commands/` or `.agents/skills/` with the existing workflows each CLI discovers in the project (including `.claude/skills/` when present), plus relevant global entries already surfaced by that CLI, by purpose, trigger and behavior, whatever their names. Do not search unrelated private/global folders or modify global workflows. The rules are "Overlapping workflows" in upstream's setup guide (`git show upstream/main:docs/serel-setup.md`; an older installed copy may lack it). A resembling name, the Claude/Codex pair of one workflow, or a specialized workflow with a different job is not a finding, and a coexistence recorded in the project's docs is respected while it still applies. For each finding, list both paths and the project workflow's rules to preserve under OVERLAPS, and keep that upstream workflow, both adapters together, out of "Pull all safe changes" until the user picks: skip it for now; add it beside the project's, with the reason recorded in the project's workflow or instruction docs; or add it and plan the project workflow's retirement as a separate migration with its own shown diffs and approval. Sync never deletes, renames or disables a project's own workflow. A skipped workflow counts as a skipped change for the anchor choice in step 10. This review is agent-guided; the allowlist and restore guard still protect only paths.
 
 8. **Offer options.** Let the user choose:
 

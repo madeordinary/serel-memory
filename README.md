@@ -61,8 +61,12 @@ not find out: one short question at a time, at most four. Recommend only the
 Kit packs I need, and for each tool explain whether its files would be shared
 in Git or kept local to this clone. Preserve existing installations and
 populated memory. Add only missing tools or selected packs; do not reset,
-reinstall, or upgrade existing ones. Show me every path you will write and
-whether Git will see it, and wait for my approval before changing anything.
+reinstall, or upgrade existing ones. Compare my existing commands and skills
+with the incoming ones by what they do, not only by name; report any overlap
+in the plan with the rules to keep and which should be primary, and do not
+delete, disable, or merge a workflow unless I approve that change. Show me
+every path you will write and whether Git will see it, and wait for my
+approval before changing anything.
 ```
 
 Keep setup and seeding in one conversation so your answers and approvals carry forward; seeding still shows its own proposal and waits for approval before writing.
@@ -76,9 +80,12 @@ outside this project and follow its docs/serel-setup.md, choosing Memory only.
 Look around before asking, then ask me only what you could not find out: one
 short question at a time, at most four. Recommend the smallest setup.
 Preserve existing installations, populated memory, and Kit files. Follow the
-guide to fill only missing or blank memory files. Show me every path you will
-write and whether Git will see it, and wait for my approval before changing
-anything.
+guide to fill only missing or blank memory files. Compare my existing
+commands and skills with the incoming ones by what they do, not only by name;
+report any overlap in the plan with the rules to keep and which should be
+primary, and do not delete, disable, or merge a workflow unless I approve
+that change. Show me every path you will write and whether Git will see it,
+and wait for my approval before changing anything.
 ```
 
 Both choices use the same [setup guide](docs/serel-setup.md). Guided setup
@@ -95,7 +102,7 @@ Update this project's Serel Memory framework. This project is the target; a fres
 1. Inspect first, changing nothing: Git status, .serel-memory.json, legacy installation metadata, Git-excluded Memory files, and .serel-kit.json. If Memory is missing, stop; do not install it.
 2. Clone https://github.com/madeordinary/serel-memory into a temporary directory outside this project. Follow its sync-upstream workflow (.claude/commands/sync-upstream.md for Claude Code, .agents/skills/sync-upstream/SKILL.md for Codex), CHANGELOG, and referenced docs, not the installed copy.
 3. Run its preflights and prepare the proposed sync. If a safeguard stops it, explain and stop; never un-ignore, force-add, or untrack files. Leave missing, legacy, or unknown baselines to the workflow; never invent one.
-4. You may fetch upstream and create the remote and temporary refs required by the workflow to prepare the review. Before editing project files or the anchor, show me the installed baseline, the proposed upstream commit and whether it is released, its benefits, diffs, and conflicts. Wait for approval, then apply only the approved changes through that workflow.
+4. You may fetch upstream and create the remote and temporary refs required by the workflow to prepare the review. Use the fresh upstream docs/serel-setup.md section "Overlapping workflows" to compare new or changed workflows with my existing commands and skills, even if my installed sync workflow predates that guidance. Show overlaps and preserve recorded coexistence choices; hold affected workflow candidates until resolved, without deleting or disabling my workflows. Before editing project files or the anchor, show me the installed baseline, the proposed upstream commit and whether it is released, its benefits, diffs, and conflicts. Wait for approval, then apply only the approved changes through that workflow.
 5. Never reset, reseed, or overwrite memory-bank/, .rules, or project docs. Preserve customizations in any proposed AGENTS.md, command, or skill update. Keep my Git sharing choices.
 6. Do not commit or push. Offer a memory bank audit or refresh as a separate step. If Serel Kit is installed, offer its upgrade separately.
 ```
