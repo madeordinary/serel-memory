@@ -93,8 +93,10 @@ The checks prove structure and mechanics, not what an agent does with a
 prompt. When a change is meant to alter agent behavior, run the matching
 manual exercise in fresh CLI sessions and record what you observed:
 `tests/analyze-acceptance.md` (`/analyze`), `tests/local-setup-acceptance.md`
-(local installs and setup routing), and `tests/memory-use-acceptance.md` (how
-`breakdown`, `review`, and `update-memory` use and write memory). Their
+(local installs and setup routing), `tests/memory-use-acceptance.md` (how
+`breakdown`, `review`, and `update-memory` use and write memory), and
+`tests/workflow-overlap-acceptance.md` (how setup and sync treat workflows
+that do the same job). Their
 builders create synthetic repositories outside any Git work tree. They are
 contributor tools, in neither the sync allowlist nor the installer's payload.
 

@@ -27,6 +27,9 @@ them yet, and v0.6.0 does not.
      `requirements`).
    - Instruction files (`AGENTS.md`, `CLAUDE.md`, `.claude/CLAUDE.md`,
      `CLAUDE.local.md`) and what `.claude/` and `.agents/` already hold.
+   - Workflows by purpose: what each agent would reach for to do the jobs
+     this setup adds, whatever the names, installed ones included (see
+     "Overlapping workflows").
    - Whether Serel Memory is installed and how: a tracked
      `.serel-memory.json` is shared; a Git-excluded anchor, or one of the
      files only Serel Memory installs, means local (the test in "Setup
@@ -60,8 +63,9 @@ them yet, and v0.6.0 does not.
    Storage: Memory [shared / local / installed: shared or local]; Kit [shared / local / none]
    Writes: [paths, or the installers' previews] (visible to Git: [yes / no])
    Left alone: [existing AGENTS.md, CLAUDE.md, other files]
+   Overlaps: [none found / existing path ↔ incoming path: rules to preserve; primary: [entry]; kept both, recorded in [doc] / migrate, diffs shown / paused]
    Hooks: off
-   Next: [one action: install, a seed workflow, Kit packs, or resume with /start]
+   Next: [one action: resolve an overlap / review migration diffs / install / seed / add Kit packs / resume with /start]
    ```
 
    Defaults: Serel Memory only, hooks off, and both adapters (each tool
@@ -75,13 +79,102 @@ them yet, and v0.6.0 does not.
    an approval already given. For a local install, the installer's preview is
    the list of writes, and `--apply` runs only after approval. Cloning Serel
    Memory or Serel Kit into a temporary folder outside the project is the only
-   write before approval.
+   write before approval. An unresolved overlap pauses only the capability it
+   affects; after the approved writes, check the entry points as described in
+   "Overlapping workflows".
 5. **Seed** (Serel Memory, or a pack that needs an initialized bank).
    Continue into the seed workflow in the same session by reading its file
    (`.claude/commands/<name>.md` or `.agents/skills/<name>/SKILL.md`),
    carrying the answers you already have; a new session is only needed to
    call the workflow by name. The workflow still shows its proposals and
    waits for approval before writing any bank file.
+
+## Overlapping workflows
+
+The installers protect paths, not purposes. A project's own `/kickoff` that
+opens a session installs cleanly beside Serel Memory's `/start`, and then the
+two compete. So setup compares workflows by what they do. This is an
+agent-guided review, not a guarantee that no duplicate remains; the
+installers still protect only paths.
+
+**What to compare.** For each agent, the workflows it would discover in this
+project, including `.claude/commands/`, `.claude/skills/` and `.agents/skills/`
+when present. Use the CLI's surfaced inventory to establish what it actually
+discovers; include installed Serel Memory and Kit workflows, plus any user-level or
+global entry the CLI already lists in this session when it does the same job.
+Do not search private or global folders beyond that, and never edit them.
+Compare them with what the plan would add, Serel Memory's workflows or the
+chosen Kit packs, by purpose, trigger and behavior (what each reads, writes
+and stops for), whatever their names or prefixes. There are two kinds of
+finding:
+
+- **Overlap:** an existing workflow an agent could pick for the same job as an
+  incoming one, such as `/kickoff` beside `/start`, or a project's own
+  manual-check recipe workflow beside Kit's `/verify-map`.
+- **Same-path customization:** an existing file at an incoming path, whether
+  the project's own workflow or an edited copy. The shared install's
+  `rsync --ignore-existing` skips it and the local installer stops on it; it
+  is never overwritten, and its project rules are listed to preserve.
+
+These are not findings: a resembling name alone (`/start-server` that
+launches a dev server); a Claude command and a Codex skill for the same
+workflow, the intended two-agent pair alone; and a
+specialized workflow that shares a topic but does a different job or serves a
+different audience (a customer release email beside `/weekly-update`). When
+unsure, state the difference instead of calling it a duplicate.
+
+**In the plan.** Each finding goes on the plan's `Overlaps` line: the existing
+and incoming paths, the custom rules to preserve, the selected primary entry
+point, and a disposition: keep both with a recorded reason, make one primary
+through a migration (below), or pause the incoming capability. Settle it
+inside setup's existing questions and approval: a disposition already given
+is not asked again; one still needed is asked within the four questions, or
+offered as choices in the plan, whose approval settles it; no file is
+approved on its own. An unresolved overlap pauses the whole affected unit,
+all of Serel Memory or one Kit pack, while unaffected choices go ahead. Never
+list installation as the next action for an unresolved unit: name the pending
+choice or migration review instead. Never install it minus the overlapping
+file, or one adapter of a pack without the other; never forge an anchor or
+receipt to hide an incomplete install or customizations. Follow the documented
+install procedure for truthful metadata.
+Never move, rename or overwrite a file merely to bypass a collision check.
+
+**Keeping both.** When the user chooses coexistence, record which workflow is
+primary for what, and why, in the project's existing workflow or instruction
+doc (`AGENTS.md`, or wherever it already describes its workflows). That edit
+is one of the plan's `Writes`, with its Git visibility: a tracked doc beside a
+local install is a write Git sees. Later runs respect the record while it
+still applies, and raise the finding again when it no longer does (the
+workflows or the recorded reason changed).
+
+**Migration.** Setup detects and reports; it does not consolidate. Making one
+workflow primary and retiring another is a migration, described separately
+as concrete diffs: which custom rules move where; which files are retired;
+every reference updated (instruction files, docs, other workflows); where the
+original bytes are kept; and each agent's workflows afterwards. It needs
+explicit authorization, which the approved plan can carry when it shows those
+diffs. A request to install or set up authorizes no deletion or disabling.
+Populated memory, decisions and recorded authorizations stay as they are,
+including notes a custom workflow maintains. Before retiring an original,
+make sure its content survives: Git history holds only committed bytes, so
+back up uncommitted edits and untracked or Git-excluded files first. Keep
+backups outside `.claude/commands/` and `.agents/skills/` entirely: an
+archived command or `SKILL.md` anywhere under them, subfolders included, is
+still discovered. Add no wrapper or alias workflow unless the user asks for
+one. Retiring a project's file at an incoming path through an approved
+migration, with its backup, can resolve a same-path customization. The
+installer then runs unchanged.
+
+**Reruns and updates.** `/start setup` and any rerun of setup review the
+workflows already installed, even when nothing new would be added: a custom
+`/kickoff` installed beside `/start` is reported like an incoming one. Left
+unresolved, it stays reported and nothing changes; resolving it is a recorded
+coexistence or a migration. `sync-upstream` applies the same review to new and changed workflows before
+offering its options, since an update can add workflows too.
+
+**After.** Once an approved setup or migration is applied, list each agent's
+workflows again and check that the selected entry points are the ones
+installed and that the instruction files and docs name them.
 
 ## Bank states and seed workflows
 
