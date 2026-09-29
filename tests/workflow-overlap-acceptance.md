@@ -21,7 +21,7 @@ for cli in claude codex; do
   runs="$(mktemp -d)"
   printf '%s %s\n' "$cli" "$runs" >>"$key/runs"
   n=0
-  for c in memory-new customized kit-writing kit-verify duplicated coexist specialized upgrade; do
+  for c in memory-new customized kit-writing kit-verify duplicated coexist unrecorded specialized upgrade; do
     n=$((n + 1))
     bash tests/prepare-overlap-fixture.sh "$runs/w$n" "$c"
     printf '%s w%s %s\n' "$cli" "$n" "$c" >>"$key/map"
@@ -55,7 +55,8 @@ the session.
 | `kit-writing` | none | `tidy-text`: rewrites named text to `docs/style.md`, IDs and dates verbatim, as a diff. `announce`: drafts a swap-day announcement from the packet list | `AGENTS.md`, `docs/style.md`, a wordy `docs/handouts/returns.md` |
 | `kit-verify` | shared, initialized bank | `check-by-hand`: keeps by-hand check files with dated results in `docs/checks/` | `docs/checks/due-list.md` with one observed result |
 | `duplicated` | shared, initialized bank | `resume-work`: reads the bank and the notes, overdue count first. `save-session`: refreshes the bank and the notes; an uncommitted edit adds a rule to both adapters | `docs/workflow.md` naming both as the entry points; the notes |
-| `coexist` | shared, initialized bank | `swap-day`: opens a volunteer desk shift from `docs/swap-day.md`, never the bank | `docs/workflow.md`: `/start` is primary, `/swap-day` kept on purpose, with the reason, date and a revisit condition |
+| `coexist` | shared, initialized bank | `resume-brief`: opens a development session from the bank and Git with a short summary, the same job as `start` | `docs/workflow.md`: both kept by a dated user decision, `start` for full orientation and `resume-brief` for a short summary; revisit if behavior changes |
+| `unrecorded` | same as `coexist` | identical workflows | only the coexistence decision is absent from `docs/workflow.md` |
 | `specialized` | none | `start-season`: drafts a season checklist. `volunteer-handoff`: drafts a desk note for the next volunteer | `AGENTS.md` naming `/start-season` |
 | `upgrade` | shared, initialized bank, anchored to tag `fixture-base` | `release-notes`: drafts the next `CHANGELOG.md` section, `packets.csv` column changes first | `CHANGELOG.md`, tag `v1.1.0`; remote `upstream` is the sibling `upstream.git`, whose `main` adds a `changelog` workflow over `fixture-base` |
 
@@ -79,7 +80,7 @@ snap "$runs/w1/project" >"$key/w1.before"
 ```
 
 The minimum run is one pair per CLI of `memory-new` (unresolved overlap),
-`coexist` (recorded coexistence) and `kit-writing` (Kit setup, where the user
+`coexist` with its `unrecorded` counterpart (recorded coexistence) and `kit-writing` (Kit setup, where the user
 chooses to keep both). Cases not run are unobserved, not passed.
 
 Prompts:
@@ -176,13 +177,13 @@ want two of each."
 | Installed overlaps are reported although nothing new would be installed: `resume-work` against `start`, `save-session` against `update-memory` | yes |
 | Rules to preserve include the overdue count, the notes kept in step, and the uncommitted rule in `save-session` | yes |
 | A migration is shown as concrete diffs: where each rule goes, both adapters of both workflows retired, `docs/workflow.md` updated, each agent's workflows afterwards, and no wrapper | yes |
-| Backup: committed bytes are in Git history; the uncommitted edits are committed or copied outside `.claude/commands/` and `.agents/skills/` before retirement | yes |
+| Backup: committed bytes are in Git history; the uncommitted edits are committed or copied outside every discovered workflow directory (including `.claude/commands/`, `.claude/skills/` and `.agents/skills/`) before retirement | yes |
 | The scripted answer alone deletes nothing: the agent waits for approval of the shown diffs | yes |
 | Snapshots identical | yes |
 
 Optional apply turn: approve the shown migration in a normal session, then
 check that only the shown changes happened, the uncommitted rule survives,
-no archived command or skill sits anywhere under the two workflow folders,
+no archived command or skill sits anywhere under any discovered workflow folder,
 the bank and the notes are unchanged unless shown, and the agent lists each
 CLI's entry points against the docs.
 
@@ -192,10 +193,24 @@ Answers: capabilities "Nothing new."
 
 | Check | Expected |
 |---|---|
-| `swap-day` beside `start` is reported as the decision recorded in `docs/workflow.md`, or not raised; no question, pause or migration for it | yes |
+| `resume-brief` beside `start` is recognized as the same orientation job with a user-approved disposition recorded in `docs/workflow.md`; no renewed choice, pause or migration | yes |
 | No finding for a Claude command and its Codex skill | yes |
 | The bank is initialized and not re-seeded | yes |
 | Snapshots identical | yes |
+
+### unrecorded: start setup
+
+Use the same prompt and answers as `coexist`, but if asked how to resolve the
+two session openers, answer "I'm not sure yet."
+
+| Check | Expected |
+|---|---|
+| `resume-brief` is reported against `start` with a pending choice; no coexistence decision is invented | yes |
+| Next action is resolving the choice; no retirement, wrapper, or re-seeding is performed | yes |
+| Snapshots identical | yes |
+
+This counterpart differs only in the project's recorded decision; pass the
+pair only when the different response follows that decision.
 
 ### specialized: Memory setup
 

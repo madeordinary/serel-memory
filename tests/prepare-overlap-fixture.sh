@@ -16,8 +16,9 @@
 #   duplicated   Serel Memory with an initialized bank; the project's own
 #                session opener and memory refresh installed beside it, one
 #                of them with uncommitted edits
-#   coexist      Serel Memory with an initialized bank; a desk-shift opener
+#   coexist      Serel Memory with an initialized bank; a brief session opener
 #                kept beside start by a decision in docs/workflow.md
+#   unrecorded   the same session openers without the coexistence decision
 #   specialized  no Serel Memory; workflows whose names or topics resemble
 #                Serel Memory's but whose jobs differ
 #   upgrade      Serel Memory at a synthetic baseline; a local synthetic
@@ -34,7 +35,7 @@ set -euo pipefail
 # touches the network.
 export GIT_ALLOW_PROTOCOL=file
 root="$(cd "$(dirname "$0")/.." && pwd -P)"
-cases="memory-new customized kit-writing kit-verify duplicated coexist specialized upgrade"
+cases="memory-new customized kit-writing kit-verify duplicated coexist unrecorded specialized upgrade"
 usage() {
   echo "usage: $0 <new-directory> <case>" >&2
   echo "cases: $cases" >&2
@@ -250,7 +251,7 @@ cd "$ws"
 init_repo
 product
 case "$fixture_case" in
-  kit-verify|duplicated|coexist|upgrade) installed=yes ;;
+  kit-verify|duplicated|coexist|unrecorded|upgrade) installed=yes ;;
   *) installed=no ;;
 esac
 if [ "$fixture_case" = upgrade ]; then
@@ -419,32 +420,31 @@ Before the session ends:
 3. Show the diffs and wait for approval before writing.
 FIXTURE
     ;;
-  coexist)
-    cat >docs/swap-day.md <<'FIXTURE'
-# Swap-day desk
-
-- Open the cash box; the key is with the library's front desk.
-- Returns: check the packet ID against the due list, then shelve by variety.
-- Questions you cannot answer go in the desk notebook for the maintainer.
-FIXTURE
+  coexist|unrecorded)
     cat >docs/workflow.md <<'FIXTURE'
 # How we work (synthetic)
 
+Both session openers read the project bank and recent Git context.
+FIXTURE
+    if [ "$fixture_case" = coexist ]; then
+      cat >>docs/workflow.md <<'FIXTURE'
+
 ## Entry points
 
-- `/start` (Codex: `$start`) opens every development session.
-- `/swap-day` (Codex: `$swap-day`) stays beside it on purpose. Volunteers at
-  the swap-day desk use it: it reads only `docs/swap-day.md` and the due list,
-  never the memory bank, and needs no Git. The maintainer chose to keep both
-  on 2026-08-30. Revisit if `/swap-day` starts reading the memory bank.
+The maintainer approved keeping both on 2026-08-30: `/start` (Codex:
+`$start`) is primary for full project orientation; `/resume-brief` (Codex:
+`$resume-brief`) is primary when the maintainer asks for a short development
+session summary. They do the same orientation job at different detail levels.
+Keep both with that choice; revisit if their reading or writing behavior changes.
 FIXTURE
-    workflow swap-day "Open a swap-day desk shift for a volunteer" <<'FIXTURE'
-Open a desk shift on a swap day, for a volunteer.
+    fi
+    workflow resume-brief "Resume a project development session with a brief summary" <<'FIXTURE'
+Open a development session from the project's memory and Git context.
 
-1. Read `docs/swap-day.md`. Do not read `memory-bank/` or Git history.
-2. Run `./swap.sh due packets.csv <today's date>` and show the packets due
-   back today or earlier.
-3. Ask which desk task to start: check-ins, returns or questions.
+1. Read the core files in `memory-bank/` and `.rules`.
+2. Run `git status` and `git log --oneline -3`.
+3. Summarize the current focus, completed work and next step in three bullets.
+4. Ask where to pick up and wait. Write nothing during orientation.
 FIXTURE
     ;;
   specialized)

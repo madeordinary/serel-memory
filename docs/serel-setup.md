@@ -158,9 +158,10 @@ Populated memory, decisions and recorded authorizations stay as they are,
 including notes a custom workflow maintains. Before retiring an original,
 make sure its content survives: Git history holds only committed bytes, so
 back up uncommitted edits and untracked or Git-excluded files first. Keep
-backups outside `.claude/commands/` and `.agents/skills/` entirely: an
-archived command or `SKILL.md` anywhere under them, subfolders included, is
-still discovered. Add no wrapper or alias workflow unless the user asks for
+backups outside every discovered workflow directory, including
+`.claude/commands/`, `.claude/skills/` and `.agents/skills/`: an archived
+command or skill must not remain an active entry point. Check nested folders
+as well. Add no wrapper or alias workflow unless the user asks for
 one. Retiring a project's file at an incoming path through an approved
 migration, with its backup, can resolve a same-path customization. The
 installer then runs unchanged.

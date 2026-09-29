@@ -14,7 +14,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ROOT="$PWD"
 B="$ROOT/tests/prepare-overlap-fixture.sh"
-CASES="memory-new customized kit-writing kit-verify duplicated coexist specialized upgrade"
+CASES="memory-new customized kit-writing kit-verify duplicated coexist unrecorded specialized upgrade"
 
 tmp="$(mktemp -d)"
 tmp="$(cd "$tmp" && pwd -P)"
@@ -41,7 +41,7 @@ own() {
     kit-writing) echo "announce tidy-text" ;;
     kit-verify) echo "check-by-hand" ;;
     duplicated) echo "resume-work save-session" ;;
-    coexist) echo "swap-day" ;;
+    coexist|unrecorded) echo "resume-brief" ;;
     specialized) echo "start-season volunteer-handoff" ;;
     upgrade) echo "release-notes" ;;
   esac
@@ -58,7 +58,7 @@ done
 
 for c in $CASES; do
   w="$tmp/$c/project"
-  case "$c" in kit-verify|duplicated|coexist|upgrade) installed=yes ;; *) installed=no ;; esac
+  case "$c" in kit-verify|duplicated|coexist|unrecorded|upgrade) installed=yes ;; *) installed=no ;; esac
 
   if [ "$installed" = yes ]; then
     differ=""
@@ -141,6 +141,14 @@ for c in $CASES; do
   done
   [ -z "$hits" ] && ok "$c: nothing names a case or an expected result" || bad "$c: named in$hits"
 done
+
+# The recorded and unrecorded sessions differ only by their actual project
+# decision. This prevents a "coexistence" case whose workflows are unrelated.
+pair_diff="$(diff -rq -x .git "$tmp/coexist/project" "$tmp/unrecorded/project")" ||
+  [ "$?" -eq 1 ] || die "could not compare the coexistence pair"
+[ "$pair_diff" = "Files $tmp/coexist/project/docs/workflow.md and $tmp/unrecorded/project/docs/workflow.md differ" ] \
+  && ok "coexistence pair differs only in the recorded project decision" \
+  || bad "coexistence pair differs elsewhere: $pair_diff"
 
 # Upgrade: a bare synthetic upstream whose main adds one workflow, both
 # adapters, over the baseline the workspace installed, and nothing fetched yet.
