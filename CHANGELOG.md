@@ -11,6 +11,11 @@ bar, and memory use shown in plans and reviews. None of this is in 0.6.0.
 
 ### Added
 
+- A Start here chooser for combined Memory + Kit setup, Memory-only setup,
+  Kit-only setup, and each tool's update prompt. The combined copyable
+  prompt uses the existing guided setup, preserves installed tools and
+  populated memory, and helps users select Kit packs and Git visibility.
+  Setup is chosen by what is installed, not by the age of the project.
 - A copyable update prompt for existing installations in the README. It
   reads fresh upstream sync instructions, explains proposed changes and
   release status before approval, and keeps framework updates separate from
