@@ -6,9 +6,9 @@ it will write and whether Git will see it. Nothing is written in your project
 until you approve that plan. Filling the memory bank comes after, through the
 usual seed workflow and its own approval step.
 
-Status: unreleased. This guide, `/start setup` and `install.sh --local` exist
-only in a Serel Memory checkout that contains this file; no release includes
-them yet, and v0.6.0 does not.
+Available since Serel Memory 0.7.0. This guide and `/start setup` are
+installed with the framework; `install.sh --local` runs from a Serel Memory
+clone and is not copied into projects.
 
 ## The flow
 
@@ -217,13 +217,10 @@ Use the README's [Install](../README.md#install) commands. The files become
 ordinary project files: review them and commit them. Updates come through
 `/sync-upstream`.
 
-Those commands are pinned to v0.6.0, which predates this guide. The workflows
-they install have no `/start setup`, no code-plus-spec routing and no
-partial-bank handling, and `docs/serel-setup.md` is not among the files; do
-not report any of that as installed. Continue in the same session instead:
-run the chosen seed workflow from the installed files and carry this guide's
-answers and rules into it (the code before the spec, the spec as planned
-intent, a partial bank's real content kept as it is).
+Those commands are pinned to v0.7.0, which installs this guide and the
+workflows it describes: `/start setup`, code-plus-spec routing and
+partial-bank handling. Continue in the same session: run the chosen seed
+workflow from the installed files and carry this guide's answers into it.
 
 ## Local install (Git-excluded)
 
@@ -232,7 +229,7 @@ else's project, or a team that has not adopted it. Run it from a clone of
 Serel Memory that contains this guide, outside your project:
 
 ```bash
-git clone https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
+git clone --branch v0.7.0 https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
 bash /tmp/serel-memory/install.sh /path/to/your-project --local          # preview
 bash /tmp/serel-memory/install.sh /path/to/your-project --local --apply  # install
 ```

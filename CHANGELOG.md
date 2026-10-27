@@ -6,9 +6,33 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [Unreleased]
 
-Guided setup and a local, Git-excluded install; decision provenance, a lesson
-bar, and memory use shown in plans and reviews; observed proof in ship checks
-and a findings ledger for review loops. None of this is in 0.6.0.
+No changes yet.
+
+## [0.7.0] — 2026-10-26
+
+Guided setup. One copyable prompt takes a project from an idea, a spec or
+existing code to a plan you approve: the agent looks before it asks, asks at
+most four questions, shows every path it will write and whether Git will see
+it, and compares your existing workflows with the incoming ones by what they
+do. `install.sh --local` keeps Serel Memory out of Git in a single clone.
+Around setup, decisions record who decided, lessons have a bar to clear,
+plans and reviews show the memory they used, `/ship` asks for observed proof,
+and review loops keep a findings ledger.
+
+Upgrade from 0.6.0: the README's update prompt follows a fresh copy of the
+sync workflow and can take everything in one pass. With the installed 0.6.0
+`/sync-upstream` (or `$sync-upstream`), run it twice, because its allowlist
+predates `docs/serel-setup.md`. The first run updates the workflows (the sync
+workflow included), `AGENTS.md`, the hooks, the two older framework docs and
+the drift checker, using 0.6.0's safeguards. Review and commit them with the
+advanced anchor; do not stash them, because sync needs clean framework files
+to start. Reload the updated workflow, in a fresh session if needed, then run
+it again to add `docs/serel-setup.md`, and commit that too. Until then the
+drift checker reports the guide as missing. Sync follows upstream `main`, not
+a release tag. The bank, `.rules` and project docs are untouched and need no
+reseeding; `install.sh` is checkout tooling and is not synced. Local,
+Git-excluded installs, new in this release, cannot be upgraded yet. Coming
+from 0.5.0 or earlier, follow the 0.6.0 upgrade note first.
 
 ### Added
 
@@ -156,7 +180,7 @@ and a findings ledger for review loops. None of this is in 0.6.0.
   line and `baseline: unavailable`, when Serel Memory's own framework files
   are Git-excluded, instead of vouching for bytes `git diff` never read.
   Another tool's excluded files there do not trigger the skip.
-- The README's existing-project install copies only the two framework docs
+- The README's existing-project install copies only the three framework docs
   into `docs/`, so Serel Memory's research notes and decision records no
   longer land in the project.
 - Review loops still stop at 2 rounds by default and 3 on request. Inside a
@@ -489,7 +513,8 @@ remain intact. Pin it from the canonical home with
   to parity; fixed a duplicate step number in the `ask-codex`/`ask-claude` workflows.
 - Fixed the broken file-tree rendering and tightened install instructions in the README.
 
-[Unreleased]: https://github.com/madeordinary/serel-memory/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/madeordinary/serel-memory/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.7.0
 [0.6.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.6.0
 [0.5.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.5.0
 [0.4.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.4.0
