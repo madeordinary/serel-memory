@@ -42,10 +42,10 @@ them yet, and v0.6.0 does not.
    already detected or already said.
    - Stage: a rough idea, a spec with no code yet, existing code, or code plus
      a spec?
-   - Capabilities: Serel Memory, Serel Kit packs (`writing`, `verify`), or
-     both? Packs keep Kit's own requirements: `writing` needs no bank and no
-     seeding; `verify` needs Serel Memory to install and an initialized bank
-     to run.
+   - Capabilities: Serel Memory, Serel Kit packs (`writing`, `verify`, `pr`),
+     or both? Packs keep Kit's own requirements: `writing` and `pr` need no
+     bank and no seeding; `verify` needs Serel Memory to install and an
+     initialized bank to run.
    - Agents: Claude Code, Codex, or both?
    - Git: share it with everyone who clones the repository (committed), or
      keep it in this clone only (Git-excluded)? Memory and Kit can differ.
@@ -207,7 +207,7 @@ the root bank only (see "Local install").
 whatever the bank's state: installation is skipped, choosing capabilities is
 not, so it can add Kit packs beside an initialized bank without touching it.
 Choosing only Kit packs beside a blank or partial bank still follows their
-requirements: `writing` leaves the bank as it is, `verify` puts the seed
+requirements: `writing` and `pr` leave the bank as it is, `verify` puts the seed
 workflow in the plan. Plain `/start` enters it on its own when the bank is
 missing or blank, and offers to fill a partial bank's blank files.
 
@@ -325,7 +325,7 @@ installer needs `jq` as well as Bash and Git.
 ## Serel Kit
 
 [Serel Kit](https://github.com/madeordinary/serel-kit) is optional: packs
-such as `writing` and `verify`, installed by Kit's own installer with a
+such as `writing`, `verify` and `pr`, installed by Kit's own installer with a
 `.serel-kit.json` receipt. Serel Memory owns the bank, `.rules` and the
 anchor; each installer writes only its own files, and Serel Memory never adds,
 changes or removes Kit's exclusions.

@@ -12,8 +12,8 @@ Your project's memory lives in version-controlled markdown you can read, diff, a
 
 **Memory** keeps your project's purpose, decisions, progress, and lessons,
 with core workflows to use and maintain them. **[Kit](https://github.com/madeordinary/serel-kit)**
-adds optional writing and manual-verification workflows; it does not include
-or install Memory.
+adds optional writing, manual-verification, and pull-request workflows; it
+does not include or install Memory.
 
 Open the project you want to work on in Claude Code or Codex. Choose by what
 is installed, whether the project is a new idea or already has code:
