@@ -1,12 +1,13 @@
 ---
+name: security-check
 description: "Lightweight OWASP Top 10 + STRIDE security pass on the current change. Use when the user asks for a security review, security check, threat model, or vulnerability scan of the current diff."
 ---
 
-# /security-check
+# Security Check
 
-Review the current change for security issues. You are a thorough but pragmatic reviewer — focus on real risks, not theoretical edge cases.
+Review the current change for security issues. You are a thorough but pragmatic reviewer — focus on real risks, not theoretical edge cases. Do not edit files.
 
-Steps:
+## Workflow
 
 1. Run `git diff main...HEAD` (or `git diff` for uncommitted) to see what changed.
 2. Launch the cross-agent pass in the background if it qualifies (see below) — before forming any findings of your own.
@@ -16,8 +17,24 @@ Steps:
 ## Cross-agent pass (opportunistic)
 
 Security is exactly the category where a second model pays for itself — and
-the diff is often authored by the model now checking it. If `codex --version`
-succeeds and the diff is non-trivial (≥ 20 changed lines):
+the diff is often authored by the model now checking it.
+
+Which CLI am I running in? Use only the matching branch below; never call your own CLI.
+
+- **In Claude Code:** your model is Claude and the other model is Codex. It is available if `codex --version` succeeds. Launch it with:
+
+  ```bash
+  codex exec --cd "$PWD" --sandbox read-only - < "$PROMPT_FILE" > "$OUT_FILE" 2>&1 &
+  ```
+
+- **In Codex:** your model is Codex and the other model is Claude. It is available if `claude --version` succeeds. Launch it with:
+
+  ```bash
+  claude -p --permission-mode plan < "$PROMPT_FILE" > "$OUT_FILE" 2>&1 &
+  ```
+
+Then, in either CLI, if the other model is available and the diff is non-trivial
+(≥ 20 changed lines):
 
 1. Right after computing the diff (step 1), write a prompt file containing:
    - the diff range
@@ -26,28 +43,26 @@ succeeds and the diff is non-trivial (≥ 20 changed lines):
      label line; you add those at merge
    - a read-only instruction: do not edit files or run write operations
 
-   **Not your own findings** — Codex must check blind, or it will anchor on
-   your framing. Launch it in the background, capturing output to a file
-   (`docs/cross-agent-review.md` has the canonical background form; prefer
-   your harness's background facility over bare `&` if it has one):
+   **Not your own findings** — the other model must check blind, or it will
+   anchor on your framing. Launch it in the background with your branch's
+   command, capturing output to a file (`docs/cross-agent-review.md` has the
+   canonical background form; prefer your harness's background facility over
+   bare `&` if it has one).
 
-   ```bash
-   codex exec --cd "$PWD" --sandbox read-only - < "$PROMPT_FILE" > "$OUT_FILE" 2>&1 &
-   ```
-
-2. Do your own full pass and **draft your own findings before reading Codex's
-   output**.
-3. After your draft is done, wait up to ~90 seconds for Codex; if it hasn't
-   returned, proceed single-model and say so.
+2. Do your own full pass and **draft your own findings before reading the other
+   model's output**.
+3. After your draft is done, wait up to ~90 seconds for the other model; if it
+   hasn't returned, proceed single-model and say so.
 4. Merge with provenance: tag every finding `[both]`, `[claude]`, or
-   `[codex]`. Verify `[codex]`-only findings against the actual code before
-   including them. Findings tagged `[both]` carry the most confidence, but confidence
+   `[codex]`. Verify findings only the other model raised (`[codex]` in Claude
+   Code, `[claude]` in Codex) against the actual code before including them.
+   Findings tagged `[both]` carry the most confidence, but confidence
    is not priority: a single verified vulnerability outranks two matching
    low-severity notes. Add one `DISAGREEMENTS:` line per explicit
    contradiction; silence from a model is not disagreement.
 
-This pass never blocks the check: if Codex is missing or slow, complete
-single-model and say so in the SECURITY SUMMARY.
+This pass never blocks the check: if the other model is missing or slow,
+complete single-model and say so in the SECURITY SUMMARY.
 
 ## OWASP Top 10 pass
 
@@ -77,7 +92,7 @@ For each, note: present / not applicable / concern.
 
 ```text
 SECURITY SUMMARY: [one line — overall risk read]
-[dual-model check (Claude + Codex) | single-model check (reason)]
+[dual-model check (<your model> + <other model>) | single-model check (reason)]
 
 HIGH RISK (block merge):
 - [both|claude|codex] [file:line] [issue] → [fix]
@@ -93,7 +108,7 @@ CHECKED & CLEAN: [list of OWASP/STRIDE categories that were checked and are clea
 
 Omit the provenance tags when the check was single-model.
 
-Rules:
+## Rules
 
 - Don't cry wolf. A theoretical attack with no realistic path doesn't belong in HIGH RISK.
 - For each finding, the fix matters as much as the identification. "This is broken" without a remediation is half a finding.
