@@ -108,8 +108,8 @@ critique instead. Do not pretend another model reviewed the work.
 
 ## Runtime stance
 
-- Claude review from Codex: prefer `claude -p --permission-mode plan < prompt-file`.
-- Codex review from Claude: prefer `codex exec --cd "$PWD" --sandbox read-only -` (prompt via stdin — see Canonical invocation below).
+- In Claude Code, the other reviewer is Codex: prefer `codex exec --cd "$PWD" --sandbox read-only -` (prompt via stdin — see Canonical invocation below).
+- In Codex, the other reviewer is Claude: prefer `claude -p --permission-mode plan < prompt-file`.
 - Treat sandboxing and plan mode as defense in depth. The prompt still must say
   not to edit files or run write operations.
 
@@ -176,36 +176,69 @@ invocation**, and clean up explicitly afterwards. An `EXIT` trap is safe only
 when set in the same invocation that runs the CLI; set in an earlier call it
 fires before the CLI ever runs and deletes the prompt file.
 
-Synchronous form (plan reviews — ask-codex, ask-claude, breakdown):
+Which CLI am I running in? A workflow both CLIs load (`breakdown`, `review`,
+`security-check`, `update-memory`) uses only its own branch below and never
+calls its own CLI: in Claude Code the other model is Codex, in Codex it is
+Claude. The ask pair has no branch, because each side has a fixed direction:
+`ask-codex` (Claude Code only) always calls Codex, and `ask-claude` (Codex
+only) always calls Claude.
 
-```bash
-PROMPT_FILE="$(mktemp)"
-cat > "$PROMPT_FILE" <<'EOF'
-...the full prompt...
-EOF
+Synchronous form (plan reviews — ask-codex, ask-claude, breakdown). Write the
+prompt file and run the CLI in one shell invocation:
 
-# Codex review from Claude:
-codex exec --cd "$PWD" --sandbox read-only - < "$PROMPT_FILE"
-# Claude review from Codex:
-claude -p --permission-mode plan < "$PROMPT_FILE"
+- **In Claude Code:** the other model is Codex. It is available if
+  `codex --version` succeeds.
 
-rm -f "$PROMPT_FILE"
-```
+  ```bash
+  PROMPT_FILE="$(mktemp)"
+  cat > "$PROMPT_FILE" <<'EOF'
+  ...the full prompt...
+  EOF
+  codex exec --cd "$PWD" --sandbox read-only - < "$PROMPT_FILE"
+  rm -f "$PROMPT_FILE"
+  ```
+
+- **In Codex:** the other model is Claude. It is available if
+  `claude --version` succeeds.
+
+  ```bash
+  PROMPT_FILE="$(mktemp)"
+  cat > "$PROMPT_FILE" <<'EOF'
+  ...the full prompt...
+  EOF
+  claude -p --permission-mode plan < "$PROMPT_FILE"
+  rm -f "$PROMPT_FILE"
+  ```
 
 Background form (parallel touchpoints — review, security-check): stdout of a
 bare `&` job is lost, so capture it to a second temp file and read that file
-at merge time:
+at merge time. Only the launch line differs by branch:
 
-```bash
-PROMPT_FILE="$(mktemp)"; OUT_FILE="$(mktemp)"
-cat > "$PROMPT_FILE" <<'EOF'
-...the full prompt...
-EOF
-codex exec --cd "$PWD" --sandbox read-only - < "$PROMPT_FILE" > "$OUT_FILE" 2>&1 &
-XAGENT_PID=$!
-rm -f "$PROMPT_FILE"          # safe — the launched process already holds the file open
-echo "$XAGENT_PID $OUT_FILE"  # note these — kill/read at merge time
-```
+- **In Claude Code:**
+
+  ```bash
+  PROMPT_FILE="$(mktemp)"; OUT_FILE="$(mktemp)"
+  cat > "$PROMPT_FILE" <<'EOF'
+  ...the full prompt...
+  EOF
+  codex exec --cd "$PWD" --sandbox read-only - < "$PROMPT_FILE" > "$OUT_FILE" 2>&1 &
+  XAGENT_PID=$!
+  rm -f "$PROMPT_FILE"          # safe — the launched process already holds the file open
+  echo "$XAGENT_PID $OUT_FILE"  # note these — kill/read at merge time
+  ```
+
+- **In Codex:**
+
+  ```bash
+  PROMPT_FILE="$(mktemp)"; OUT_FILE="$(mktemp)"
+  cat > "$PROMPT_FILE" <<'EOF'
+  ...the full prompt...
+  EOF
+  claude -p --permission-mode plan < "$PROMPT_FILE" > "$OUT_FILE" 2>&1 &
+  XAGENT_PID=$!
+  rm -f "$PROMPT_FILE"          # safe — the launched process already holds the file open
+  echo "$XAGENT_PID $OUT_FILE"  # note these — kill/read at merge time
+  ```
 
 If your harness has a native background-execution facility on its shell tool,
 prefer it over bare `&` — it tracks completion for you. At merge time read
