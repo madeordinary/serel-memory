@@ -1,25 +1,29 @@
 ---
+name: weekly-update
 description: "Draft a stakeholder-ready weekly update from the memory bank and recent activity. Use when the user asks for a weekly update, status report, stakeholder summary, or progress email."
 ---
 
-# /weekly-update
+# Weekly Update
 
 Draft a weekly update suitable for stakeholders, pulling from the memory bank and recent git activity. The output should be skimmable in 30 seconds.
 
 **Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
 
-Steps:
+## Workflow
 
-1. Read `memory-bank/projectbrief.md` for what this project is.
-2. Read `memory-bank/activeContext.md` for current focus and open questions.
-3. Read `memory-bank/progress.md` for what works and what's in progress.
-4. Read `memory-bank/decisionLog.md` for decisions made or changed this week.
-5. Run `git log --since="1 week ago" --oneline --all` for recent activity.
-6. Run `git status` to see current uncommitted work.
+1. Read:
+   - `memory-bank/projectbrief.md` — what this project is
+   - `memory-bank/activeContext.md` — current focus and open questions
+   - `memory-bank/progress.md` — what works and what's in progress
+   - `memory-bank/decisionLog.md` — decisions made or changed this week
+2. Run `git log --since="1 week ago" --oneline --all` for recent activity.
+3. Run `git status` to see current uncommitted work.
 
-Then produce an update in this structure:
+## Output
 
-~~~markdown
+Produce an update in this structure:
+
+```text
 # [Project name] — Week of [Mon DD, YYYY]
 
 ## Headline
@@ -48,9 +52,9 @@ Then produce an update in this structure:
 ## Asks
 - [anything needed from stakeholders — decisions, resources, feedback]
 - (or write "None this week")
-~~~
+```
 
-Rules:
+## Rules
 
 - Keep each bullet to one line. If something needs more, it belongs in a separate doc with a link from the update.
 - "Shipped" means done and verifiable. Don't conflate intent with completion.
