@@ -11,7 +11,7 @@ You're being asked whether the current branch or change is ready to merge. Run t
 
 ## Checklist
 
-1. **Tests pass.** Run the project test suite if discoverable. If there are no tests for a project that should have them, flag it.
+1. **Tests pass.** Run the test suite. If you can't discover how to run it, ask the user for the test command rather than skipping it. If there are no tests for a project that should have them, flag it.
 2. **New behavior has tests.** Look at the diff — anything new without a corresponding test?
 3. **Documentation updated.** README, docs/, comments on non-obvious code, anywhere users would look.
 4. **Env vars documented.** If new env vars were added, are they in README and/or `.env.example`?
