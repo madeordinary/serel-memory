@@ -7,13 +7,20 @@
 # anchor — and drives it across the cutover with the documented pieces:
 #
 #   (a) FAIL FAST: the sync-upstream legacy-anchor guard (extracted verbatim
-#       from .claude/commands/sync-upstream.md) must stop when only the
-#       legacy anchor exists — no silent "unanchored", no baseline
-#       reconstruction.
+#       from the current sync-upstream source, .agents/skills/sync-upstream/
+#       SKILL.md, which Claude Code loads as the byte-identical copy
+#       .claude/skills/sync-upstream/SKILL.md) must stop when only the legacy
+#       anchor exists — no silent "unanchored", no baseline reconstruction.
 #   (b) MIGRATE + SYNC: after refreshing tooling per the per-file rule
 #       (auto-replace only files byte-identical to a known upstream vintage)
 #       and renaming the anchor to .serel-memory.json, the guard passes and
 #       the documented template-mode sync runs to completion.
+#
+# The v0.2.0 tree is genuinely historical, so its Claude commands
+# (.claude/commands/*.md) stay old paths here. Upstream now ships every
+# workflow as a skill: the refresh adds the skills and never deletes, so the
+# old commands are left as they were and reported as removed upstream for
+# review; retiring them is the separate step sync-upstream offers.
 #
 # Like smoke-sync, this exercises the documented procedure mechanically —
 # it proves the doc's steps work, not that an agent can't misread them.
@@ -33,26 +40,33 @@ for tag in v0.1.0 v0.2.0; do
 done
 V020_REF="$(git rev-parse "v0.2.0^{commit}")"
 
-# The allowlist the procedure operates on — parsed from the command doc so
+# The current sync-upstream workflow: its source and the Claude copy.
+SYNC_SRC=.agents/skills/sync-upstream/SKILL.md
+SYNC_COPY=.claude/skills/sync-upstream/SKILL.md
+for f in "$SYNC_SRC" "$SYNC_COPY"; do
+  [ -f "$f" ] || { echo "FAIL: $f is missing"; exit 1; }
+done
+
+# The allowlist the procedure operates on — parsed from the sync source so
 # this test fails if the doc and the test ever disagree.
-ALLOWLIST_LINE="$(grep -m1 '^\.agents/skills/ ' .claude/commands/sync-upstream.md)"
+ALLOWLIST_LINE="$(grep -m1 '^\.agents/skills/ ' "$SYNC_SRC")"
 if [ -z "$ALLOWLIST_LINE" ]; then
   echo "FAIL: could not parse the framework allowlist from sync-upstream.md"
   exit 1
 fi
 read -r -a ALLOWLIST <<<"$ALLOWLIST_LINE"
 
-# The legacy-anchor guard, extracted verbatim from the command doc — the test
+# The legacy-anchor guard, extracted verbatim from the sync source — the test
 # runs what the doc tells an agent to run, not a paraphrase. (The snippet sits
 # inside an indented list fence, so the patterns tolerate leading whitespace.)
-GUARD_SNIPPET="$(awk '/^[[:space:]]*# Legacy-anchor guard: fail fast/,/^[[:space:]]*fi[[:space:]]*$/' .claude/commands/sync-upstream.md)"
+GUARD_SNIPPET="$(awk '/^[[:space:]]*# Legacy-anchor guard: fail fast/,/^[[:space:]]*fi[[:space:]]*$/' "$SYNC_SRC")"
 if [ -z "$GUARD_SNIPPET" ]; then
-  echo "FAIL: could not extract the legacy-anchor guard from sync-upstream.md"
+  echo "FAIL: could not extract the legacy-anchor guard from $SYNC_SRC"
   exit 1
 fi
-GUARD_SKILL="$(awk '/^[[:space:]]*# Legacy-anchor guard: fail fast/,/^[[:space:]]*fi[[:space:]]*$/' .agents/skills/sync-upstream/SKILL.md)"
-if [ "$GUARD_SNIPPET" != "$GUARD_SKILL" ]; then
-  echo "FAIL: legacy-anchor guard differs between command and skill adapters"
+GUARD_COPY="$(awk '/^[[:space:]]*# Legacy-anchor guard: fail fast/,/^[[:space:]]*fi[[:space:]]*$/' "$SYNC_COPY")"
+if [ "$GUARD_SNIPPET" != "$GUARD_COPY" ]; then
+  echo "FAIL: legacy-anchor guard differs between $SYNC_SRC and its Claude copy $SYNC_COPY"
   exit 1
 fi
 
@@ -159,15 +173,32 @@ if ! $GIT rev-parse --verify --quiet "$V020_REF^{commit}" >/dev/null; then
   echo "FAIL: migrated anchor ref does not resolve after fetch"
   fail=1
 fi
-changed="$($GIT diff --name-only "$V020_REF" upstream/main -- "${ALLOWLIST[@]}")"
+# Additions and modifications are restorable; deletions are reported for
+# review only. --no-renames keeps a command-to-skill move from hiding as a
+# rename.
+report="$($GIT diff --no-renames --name-status "$V020_REF" upstream/main -- "${ALLOWLIST[@]}")"
+changed="$(awk -F '\t' '$1 != "D" { print $2 }' <<<"$report")"
+removed="$(awk -F '\t' '$1 == "D" { print $2 }' <<<"$report")"
 
-# The v0.2.0 -> v0.3.0 upstream delta must be reported ...
-printf '%s\n' "$changed" | grep -qx '.claude/commands/sync-upstream.md' \
-  || { echo "FAIL: changed report missed the cutover command adapter"; fail=1; }
+# The v0.2.0 -> current upstream delta must be reported ...
+printf '%s\n' "$changed" | grep -qx "$SYNC_SRC" \
+  || { echo "FAIL: changed report missed the cutover sync source $SYNC_SRC"; fail=1; }
+printf '%s\n' "$changed" | grep -qx "$SYNC_COPY" \
+  || { echo "FAIL: changed report missed the new Claude copy $SYNC_COPY"; fail=1; }
 printf '%s\n' "$changed" | grep -qx 'hooks/session-start.sh' \
   || { echo "FAIL: changed report missed the cutover hook change"; fail=1; }
-printf '%s\n' "$changed" | grep -q '^memory-bank/' \
+printf '%s\n' "$report" | grep -q 'memory-bank/' \
   && { echo "FAIL: allowlist leak — memory-bank/ showed up in the sync report"; fail=1; }
+
+# ... the historical command adapter is reported as removed upstream, and
+# every removed path is still in the project with its v0.2.0 bytes.
+printf '%s\n' "$removed" | grep -qx '.claude/commands/sync-upstream.md' \
+  || { echo "FAIL: removed-upstream report missed the v0.2.0 command adapter"; fail=1; }
+while IFS= read -r f; do
+  [ -n "$f" ] || continue
+  cmp -s "$f" "$tmp/vintage-v020/$f" \
+    || { echo "FAIL: a path removed upstream was not left as v0.2.0 shipped it: $f"; fail=1; }
+done <<<"$removed"
 
 # ... and step 9's per-file restore is a no-op because the migration already
 # landed those exact bytes (proves refresh and upstream agree).
@@ -178,7 +209,7 @@ while IFS= read -r f; do
 done <<<"$changed"
 
 # Step 10 / migration finish: advance the anchor with the documented snippet.
-UPDATE_SNIPPET="$(awk '/^[[:space:]]*# Anchor update: keep every other key/,/^[[:space:]]*fi[[:space:]]*$/' "$ROOT/.claude/commands/sync-upstream.md")"
+UPDATE_SNIPPET="$(awk '/^[[:space:]]*# Anchor update: keep every other key/,/^[[:space:]]*fi[[:space:]]*$/' "$ROOT/$SYNC_SRC")"
 [ -n "$UPDATE_SNIPPET" ] || { echo "FAIL: could not extract the anchor-update snippet"; exit 1; }
 bash -c "$UPDATE_SNIPPET"
 
@@ -188,12 +219,20 @@ bash -c "$UPDATE_SNIPPET"
 grep -q "$($GIT rev-parse upstream/main)" .serel-memory.json \
   || { echo "FAIL: anchor was not advanced to the synced upstream commit"; fail=1; }
 
-cmd_count="$(find .claude/commands -name '*.md' | wc -l | tr -d ' ')"
+# Each CLI's workflows match upstream: the sources Codex loads and the
+# Claude copies Claude Code loads.
 skill_count="$(find .agents/skills -name SKILL.md | wc -l | tr -d ' ')"
-expected_cmd_count="$(find "$tmp/v030/.claude/commands" -name '*.md' | wc -l | tr -d ' ')"
 expected_skill_count="$(find "$tmp/v030/.agents/skills" -name SKILL.md | wc -l | tr -d ' ')"
-[ "$cmd_count" -eq "$expected_cmd_count" ] || { echo "FAIL: expected $expected_cmd_count commands after migration, found $cmd_count"; fail=1; }
+copy_count=0
+[ ! -d .claude/skills ] || copy_count="$(find .claude/skills -name SKILL.md | wc -l | tr -d ' ')"
+expected_copy_count="$(find "$tmp/v030/.claude/skills" -name SKILL.md | wc -l | tr -d ' ')"
 [ "$skill_count" -eq "$expected_skill_count" ] || { echo "FAIL: expected $expected_skill_count skills after migration, found $skill_count"; fail=1; }
+[ "$copy_count" -eq "$expected_copy_count" ] || { echo "FAIL: expected $expected_copy_count Claude skills after migration, found $copy_count"; fail=1; }
+cmp -s "$SYNC_COPY" "$tmp/v030/$SYNC_COPY" \
+  || { echo "FAIL: the migrated project lacks upstream's Claude copy $SYNC_COPY"; fail=1; }
+# The v0.2.0 commands stay exactly as v0.2.0 shipped them, none added or lost.
+diff -r .claude/commands "$tmp/vintage-v020/.claude/commands" >/dev/null \
+  || { echo "FAIL: the migration changed the v0.2.0 Claude commands"; fail=1; }
 
 grep -q "shipping the downstream widget" memory-bank/activeContext.md \
   || { echo "FAIL: user memory bank content was lost"; fail=1; }

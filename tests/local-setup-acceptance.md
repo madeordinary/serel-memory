@@ -46,7 +46,7 @@ snap "$exercise_root/claude-team" >"$exercise_root/claude-team.before"
 Open each fixture in its CLI in a fresh session, in read-only or plan mode.
 Give the agent only the request below, not the expected results.
 
-1. **Discovery.** In Claude Code, type `/` and look for the project commands
+1. **Discovery.** In Claude Code, type `/` and look for the project skills
    (`/start`, `/init-memory`, ...). In Codex, use `/skills` or type `$`.
    Record whether the Git-excluded workflows are listed.
 2. **Start.** Run `/start` or `$start`.

@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Guards the session-start read list against silent drift. The canonical
-# 7-file memory bank list is duplicated by design in AGENTS.md, /start,
-# $start, and hooks/session-start.sh — if a bank file is ever added or
+# 7-file memory bank list is duplicated by design in AGENTS.md, the start
+# workflow (its source and the Claude copy check-single-source.sh keeps
+# identical), and hooks/session-start.sh — if a bank file is ever added or
 # renamed in one place but not the others, agents and hook users silently
-# read different banks. This test asserts all four artifacts agree.
+# read different banks. This test asserts all of them agree.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -26,10 +27,11 @@ if [ "$agents_list" != "$CANONICAL" ]; then
   fail=1
 fi
 
-# 3. Both start adapters must mention every canonical file.
-for adapter in .claude/commands/start.md .agents/skills/start/SKILL.md; do
+# 3. The start workflow must mention every canonical file: its source, which
+# Codex loads, and the copy Claude Code loads.
+for adapter in .agents/skills/start/SKILL.md .claude/skills/start/SKILL.md; do
   for name in $CANONICAL; do
-    if ! grep -q "$name\.md" "$adapter"; then
+    if [ ! -f "$adapter" ] || ! grep -q "$name\.md" "$adapter"; then
       echo "DRIFT: $adapter does not mention $name.md"
       fail=1
     fi
@@ -37,6 +39,6 @@ for adapter in .claude/commands/start.md .agents/skills/start/SKILL.md; do
 done
 
 if [ "$fail" -eq 0 ]; then
-  echo "readlist OK: AGENTS.md, /start, \$start, and session-start.sh agree on the 7-file bank"
+  echo "readlist OK: AGENTS.md, the start workflow (source and Claude copy), and session-start.sh agree on the 7-file bank"
 fi
 exit "$fail"
