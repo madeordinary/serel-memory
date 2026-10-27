@@ -1,4 +1,5 @@
 ---
+name: ask-codex
 description: "Ask Codex CLI for an independent second opinion while working in Claude Code. Use when the user wants Codex to review a plan, architecture decision, PRD interpretation, implementation approach, or risk assessment. Supports optional bounded loop mode when explicitly requested."
 ---
 
