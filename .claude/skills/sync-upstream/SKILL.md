@@ -172,10 +172,10 @@ done
   shipped. Offer to add the skill and retire the command together, separately
   from "pull all safe changes". Show the command against its replacement
   (`git diff HEAD:.claude/commands/<n>.md upstream/main:.claude/skills/<n>/SKILL.md`).
-  Only after the user selects it, restore the skill if it is absent
-  (`git restore --source=upstream/main -- .claude/skills/<n>/SKILL.md`), then
-  run the apply snippet below with that line's blob: it rechecks the bytes
-  just before deleting.
+  Only after the user selects it, run the apply snippet below with that line's
+  blob. It writes nothing until every adapter of the workflow still holds the
+  bytes it had when shown; then it adds the skill from upstream (when absent)
+  and deletes the command.
 - **`HOLD <n>`** — some adapter holds unknown bytes (customized). Keep this
   workflow's Claude skill, Codex skill and command retirement out of "pull all
   safe changes", and resolve the customizations on the Claude and Codex sides
@@ -186,9 +186,12 @@ done
   `git diff "$(git rev-list -1 upstream/main -- <path>)^" -- <path>` for a
   removed command). Then offer:
   - port the customizations into the new skill copies (they may stay
-    different per CLI): show the proposed copies against upstream's, write
-    them only after approval, then retire the command with the apply snippet
-    and that line's blob;
+    different per CLI): show the proposed copies against upstream's, and only
+    after approval write them to temporary files outside the project; then
+    run the apply snippet with that line's blob, `claude_copy` naming the
+    Claude copy and `codex_copy` the Codex copy (leave `codex_copy` unset to
+    keep the Codex skill as it is). The snippet installs them only after its
+    recheck;
   - or keep the command and skip the skill for now. That is a skipped change,
     so the anchor rule in step 10 applies, and the next sync offers it again.
 
@@ -200,22 +203,36 @@ done
   its command yet; nothing to retire.
 
 ```bash
-# Retirement apply: only after the user selects this workflow; set n and blob from its inventory line.
-old=".claude/commands/$n.md" new=".claude/skills/$n/SKILL.md"
-if [ -f "$new" ] && [ ! -L "$new" ] && [ -f "$old" ] && [ ! -L "$old" ] &&
-   [ "$(git hash-object -- "$old")" = "$blob" ] && [ "$(git rev-parse -q --verify "HEAD:$old")" = "$blob" ]; then
-  rm -- "$old" && echo "RETIRED $n: deleted $old (uncommitted; HEAD keeps it)"
-else
-  echo "NOT RETIRED $n: $old changed since it was shown or is not committed, or $new is missing"
+# Retirement apply: only after the user selects this workflow. Set n and blob from its inventory line (and, for a ported held workflow, claude_copy and codex_copy).
+old=".claude/commands/$n.md" new=".claude/skills/$n/SKILL.md" src=".agents/skills/$n/SKILL.md"
+cmd_ok() { [ -f "$old" ] && [ ! -L "$old" ] && [ "$(git hash-object -- "$old")" = "$blob" ] && [ "$(git rev-parse -q --verify "HEAD:$old")" = "$blob" ]; }
+unchanged() {  # <path>: absent as in HEAD, or HEAD's bytes, or upstream's (this sync's own pull)
+  if [ ! -e "$1" ] && [ ! -L "$1" ]; then ! git cat-file -e "HEAD:$1" 2>/dev/null; return; fi
+  [ -f "$1" ] && [ ! -L "$1" ] && b="$(git hash-object -- "$1")" || return 1
+  [ "$b" = "$(git rev-parse -q --verify "HEAD:$1")" ] || [ "$b" = "$(git rev-parse -q --verify "upstream/main:$1")" ]
+}
+if ! cmd_ok || ! unchanged "$new" || ! unchanged "$src"; then
+  echo "NOT RETIRED $n: $old, $new or $src changed since it was shown (or the command is not committed); nothing written"
   exit 1
 fi
+mkdir -p ".claude/skills/$n" &&
+  if [ -n "${claude_copy:-}" ]; then cp -- "$claude_copy" "$new"; elif [ ! -e "$new" ]; then git restore --source=upstream/main -- "$new"; fi &&
+  if [ -n "${codex_copy:-}" ]; then mkdir -p ".agents/skills/$n" && cp -- "$codex_copy" "$src"; fi &&
+  cmd_ok && rm -- "$old" && { echo "RETIRED $n: deleted $old (uncommitted; HEAD keeps it); $new is in place"; exit 0; }
+for p in "$new" "$src"; do  # undo: this workflow's skills go back to HEAD, so the command stays the active one
+  if git cat-file -e "HEAD:$p" 2>/dev/null; then git restore --source=HEAD -- "$p"; else rm -f -- "$p"; fi
+done
+rmdir ".claude/skills/$n" ".agents/skills/$n" 2>/dev/null
+echo "NOT RETIRED $n: the retirement failed after writing; $new and $src are back as HEAD has them, and $old stays"
+exit 1
 ```
 
 If the apply snippet refuses, stop for that workflow, run the inventory again,
-and show the user what changed. Retired commands are deleted from the
-worktree only: an approved retirement stays uncommitted, like the restored
-framework files, and `HEAD` keeps the old bytes. Inventory commands are
-offered here only, never again under REMOVED UPSTREAM.
+and show the user what changed; nothing it wrote stays behind to shadow the
+command. Retired commands are deleted from the worktree only: an approved
+retirement stays uncommitted, like the restored framework files, and `HEAD`
+keeps the old bytes. Inventory commands are offered here only, never again
+under REMOVED UPSTREAM.
 
 ## Workflow
 
@@ -418,7 +435,7 @@ offered here only, never again under REMOVED UPSTREAM.
    git restore --source=upstream/main -- <new-file-path>
    ```
 
-   For each selected retirement, add the skill first, then run the apply snippet in "Command retirement"; a command is deleted only after its replacement is in place.
+   For each selected retirement, run the apply snippet in "Command retirement". It rechecks every adapter of the workflow before writing the replacement, deletes the command only once the replacement is in place, and puts that workflow's skills back as `HEAD` has them if the deletion still fails.
 
 10. **After syncing, update the anchor and summarize.** Advance `.serel-memory.json` to the upstream commit you just synced from, so the next sync reports only what's newer. **Only if at least one file was restored, or the user explicitly chose to skip everything** — an empty restore (an unresolved anchor, a mis-parsed list) must never move the anchor, or the next sync silently loses those changes. Update the two provenance keys in place — the anchor may carry other keys (such as `scopes`) that must survive — then drop the private ref (`git update-ref -d refs/serel-memory/anchor`):
 
