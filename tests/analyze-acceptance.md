@@ -1,7 +1,7 @@
 # Analyze acceptance exercise
 
-This exercise tests observable agent behavior. The automated parity and export
-checks cannot establish that a prompt makes correct semantic judgments.
+This exercise tests observable agent behavior. The automated single-source and
+export checks cannot establish that a prompt makes correct semantic judgments.
 
 From the Memory checkout, create two independent fixtures:
 

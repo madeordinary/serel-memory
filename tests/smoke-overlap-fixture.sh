@@ -4,8 +4,9 @@
 # setup plan or sync review; it proves the exercise's inputs are what the
 # guide says: Serel Memory is installed only in the cases that say so, with
 # framework files identical to this checkout; each case holds exactly its own
-# workflows, each as a Claude command and Codex skill pair; no Kit file is
-# present; only the intended edits are uncommitted; the upgrade case's
+# workflows, each laid out as Serel Memory lays out its own (a source with its
+# manifest and a byte-identical Claude copy, no Claude commands); no Kit file
+# is present; only the intended edits are uncommitted; the upgrade case's
 # upstream adds exactly one workflow over the installed baseline; nothing in a
 # workspace names its case or the expected results; unsafe targets are refused
 # before anything is created; the checkout is left as it was.
@@ -31,9 +32,9 @@ before="$(git status --porcelain --untracked-files=all)" || die "git status fail
 # The files a shared install has, as the builder copies them.
 framework="$(
   { printf '%s\n' AGENTS.md docs/workflow-contract.md docs/cross-agent-review.md docs/serel-setup.md bin/serel-memory
-    find .claude/commands .agents/skills hooks -type f; } | LC_ALL=C sort
+    find .claude/skills .agents/skills hooks -type f; } | LC_ALL=C sort
 )" || die "could not list the framework files"
-# Each case's own workflows, by the name both adapters share.
+# Each case's own workflows, by the name the source and its copy share.
 own() {
   case "$1" in
     memory-new) echo "pick-up wrap-up" ;;
@@ -46,10 +47,7 @@ own() {
     upgrade) echo "release-notes" ;;
   esac
 }
-# command name -> skill name (the one intentional asymmetry, as check-parity.sh)
-skill_for() { case "$1" in ask-codex) echo ask-claude ;; *) echo "$1" ;; esac; }
-command_for() { case "$1" in ask-claude) echo ask-codex ;; *) echo "$1" ;; esac; }
-sorted() { printf '%s\n' "$1" | tr ' ' '\n' | sed '/^$/d' | LC_ALL=C sort | tr '\n' ' ' | sed 's/ $//'; }
+sorted() { printf '%s\n' "$1" | tr ' ' '\n' | sed '/^$/d' | LC_ALL=C sort -u | tr '\n' ' ' | sed 's/ $//'; }
 same() { [ -f "$1" ] && [ -f "$2" ] && cmp -s "$1" "$2"; }
 
 for c in $CASES; do
@@ -81,39 +79,50 @@ for c in $CASES; do
     [ -z "$present" ] && ok "$c: no Serel Memory installed" || bad "$c: Serel Memory files present:$present"
   fi
 
-  # The case's own workflows: every command that is not this checkout's own
-  # file, byte for byte.
+  # The case's own workflows: every source or Claude copy that is not this
+  # checkout's own file, byte for byte.
   mine=""
-  for f in "$w"/.claude/commands/*.md; do
-    n="$(basename "$f" .md)"
-    same "$ROOT/.claude/commands/$n.md" "$f" || mine="$mine $n"
+  for f in "$w"/.agents/skills/*/SKILL.md "$w"/.claude/skills/*/SKILL.md; do
+    [ -f "$f" ] || continue
+    same "$ROOT/${f#"$w"/}" "$f" || mine="$mine $(basename "$(dirname "$f")")"
   done
   mine="$(sorted "$mine")"
   expected="$(sorted "$(own "$c")")"
   [ "$mine" = "$expected" ] && ok "$c: own workflows are $expected" || bad "$c: own workflows are '$mine', expected '$expected'"
 
-  # Every workflow ships as the pair each CLI discovers, in both directions.
+  # Every workflow is discoverable by each CLI, in both directions: a source
+  # with its manifest, and its byte-identical Claude copy alone in its folder.
+  # The ask pair is the one exception, as in check-single-source.sh. No
+  # workflow is a Claude command.
   unpaired=""
-  for f in "$w"/.claude/commands/*.md; do
-    s="$(skill_for "$(basename "$f" .md)")"
-    [ -f "$w/.agents/skills/$s/SKILL.md" ] && [ -f "$w/.agents/skills/$s/agents/openai.yaml" ] || unpaired="$unpaired $s"
-  done
   for d in "$w"/.agents/skills/*/; do
-    n="$(command_for "$(basename "$d")")"
-    [ -f "$w/.claude/commands/$n.md" ] || unpaired="$unpaired $n"
+    [ -d "$d" ] || continue
+    n="$(basename "$d")"
+    [ -f "$d/SKILL.md" ] && [ -f "$d/agents/openai.yaml" ] || unpaired="$unpaired $n:source-or-manifest"
+    [ "$n" = ask-claude ] && continue
+    same "$d/SKILL.md" "$w/.claude/skills/$n/SKILL.md" || unpaired="$unpaired $n:claude-copy"
+    extra="$(find "$w/.claude/skills/$n" -mindepth 1 ! -name SKILL.md -print 2>/dev/null)" || true
+    [ -z "$extra" ] || unpaired="$unpaired $n:extra-files"
   done
-  [ -z "$unpaired" ] && ok "$c: every workflow is a Claude/Codex pair" || bad "$c: unpaired:$unpaired"
+  for d in "$w"/.claude/skills/*/; do
+    [ -d "$d" ] || continue
+    n="$(basename "$d")"
+    [ "$n" = ask-codex ] || [ -f "$w/.agents/skills/$n/SKILL.md" ] || unpaired="$unpaired $n:no-source"
+  done
+  [ ! -e "$w/.claude/commands" ] || unpaired="$unpaired .claude/commands"
+  [ -z "$unpaired" ] && ok "$c: every workflow is a source with its manifest and a byte-identical Claude copy" || bad "$c: not laid out as one source:$unpaired"
 
   kit=""
-  for f in .serel-kit.json .claude/commands/polish.md .claude/commands/verify-map.md .agents/skills/polish .agents/skills/verify-map; do
+  for f in .serel-kit.json .claude/commands/polish.md .claude/commands/verify-map.md \
+    .claude/skills/polish .claude/skills/verify-map .agents/skills/polish .agents/skills/verify-map; do
     if [ -e "$w/$f" ]; then kit="$kit $f"; fi
   done
   [ -z "$kit" ] && ok "$c: no Serel Kit files" || bad "$c: Kit files present:$kit"
 
   status="$(git -C "$w" status --porcelain --untracked-files=all)" || die "$c: git status failed (exit $?)"
   if [ "$c" = duplicated ]; then
-    [ "$status" = "$(printf ' M .agents/skills/save-session/SKILL.md\n M .claude/commands/save-session.md')" ] \
-      && ok "$c: only the save-session adapters are uncommitted" || bad "$c: status $(tr '\n' '|' <<<"$status")"
+    [ "$status" = "$(printf ' M .agents/skills/save-session/SKILL.md\n M .claude/skills/save-session/SKILL.md')" ] \
+      && ok "$c: only save-session's source and Claude copy are uncommitted" || bad "$c: status $(tr '\n' '|' <<<"$status")"
     numstat="$(git -C "$w" diff --numstat)" || die "$c: git diff failed (exit $?)"
     removed="$(awk '{ s += $2 } END { print s + 0 }' <<<"$numstat")"
     added="$(awk '{ s += $1 } END { print s + 0 }' <<<"$numstat")"
@@ -150,8 +159,9 @@ pair_diff="$(diff -rq -x .git "$tmp/coexist/project" "$tmp/unrecorded/project")"
   && ok "coexistence pair differs only in the recorded project decision" \
   || bad "coexistence pair differs elsewhere: $pair_diff"
 
-# Upgrade: a bare synthetic upstream whose main adds one workflow, both
-# adapters, over the baseline the workspace installed, and nothing fetched yet.
+# Upgrade: a bare synthetic upstream whose main adds one workflow (source,
+# manifest and Claude copy) over the baseline the workspace installed, and
+# nothing fetched yet.
 w="$tmp/upgrade/project"
 up="$tmp/upgrade/upstream.git"
 bare="$(git -C "$up" rev-parse --is-bare-repository)" || die "upgrade: no upstream repository (exit $?)"
@@ -162,8 +172,8 @@ ref="$(sed -n 's/.*"ref":"\([^"]*\)".*/\1/p' "$w/.serel-memory.json")"
 git -C "$up" rev-parse --verify --quiet "refs/tags/$ref^{commit}" >/dev/null \
   && ok "upgrade: the anchor's ref is an upstream tag" || bad "upgrade: anchor ref '$ref' is not an upstream tag"
 added="$(git -C "$up" diff --name-status "refs/tags/$ref" main)" || die "upgrade: git diff failed in upstream (exit $?)"
-[ "$added" = "$(printf 'A\t.agents/skills/changelog/SKILL.md\nA\t.agents/skills/changelog/agents/openai.yaml\nA\t.claude/commands/changelog.md')" ] \
-  && ok "upgrade: upstream main adds exactly one workflow pair" || bad "upgrade: upstream change is $(tr '\n' '|' <<<"$added")"
+[ "$added" = "$(printf 'A\t.agents/skills/changelog/SKILL.md\nA\t.agents/skills/changelog/agents/openai.yaml\nA\t.claude/skills/changelog/SKILL.md')" ] \
+  && ok "upgrade: upstream main adds exactly one workflow" || bad "upgrade: upstream change is $(tr '\n' '|' <<<"$added")"
 baseline="$(git -C "$up" ls-tree -r --name-only "refs/tags/$ref")" || die "upgrade: git ls-tree failed (exit $?)"
 [ "$baseline" = "$framework" ] && ok "upgrade: the baseline is this checkout's framework" || bad "upgrade: the baseline file list differs from the framework"
 differ=""
@@ -171,7 +181,7 @@ while IFS= read -r f; do
   git -C "$up" show "refs/tags/$ref:$f" | cmp -s - "$w/$f" || differ="$differ $f"
 done <<<"$baseline"
 [ -z "$differ" ] && ok "upgrade: the workspace holds the baseline unchanged" || bad "upgrade: the workspace differs from the baseline:$differ"
-[ ! -e "$w/.claude/commands/changelog.md" ] && [ ! -e "$w/.agents/skills/changelog" ] \
+[ ! -e "$w/.claude/skills/changelog" ] && [ ! -e "$w/.agents/skills/changelog" ] \
   && ok "upgrade: the new workflow is not in the workspace yet" || bad "upgrade: the new workflow is already installed"
 head_up="$(git -C "$up" rev-parse main)" || die "upgrade: rev-parse failed in upstream (exit $?)"
 if git -C "$w" cat-file -e "$head_up^{commit}" 2>/dev/null; then bad "upgrade: upstream was already fetched"; else ok "upgrade: nothing fetched yet"; fi

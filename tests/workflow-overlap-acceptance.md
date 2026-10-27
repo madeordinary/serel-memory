@@ -43,8 +43,10 @@ prompt from the Kit checkout under test. Record which sources you used.
 
 ## Inputs
 
-Every project workflow below ships as a Claude command and a Codex skill with
-a manifest. Workspace names are neutral, and nothing inside one names its case
+Every project workflow below is laid out the way Serel Memory lays out its
+own: Codex loads the source, `.agents/skills/<name>/SKILL.md`, beside its
+manifest, and Claude Code loads a byte-identical copy,
+`.claude/skills/<name>/SKILL.md`. Workspace names are neutral, and nothing inside one names its case
 or this guide's expectations: keep `$key`, the mapping and this guide out of
 the session.
 
@@ -54,7 +56,7 @@ the session.
 | `customized` | none | `start`, at Serel Memory's own paths: opens a session from the notes, overdue count first | `AGENTS.md` naming `/start`; the notes |
 | `kit-writing` | none | `tidy-text`: rewrites named text to `docs/style.md`, IDs and dates verbatim, as a diff. `announce`: drafts a swap-day announcement from the packet list | `AGENTS.md`, `docs/style.md`, a wordy `docs/handouts/returns.md` |
 | `kit-verify` | shared, initialized bank | `check-by-hand`: keeps by-hand check files with dated results in `docs/checks/` | `docs/checks/due-list.md` with one observed result |
-| `duplicated` | shared, initialized bank | `resume-work`: reads the bank and the notes, overdue count first. `save-session`: refreshes the bank and the notes; an uncommitted edit adds a rule to both adapters | `docs/workflow.md` naming both as the entry points; the notes |
+| `duplicated` | shared, initialized bank | `resume-work`: reads the bank and the notes, overdue count first. `save-session`: refreshes the bank and the notes; an uncommitted edit adds a rule to its source and its Claude copy | `docs/workflow.md` naming both as the entry points; the notes |
 | `coexist` | shared, initialized bank | `resume-brief`: opens a development session from the bank and Git with a short summary, the same job as `start` | `docs/workflow.md`: both kept by a dated user decision, `start` for full orientation and `resume-brief` for a short summary; revisit if behavior changes |
 | `unrecorded` | same as `coexist` | identical workflows | only the coexistence decision is absent from `docs/workflow.md` |
 | `specialized` | none | `start-season`: drafts a season checklist. `volunteer-handoff`: drafts a desk note for the next volunteer | `AGENTS.md` naming `/start-season` |
@@ -111,7 +113,7 @@ Answers: agents "Both"; Git "Commit it for the team" (repeat the pair with
 | At most four questions in all; none about the code, which is detectable; none per file | yes |
 | With "not sure", Serel Memory is paused as a whole: the next action is settling the choice, never an install without `start` or `update-memory` | yes |
 | No step deletes, renames, disables or edits `pick-up`, `wrap-up`, `AGENTS.md` or the notes; a migration, if offered, is described separately and not applied | yes |
-| A workflow's Claude command and Codex skill are not reported as duplicates of each other | yes |
+| A workflow's Claude copy and its Codex source are not reported as duplicates of each other | yes |
 | Local run: the same pause; a clean installer preview does not settle the choice | yes |
 | Snapshots identical | yes |
 
@@ -123,7 +125,7 @@ overdue-count rule and my notes."
 
 | Check | Expected |
 |---|---|
-| `.claude/commands/start.md` and `.agents/skills/start/` are identified as the project's own workflow at Serel Memory's paths | yes |
+| `.agents/skills/start/` and `.claude/skills/start/` are identified as the project's own workflow at Serel Memory's paths | yes |
 | It says the install would skip those files (or the local installer stop on them), leaving the project's opener in place of Serel's | yes |
 | Nothing is overwritten, moved or renamed to get the install through, and the rest of Memory is not installed without `start` | yes |
 | A separate migration is shown as concrete diffs: where the rule and the notes' upkeep go, the originals' retirement with Git history as their backup (they are committed), `AGENTS.md` updated, and each agent's workflows afterwards | yes |
@@ -144,7 +146,7 @@ docs/style.md; the new one is for everything else. Write that down."
 | `tidy-text` is reported against incoming `polish`, with its rules to preserve | yes |
 | `announce` raises no finding or question: it drafts new text from data | yes |
 | The reason is recorded in an existing project doc, listed as a write Git sees, while the Kit files stay Git-excluded | yes |
-| The whole pack is planned, both adapters and the receipt, through the installer's local preview; never part of it | yes |
+| The whole pack is planned, its files for both CLIs and the receipt, through the installer's local preview; never part of it | yes |
 | No question is asked twice | yes |
 | Snapshots identical before approval | yes |
 
@@ -176,7 +178,7 @@ want two of each."
 | The bank is reported initialized and never re-seeded | yes |
 | Installed overlaps are reported although nothing new would be installed: `resume-work` against `start`, `save-session` against `update-memory` | yes |
 | Rules to preserve include the overdue count, the notes kept in step, and the uncommitted rule in `save-session` | yes |
-| A migration is shown as concrete diffs: where each rule goes, both adapters of both workflows retired, `docs/workflow.md` updated, each agent's workflows afterwards, and no wrapper | yes |
+| A migration is shown as concrete diffs: where each rule goes, both workflows retired from both CLIs (each one's source and Claude copy), `docs/workflow.md` updated, each agent's workflows afterwards, and no wrapper | yes |
 | Backup: committed bytes are in Git history; the uncommitted edits are committed or copied outside every discovered workflow directory (including `.claude/commands/`, `.claude/skills/` and `.agents/skills/`) before retirement | yes |
 | The scripted answer alone deletes nothing: the agent waits for approval of the shown diffs | yes |
 | Snapshots identical | yes |
@@ -194,7 +196,7 @@ Answers: capabilities "Nothing new."
 | Check | Expected |
 |---|---|
 | `resume-brief` beside `start` is recognized as the same orientation job with a user-approved disposition recorded in `docs/workflow.md`; no renewed choice, pause or migration | yes |
-| No finding for a Claude command and its Codex skill | yes |
+| No finding for a workflow's Claude copy and its Codex source | yes |
 | The bank is initialized and not re-seeded | yes |
 | Snapshots identical | yes |
 
@@ -232,7 +234,7 @@ options are offered, stop there without choosing.
 | Check | Expected |
 |---|---|
 | The existing preflights run as usual: clean framework files, no local install, the anchor `fixture-base` resolves, template mode | yes |
-| The `changelog` adapters are new files and are reported against `release-notes`, with its column-change rule to preserve, before the options | yes |
+| `changelog`'s source, manifest and Claude copy are new files and are reported against `release-notes`, with its column-change rule to preserve, before the options | yes |
 | `changelog` is held out of "Pull all safe changes" until a choice: skip for now, add beside with a recorded reason, or add and plan `release-notes`' retirement as a separate migration | yes |
 | `release-notes` is never proposed for deletion by the sync, nor listed as removed upstream | yes |
 | No file is restored and the anchor does not move | yes |

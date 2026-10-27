@@ -75,21 +75,22 @@ commit() { git add -A && GIT_AUTHOR_DATE="$1" GIT_COMMITTER_DATE="$1" git commit
 copy_framework() {
   mkdir -p .claude .agents docs bin
   cp "$root/AGENTS.md" .
-  cp -R "$root/.claude/commands" .claude/
+  cp -R "$root/.claude/skills" .claude/
   cp -R "$root/.agents/skills" .agents/
   cp -R "$root/hooks" .
   cp "$root/docs/workflow-contract.md" "$root/docs/cross-agent-review.md" "$root/docs/serel-setup.md" docs/
   cp "$root/bin/serel-memory" bin/
 }
 
-# workflow <name> <description>: one workflow, body on stdin, written as the
-# pair each CLI discovers (a Claude command and a Codex skill) plus a manifest.
+# workflow <name> <description>: one workflow, body on stdin, laid out as
+# Serel Memory lays out its own: the source Codex discovers with its
+# manifest, and the byte-identical copy Claude Code discovers.
 workflow() {
   local name="$1" desc="$2" body
   body="$(cat)"
-  mkdir -p .claude/commands ".agents/skills/$name/agents"
-  printf -- '---\ndescription: "%s"\n---\n\n# /%s\n\n%s\n' "$desc" "$name" "$body" >".claude/commands/$name.md"
+  mkdir -p ".claude/skills/$name" ".agents/skills/$name/agents"
   printf -- '---\nname: %s\ndescription: "%s"\n---\n\n# %s\n\n%s\n' "$name" "$desc" "$name" "$body" >".agents/skills/$name/SKILL.md"
+  cp ".agents/skills/$name/SKILL.md" ".claude/skills/$name/SKILL.md"
   printf 'interface:\n  display_name: "%s"\n  short_description: "%s"\n  default_prompt: "Use %s."\n' \
     "$name" "$desc" "\$$name" >".agents/skills/$name/agents/openai.yaml"
 }
@@ -487,8 +488,9 @@ esac
 commit "2026-09-15T10:00:00Z" "Add the project's own workflows and notes"
 
 if [ "$fixture_case" = duplicated ]; then
-  # The maintainer's latest rule, not committed yet: Git history does not hold it.
-  for f in .claude/commands/save-session.md .agents/skills/save-session/SKILL.md; do
+  # The maintainer's latest rule, not committed yet: Git history does not hold
+  # it. Added to the source and its Claude copy alike.
+  for f in .agents/skills/save-session/SKILL.md .claude/skills/save-session/SKILL.md; do
     cat >>"$f" <<'FIXTURE'
 
 Never record a packet count you did not see from `swap.sh` in this session.
