@@ -1,16 +1,17 @@
 ---
+name: update-memory
 description: "Refresh memory-bank files after a work session. Use when the user asks to update memory, preserve session context, refresh activeContext/progress, or capture new project learnings."
 ---
 
-# /update-memory
+# Update Memory
 
-Update the memory bank to reflect the work done this session. Show diffs before writing anything.
+Update the memory bank to reflect the work done this session. Always show proposed diffs before writing anything.
 
 **Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), all reads and writes below target it and its `.rules` — never the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
 **Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
 
-Steps:
+## Workflow
 
 1. Read the seven core files in the effective bank, its `.rules`, and the
    contract's **Memory accuracy** section. Read optional docs only for relevant
@@ -76,29 +77,47 @@ DIFF:
 ## Bank-vs-reality audit (offered)
 
 The bank update is the agent writing the durable record of its own session —
-the purest self-grading moment in the framework. After showing the proposed
-diffs and before asking for confirmation, if `codex --version` succeeds and the
-session wasn't trivial (docs-only or a tiny diff), offer once:
+the purest self-grading moment in the framework.
 
-> Want Codex to verify these updates against the actual repo? (~30–90s, read-only)
+Which CLI am I running in? Use only the matching branch below; never call your own CLI.
+
+- **In Claude Code:** your model is Claude and the other model is Codex. It is available if `codex --version` succeeds. The offer reads:
+
+  > Want Codex to verify these updates against the actual repo? (~30–90s, read-only)
+
+  Run it read-only with:
+
+  ```bash
+  codex exec --cd "$PWD" --sandbox read-only - < "$PROMPT_FILE"
+  ```
+
+- **In Codex:** your model is Codex and the other model is Claude. It is available if `claude --version` succeeds. The offer reads:
+
+  > Want Claude to verify these updates against the actual repo? (~30–90s, read-only)
+
+  Run it read-only with:
+
+  ```bash
+  claude -p --permission-mode plan < "$PROMPT_FILE"
+  ```
+
+Then, in either CLI: after showing the proposed diffs and before asking for
+confirmation, if the other model is available and the session wasn't trivial
+(docs-only or a tiny diff), make your branch's offer once.
 
 If accepted:
 
 1. Write a prompt file containing the proposed diff blocks, the coverage
    summary and relevant evidence, the selected effective bank path, the
    instructions below, and a read-only instruction (do not edit
-   files or run write operations), then run Codex read-only — synchronous
-   form, `docs/cross-agent-review.md` has the canonical invocation:
-
-   ```bash
-   codex exec --cd "$PWD" --sandbox read-only - < "$PROMPT_FILE"
-   ```
-
-2. Ask Codex to read the relevant live bank sections alongside the proposed
-   diffs, looking for old claims about the changed subjects that the proposal
-   leaves behind. Classify claims as **current fact**, **durable decision**,
-   **intended future**, or **open question**. Flag only *current-fact* claims
-   the code, tests, or git history
+   files or run write operations), then run the other model read-only with
+   your branch's command — synchronous form, `docs/cross-agent-review.md` has
+   the canonical invocation.
+2. Ask the other model to read the relevant live bank sections alongside the
+   proposed diffs, looking for old claims about the changed subjects that the
+   proposal leaves behind. Classify claims as **current fact**, **durable
+   decision**, **intended future**, or **open question**. Flag only
+   *current-fact* claims the code, tests, or git history
    don't support. Intent is allowed to lead the code; facts are not. When a
    claim is ambiguous between fact and intent (present-tense statements in
    `projectbrief.md`, `productContext.md`, or `systemPatterns.md` often
@@ -111,16 +130,16 @@ If accepted:
 4. Fold accepted findings into the proposed diffs, mark which lines changed
    because of the audit, and show the revised diffs.
 
-If Codex is unavailable or the user declines, continue single-model — the
-audit never blocks a bank update.
+If the other model is unavailable or the user declines, continue single-model —
+the audit never blocks a bank update.
 
 Wait for confirmation before writing any file. If the user pushes back, revise — don't argue.
 
-Rules:
+## Rules
 
-- Don't bloat. Every line in the bank should still be earning its place.
+- Don't bloat the bank. Every line in the bank should still be earning its place.
 - The `## Checkpoint` is the resume note (branch and HEAD, uncommitted, verified, first action). No `wip:` commit unless the user asked for a pause (contract "Clean stop").
-- Don't journal — this isn't a log. Current-state sections (`Current focus`, `Checkpoint`, `Next steps`, `Open questions`, `Notes for next session`) are rewritten in place; historical entries rotate losslessly to `archive/` per step 6, never deleted, never paraphrased.
+- Don't journal one-off events — this isn't a log. Keep `activeContext.md` current: current-state sections (`Current focus`, `Checkpoint`, `Next steps`, `Open questions`, `Notes for next session`) are rewritten in place; historical entries rotate losslessly to `archive/` per step 6, never deleted, never paraphrased.
 - Never write to two scopes in one pass. If a learning clearly belongs to another project bank or to the root, say so and offer to run this workflow again with that `--scope`, rather than writing outside the resolved scope.
-- If `.rules` already covers a learning, refine the existing entry instead of duplicating.
-- Follow `docs/workflow-contract.md` when present: session state goes to `activeContext.md`, completed status to `progress.md`, durable decisions to `decisionLog.md`, reusable gotchas to `.rules`.
+- If `.rules` already covers a learning, refine the existing entry instead of duplicating it.
+- Follow `docs/workflow-contract.md` when present to promote information: session state goes to `activeContext.md`, completed status to `progress.md`, durable decisions to `decisionLog.md`, reusable gotchas to `.rules`.
