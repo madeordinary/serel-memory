@@ -39,13 +39,18 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
   - A command-retirement step checks a fixed list of Memory's own workflows on
     every run. It shows RETIRE and HELD lines in the summary and two new
     options.
+  - Retirement rechecks every adapter before writing the replacement skill.
+    If the deletion still fails afterwards, it puts that workflow's skills
+    back as `HEAD` has them, so the command stays active.
   - Added-and-deleted discovery uses `--no-renames`.
   - A command counts as known when its bytes match any version that path had
     upstream, or the anchor's version. Anything else is held. A shallow clone
     holds every workflow until you run `git fetch --unshallow`.
   - It states which installed versions can reach 0.8.0 and how.
 - **The drift checker** reports only paths Serel Memory ships, so Kit and
-  project files no longer show up as framework findings. Two new INFO lines:
+  project files no longer show up as framework findings. Its baseline
+  comparison ignores renames, so a Memory file moved to a project-only path
+  is still reported missing. Two new INFO lines:
   - a workflow's Claude and Codex copies differ;
   - an old command is shadowed by its skill (retire it with `sync-upstream`).
 - **`install.sh --local`** installs `.claude/skills/`. It refuses when the
