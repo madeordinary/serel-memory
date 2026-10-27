@@ -1,23 +1,22 @@
 ---
+name: decision-log
 description: "Record an architectural, product, workflow, or operational decision. Use when the user asks to log a decision, create an ADR, or preserve decision rationale."
 ---
 
-# /decision-log
+# Decision Log
 
-Record an architectural or design decision in standard ADR (Architecture Decision Record) format. Use this when a decision is significant enough that future-you (or a future teammate) will want to know why it was made.
+Record a durable architectural or design decision in standard ADR (Architecture Decision Record) format: an ADR in `docs/decisions/` and a short index entry in `memory-bank/decisionLog.md`. Use this when a decision is significant enough that future-you (or a future teammate) will want to know why it was made.
 
 **Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), all memory-bank reads and writes below target it instead of the tracked templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
 **Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
 
-Steps:
+## Workflow
 
 1. If the user hasn't already stated the decision, ask: "What's the decision you want to record?"
-2. Read `memory-bank/systemPatterns.md`, `memory-bank/techContext.md`, and `memory-bank/decisionLog.md` for related context.
-3. Check `docs/decisions/` for existing ADRs to determine the next number. If the directory is missing, create it when the ADR is approved.
-4. Draft the ADR and a short `memory-bank/decisionLog.md` entry.
-
-Use this structure:
+2. Read `memory-bank/systemPatterns.md`, `memory-bank/techContext.md`, `memory-bank/decisionLog.md`, and `.rules` for related context.
+3. Check `docs/decisions/` for existing ADRs to determine the next sequential number. If the directory is missing, plan to create it, and create it only when the ADR is approved.
+4. Draft the ADR and a short `memory-bank/decisionLog.md` entry. Use this structure for the ADR:
 
 ~~~markdown
 # [NNN]. [Short imperative title — e.g., "Use Postgres for state, not SQLite"]
@@ -57,15 +56,14 @@ Proposed | Accepted | Deprecated | Superseded by [NNN]
 - [link to relevant code, doc, discussion, ticket]
 ~~~
 
-Show the proposed ADR and memory-bank entry, then wait for confirmation before writing.
+5. Show the proposed ADR and the proposed `memory-bank/decisionLog.md` index entry.
+6. Wait for confirmation before writing.
+7. When approved, save the ADR to `docs/decisions/NNN-<slug>.md`, where NNN is the next sequential number padded to 3 digits (e.g., `001-use-postgres-for-state.md`). Add the short entry to `memory-bank/decisionLog.md`.
+8. After writing, ask the user whether `memory-bank/systemPatterns.md` should be updated to reference this decision under "Key decisions."
 
-When approved, save the ADR to `docs/decisions/NNN-<slug>.md`, where NNN is the next sequential number padded to 3 digits (e.g., `001-use-postgres-for-state.md`). Add the short entry to `memory-bank/decisionLog.md`.
+## Rules
 
-After writing, ask the user whether `memory-bank/systemPatterns.md` should be updated to reference this decision under "Key decisions."
-
-Rules:
-
-- ADRs are for *real* decisions — ones with alternatives that were genuinely considered. Don't ADR trivial things ("we use 2-space indents").
+- ADRs are for *real* decisions — ones with alternatives that were genuinely considered, or with meaningful future consequences. Don't ADR trivial things ("we use 2-space indents").
 - Status starts as "Proposed" unless the user directed or already approved the decision; being implemented is not approval. Only the user makes it "Accepted" — never accept your own suggestion, and don't ask again for approval already given (a user who changes a Proposed draft to Accepted in review has approved it). Record who decided in the ADR and the index entry (contract "Memory writes").
 - Alternatives section should be honest. If you didn't seriously consider others, say so — that's also useful context.
 - Consequences should be balanced. If you can't think of negatives, you probably haven't thought hard enough about the decision.
