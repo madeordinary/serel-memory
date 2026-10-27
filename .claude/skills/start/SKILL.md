@@ -1,18 +1,21 @@
 ---
-description: "Start or resume a memory-bank project. Use: /start (quick), /start full (rich dashboard), or /start setup (guided setup). Loads memory bank, summarizes state, asks where to pick up; routes a missing or blank bank to setup."
+name: start
+description: "Start or resume a memory-bank project. Use: `start` (quick), `start full` (rich dashboard), or `start setup` (guided setup). Loads memory bank, summarizes state, asks where to pick up; routes a missing or blank bank to setup."
 ---
 
-# /start
+# Start
 
-You are starting a new session on this project. Your memory has reset; the memory bank is your only continuity.
+You are starting a new session on this project. Your memory has reset; the memory bank is your only continuity. Use this workflow to orient the session around the Serel Memory bank.
 
-**Mode:** Check `$ARGUMENTS` for a mode keyword.
+Arguments the user gave with the call (Claude Code substitutes them here: [$ARGUMENTS]; in Codex they are in the user's message after the skill name).
+
+**Mode:** Check those arguments for a mode keyword.
 
 - If empty, `quick`, or `brief` → use **Quick mode** (compact output; both modes read the same inputs).
 - If `full`, `onboard`, or `dashboard` → use **Full mode** (rich onboarding dashboard).
 - If `setup` → use **Setup mode** (guided setup routing, `docs/serel-setup.md`).
 
-Also check `$ARGUMENTS` for `--scope <path>` (scoped banks only — see "Resolving scope" in `docs/workflow-contract.md`). `--scope .` is the root; a path equal to a project root selects that project's bank; anything else: stop and list the valid selectors (`hooks/lib/resolve-scope.sh --list`). Without it, resolve by the current directory, then the root. Never read more than one bank in a pass.
+Also check the arguments for `--scope <path>` (scoped banks only — see "Resolving scope" in `docs/workflow-contract.md`). `--scope .` is the root; a path equal to a project root selects that project's bank; anything else: stop and list the valid selectors (`hooks/lib/resolve-scope.sh --list`). Without it, resolve by the current directory, then the root. Never read more than one bank in a pass.
 
 **Local install at a project scope.** After resolving the scope, and only when it is not the root, check from the repository root whether Serel Memory is installed locally (the test in "Setup routing" in `docs/workflow-contract.md`):
 
@@ -22,7 +25,7 @@ if [ -n "$(git -C "$top" ls-files --others --ignored --exclude-standard -- bin/s
   git -C "$top" check-ignore -q .serel-memory.json; then echo "LOCAL INSTALL"; fi
 ```
 
-A local install holds the root bank only: it excludes the root `memory-bank/` and `.rules`, and `scopes` listed later do not extend that, so a bank seeded at this scope would be visible to Git. If it prints `LOCAL INSTALL` and this run would use Setup mode or offer to fill blank files (Step 1), do neither: stop before any plan or write. Say why in one or two sentences, write nothing, leave any existing files at this scope, the exclusions, `.gitignore` and instruction files as they are, and offer the supported choices: the root bank (`/start --scope .`) or a shared, committed install, where scoped banks work. Never un-ignore, untrack or force-add anything.
+A local install holds the root bank only: it excludes the root `memory-bank/` and `.rules`, and `scopes` listed later do not extend that, so a bank seeded at this scope would be visible to Git. If it prints `LOCAL INSTALL` and this run would use Setup mode or offer to fill blank files (Step 1), do neither: stop before any plan or write. Say why in one or two sentences, write nothing, leave any existing files at this scope, the exclusions, `.gitignore` and instruction files as they are, and offer the supported choices: the root bank (`start --scope .`) or a shared, committed install, where scoped banks work. Never un-ignore, untrack or force-add anything.
 
 ---
 
@@ -84,7 +87,7 @@ OPEN QUESTIONS: [anything blocking or unresolved]
 
 If the repo configures `scopes` and the scope resolved to the root, add an **Active scopes** list before the closing question — one line per project root from `hooks/lib/resolve-scope.sh --list`, as `--scope <path> [initialized|uninitialized]`. Read nothing from those banks. Then end with: **"Which scope, or stay at the root?"** Otherwise end with: **"Where do you want to pick up?"** Then wait.
 
-### Full mode (`/start full`)
+### Full mode (`start full`)
 
 Produce the full context audit (same as quick mode), then continue with all of the sections below.
 
@@ -149,7 +152,7 @@ Present 3–4 options clearly:
 
 End with: **"Which direction would you like to take for this session?"** Then wait.
 
-### Setup mode (`/start setup`, or a missing or blank bank)
+### Setup mode (`start setup`, or a missing or blank bank)
 
 Follow `docs/serel-setup.md` "The flow" for the resolved scope, and stay read-only until the user approves. Serel Memory is already installed here, so installation is skipped; choosing capabilities is not. An initialized bank is kept exactly as it is.
 
@@ -167,12 +170,12 @@ SETUP PLAN:
 - Requires: [none / verify: an initialized bank, so seed first]
 - Instructions: [AGENTS.md and any Claude instruction files found]
 - Overlaps: [none found / existing path ↔ other or incoming path: rules to preserve; primary: <entry>; kept both, recorded in <doc> / migrate, diffs shown / paused]
-NEXT: [/discover | /from-prd <path> | /init-memory | /init-memory naming the spec] [--scope <path> when not the root] / add Kit packs <names> / resume
+NEXT: [discover | from-prd <path> | init-memory | init-memory naming the spec] [--scope <path> when not the root] / add Kit packs <names> / resume
 ```
 
-End with **"Continue with <next>?"** Then wait, unless the user has already told you to go ahead with this plan. A seed workflow runs in this session by following `.claude/commands/<workflow>.md`, carrying the answers you already have; its proposals and approval come before any bank write, and in a partial bank it fills only the blank files. For code plus a spec, the code describes what exists and the spec stays planned intent. Kit packs come from Serel Kit's own installer, previewed before anything is written (`docs/serel-setup.md` "Serel Kit"); packs keep Kit's own requirements even when chosen alone: `writing` leaves the bank as it is; `verify` needs an initialized bank, so beside a missing, blank or partial one `Requires` and `NEXT` name the seed workflow, which keeps its own approval. An initialized bank is never re-seeded: when no Kit packs are wanted and no overlap choice or migration remains, end with **"Where do you want to pick up?"** instead.
+End with **"Continue with <next>?"** Then wait, unless the user has already told you to go ahead with this plan. A seed workflow runs in this session by following its skill file (`.claude/skills/<workflow>/SKILL.md` in Claude Code, `.agents/skills/<workflow>/SKILL.md` in Codex), carrying the answers you already have; its proposals and approval come before any bank write, and in a partial bank it fills only the blank files. For code plus a spec, the code describes what exists and the spec stays planned intent. Kit packs come from Serel Kit's own installer, previewed before anything is written (`docs/serel-setup.md` "Serel Kit"); packs keep Kit's own requirements even when chosen alone: `writing` leaves the bank as it is; `verify` needs an initialized bank, so beside a missing, blank or partial one `Requires` and `NEXT` name the seed workflow, which keeps its own approval. An initialized bank is never re-seeded: when no Kit packs are wanted and no overlap choice or migration remains, end with **"Where do you want to pick up?"** instead.
 
-`Overlaps` covers workflows already installed here, such as a custom session opener beside `/start`, even when nothing new would be added. A resembling name, the Claude/Codex pair of one workflow, or a specialized workflow with a different job is not a finding, and a coexistence recorded in the project's docs is respected while it still applies. Settle a finding within the questions above and this plan's approval, never per file; an unresolved one pauses its whole capability (a Kit pack is not installed in part). Retiring or merging a workflow is a separate migration shown as diffs and approved explicitly; setup alone deletes and disables nothing. If an overlap remains unresolved, NEXT names the choice or migration review needed; it must not name installation of that capability.
+`Overlaps` covers workflows already installed here, such as a custom session opener beside `start`, even when nothing new would be added. A resembling name, the Claude/Codex pair of one workflow, or a specialized workflow with a different job is not a finding, and a coexistence recorded in the project's docs is respected while it still applies. Settle a finding within the questions above and this plan's approval, never per file; an unresolved one pauses its whole capability (a Kit pack is not installed in part). Retiring or merging a workflow is a separate migration shown as diffs and approved explicitly; setup alone deletes and disables nothing. If an overlap remains unresolved, NEXT names the choice or migration review needed; it must not name installation of that capability.
 
 ---
 
