@@ -591,6 +591,24 @@ run --root "$W"
 assert_not "shadowed" "a retired command is no longer reported"
 assert_has "^DRIFT .claude/commands/demo.md framework file missing" "the retirement is still visible against the old baseline until the anchor moves"
 
+# A Memory workflow moved to a project-only path is still a missing framework
+# file. Rename detection would report only the destination, which the
+# ownership filter drops, so the move would vanish from the report.
+RN="$tmp/renamed"
+build_fixture "$RN"
+git -C "$RN" update-ref refs/serel-memory/anchor HEAD
+mkdir -p "$RN/.agents/skills/my-demo"
+(cd "$RN" && $GIT mv .agents/skills/demo/SKILL.md .agents/skills/my-demo/SKILL.md && $GIT commit --quiet -m "make demo the project's own")
+[ -n "$(git -C "$RN" -c diff.renames=true diff -M --name-only --diff-filter=R refs/serel-memory/anchor -- .agents/skills/)" ] \
+  && ok "fixture: Git sees the move as a rename" || bad "fixture invalid: the move is not rename-shaped"
+run --root "$RN"
+assert_rc 1 "an owned workflow renamed to a project-only path"
+assert_has "^DRIFT .agents/skills/demo/SKILL.md framework file missing" "the moved Memory file is reported missing"
+assert_not "my-demo" "the project-only destination is not a framework finding"
+git -C "$RN" config diff.renames copies
+run --root "$RN"
+assert_has "^DRIFT .agents/skills/demo/SKILL.md framework file missing" "the moved file is reported whatever diff.renames says"
+
 # =============================================================================
 # 9. The documented shape of a real report: two fresh markers, one stale
 # =============================================================================
