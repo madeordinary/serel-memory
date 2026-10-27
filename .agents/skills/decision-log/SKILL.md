@@ -5,7 +5,7 @@ description: "Record an architectural, product, workflow, or operational decisio
 
 # Decision Log
 
-Use this skill to record a durable decision. Significant decisions should get an ADR in `docs/decisions/` and a short index entry in `memory-bank/decisionLog.md`.
+Record a durable architectural or design decision in standard ADR (Architecture Decision Record) format: an ADR in `docs/decisions/` and a short index entry in `memory-bank/decisionLog.md`. Use this when a decision is significant enough that future-you (or a future teammate) will want to know why it was made.
 
 **Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), all memory-bank reads and writes below target it instead of the tracked templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
@@ -13,17 +13,13 @@ Use this skill to record a durable decision. Significant decisions should get an
 
 ## Workflow
 
-1. If the decision is not clear, ask: **"What's the decision you want to record?"**
-2. Read:
-   - `memory-bank/systemPatterns.md`
-   - `memory-bank/techContext.md`
-   - `memory-bank/decisionLog.md`
-   - `.rules`
-3. Check `docs/decisions/` for existing ADRs and determine the next sequential number. If the directory is missing, plan to create it.
-4. Draft an ADR:
+1. If the user hasn't already stated the decision, ask: "What's the decision you want to record?"
+2. Read `memory-bank/systemPatterns.md`, `memory-bank/techContext.md`, `memory-bank/decisionLog.md`, and `.rules` for related context.
+3. Check `docs/decisions/` for existing ADRs to determine the next sequential number. If the directory is missing, plan to create it, and create it only when the ADR is approved.
+4. Draft the ADR and a short `memory-bank/decisionLog.md` entry. Use this structure for the ADR:
 
-```text
-# [NNN]. [Short imperative title]
+~~~markdown
+# [NNN]. [Short imperative title — e.g., "Use Postgres for state, not SQLite"]
 
 ## Status
 
@@ -33,43 +29,42 @@ Proposed | Accepted | Deprecated | Superseded by [NNN]
 
 ## Context
 
-[Situation, constraints, and why this decision exists.]
+[What's the situation that's forcing this decision? What constraints are in play? Be specific about what's actually true today.]
 
 ## Decision
 
-[The decision in definitive language.]
+[What did we decide? Be definitive. "We will use X" not "We're considering X."]
 
 ## Alternatives considered
 
-- **[Alternative A]**: [why rejected]
-- **[Alternative B]**: [why rejected]
+- **[Alternative A]**: [brief description and why it was rejected]
+- **[Alternative B]**: [brief description and why it was rejected]
 
 ## Consequences
 
 **Positive**:
-- [benefit]
+- [what this decision enables or makes easier]
 
 **Negative**:
-- [cost or tradeoff]
+- [what this decision costs us or makes harder]
 
 **Neutral**:
-- [side effect]
+- [side effects that aren't clearly good or bad but should be known]
 
 ## References
 
-- [link to code, doc, discussion, ticket]
-```
+- [link to relevant code, doc, discussion, ticket]
+~~~
 
 5. Show the proposed ADR and the proposed `memory-bank/decisionLog.md` index entry.
 6. Wait for confirmation before writing.
-7. When approved, write:
-   - `docs/decisions/NNN-<slug>.md`
-   - an entry in `memory-bank/decisionLog.md`
-8. Ask whether `memory-bank/systemPatterns.md` should reference the decision under "Key decisions."
+7. When approved, save the ADR to `docs/decisions/NNN-<slug>.md`, where NNN is the next sequential number padded to 3 digits (e.g., `001-use-postgres-for-state.md`). Add the short entry to `memory-bank/decisionLog.md`.
+8. After writing, ask the user whether `memory-bank/systemPatterns.md` should be updated to reference this decision under "Key decisions."
 
 ## Rules
 
-- ADRs are for decisions with meaningful alternatives or future consequences.
-- Use `Proposed` unless the user directed or already approved the decision; being implemented is not approval. Only the user makes it `Accepted` — never accept your own suggestion, and do not ask again for approval already given (a user who changes a `Proposed` draft to `Accepted` in review has approved it). Record who decided in the ADR and the index entry (contract "Memory writes").
-- Consequences should be balanced.
-- Do not silently overwrite existing ADRs.
+- ADRs are for *real* decisions — ones with alternatives that were genuinely considered, or with meaningful future consequences. Don't ADR trivial things ("we use 2-space indents").
+- Status starts as "Proposed" unless the user directed or already approved the decision; being implemented is not approval. Only the user makes it "Accepted" — never accept your own suggestion, and don't ask again for approval already given (a user who changes a Proposed draft to Accepted in review has approved it). Record who decided in the ADR and the index entry (contract "Memory writes").
+- Alternatives section should be honest. If you didn't seriously consider others, say so — that's also useful context.
+- Consequences should be balanced. If you can't think of negatives, you probably haven't thought hard enough about the decision.
+- Do not silently overwrite an existing ADR or decision-log entry.
