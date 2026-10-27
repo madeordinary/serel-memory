@@ -40,8 +40,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
     every run. It shows RETIRE and HELD lines in the summary and two new
     options.
   - Retirement rechecks every adapter before writing the replacement skill.
-    If the deletion still fails afterwards, it puts that workflow's skills
-    back as `HEAD` has them, so the command stays active.
+    If the deletion still fails afterwards, it puts back only what that
+    attempt wrote, as it was before, so the command stays active.
   - Added-and-deleted discovery uses `--no-renames`.
   - A command counts as known when its bytes match any version that path had
     upstream, or the anchor's version. Anything else is held. A shallow clone
