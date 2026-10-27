@@ -1,5 +1,5 @@
 ---
-description: Help the user define a project from a rough idea (no code yet); produces initial memory bank
+description: "Shape a brand-new project from a rough idea and seed memory-bank files. Use when there is no code yet, the memory bank is blank, template-only, or partly filled, or the user asks to discover, define, clarify, or scope a new project."
 ---
 
 # /discover

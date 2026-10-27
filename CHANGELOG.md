@@ -7,7 +7,8 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 ## [Unreleased]
 
 Guided setup and a local, Git-excluded install; decision provenance, a lesson
-bar, and memory use shown in plans and reviews. None of this is in 0.6.0.
+bar, and memory use shown in plans and reviews; observed proof in ship checks
+and a findings ledger for review loops. None of this is in 0.6.0.
 
 ### Added
 
@@ -94,6 +95,23 @@ bar, and memory use shown in plans and reviews. None of this is in 0.6.0.
   duplicates, and an update that adds an overlapping workflow.
   `tests/smoke-overlap-fixture.sh` checks the builder's inputs, isolation and
   refusals, not agent judgment.
+- `/ship` and `$ship` check that each behavior change was proven: evidence
+  observed in the session, with how it was obtained (command output, a
+  reproduction that failed before and passes after, the app run and looked
+  at, a screenshot). Mocked or unit tests alone do not prove user-facing
+  behavior. When Serel Kit's verify pack has left a map at
+  `<effective bank>/verification/<feature>.md`, ship follows its Recipe and
+  reports the date of its newest record; it reads the map only when present
+  and never writes it. An unproven change is never READY: it is listed under
+  READY WITH CAVEATS, and it never outweighs a blocker, so failing tests are
+  still NOT READY.
+- "Findings ledger" and "Severity" in `docs/cross-agent-review.md`. A finding
+  keeps a stable id (F1, F2, …) across rounds and gets one outcome: fixed,
+  disputed with evidence, or declined as a follow-up. Later rounds send the
+  ledger and only what changed. HIGH, MEDIUM and LOW are judged by the case
+  the change is meant to handle, and the primary agent re-grades every
+  finding. A timeout, an error, no reply or reaching the round cap is not
+  approval, and no finding is accepted just to end a loop.
 
 ### Changed
 
@@ -141,6 +159,15 @@ bar, and memory use shown in plans and reviews. None of this is in 0.6.0.
 - The README's existing-project install copies only the two framework docs
   into `docs/`, so Serel Memory's research notes and decision records no
   longer land in the project.
+- Review loops still stop at 2 rounds by default and 3 on request. Inside a
+  loop the user asked for, a 3rd round may now also run without asking when
+  a HIGH security, auth, data-loss or concurrency finding is still open with
+  evidence after round 2; the synthesis says so. Never more than 3.
+  `/ask-codex` and `$ask-claude` carry the findings ledger between rounds.
+- `/review` and `$review` define HIGH, MEDIUM and LOW inline and re-grade the
+  other model's findings by those definitions when merging.
+- Every Claude command's `description` now says when to use it, matching its
+  Codex skill's.
 
 ## [0.6.0] — 2026-09-23
 

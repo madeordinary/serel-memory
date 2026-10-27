@@ -1,5 +1,5 @@
 ---
-description: Draft a stakeholder-ready weekly update from the memory bank and recent activity
+description: "Draft a stakeholder-ready weekly update from the memory bank and recent activity. Use when the user asks for a weekly update, status report, stakeholder summary, or progress email."
 ---
 
 # /weekly-update

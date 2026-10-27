@@ -1,5 +1,5 @@
 ---
-description: Record an architectural decision in ADR format
+description: "Record an architectural, product, workflow, or operational decision. Use when the user asks to log a decision, create an ADR, or preserve decision rationale."
 ---
 
 # /decision-log

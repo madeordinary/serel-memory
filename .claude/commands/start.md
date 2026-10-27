@@ -1,5 +1,5 @@
 ---
-description: "Read the memory bank, summarize state, ask where to pick up. Use: /start (quick), /start full (rich dashboard), or /start setup (guided setup)"
+description: "Start or resume a memory-bank project. Use: /start (quick), /start full (rich dashboard), or /start setup (guided setup). Loads memory bank, summarizes state, asks where to pick up; routes a missing or blank bank to setup."
 ---
 
 # /start

@@ -1,5 +1,5 @@
 ---
-description: Surface risks not yet documented in the memory bank
+description: "Surface project risks not yet captured in the memory bank. Use when the user asks for risk review, hidden risks, assumptions, unknowns, or pre-planning risk assessment."
 ---
 
 # /risk-review

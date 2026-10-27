@@ -1,5 +1,5 @@
 ---
-description: Generate a handoff document for someone picking up this project cold
+description: "Generate a handoff document from a project. Use when the user asks for a handoff, onboarding summary, transfer doc, or context package for someone new."
 ---
 
 # /handoff

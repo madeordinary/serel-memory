@@ -1,5 +1,5 @@
 ---
-description: Break a task into steps before executing
+description: "Break down a task before implementation. Use when the user asks to plan, break down work, assess scope, or decide how to proceed before editing."
 ---
 
 # /breakdown

@@ -11,7 +11,7 @@ their CLIs. This is intentionally a thin workflow, not a full orchestrator.
 - Don't pin the secondary CLI's model or effort flags, and don't hardcode model names in prompts or docs — inherit that CLI's own defaults so upgrades flow through without leaving stale claims behind.
 - Use a loop only when the user explicitly asks for debate, back-and-forth, or a loop.
 - Cap loops at 2 rounds by default.
-- Cap at 3 rounds only when the user explicitly asks.
+- Cap at 3 rounds when the user explicitly asks, or without asking when a HIGH security, auth, data-loss or concurrency finding is still open with evidence after round 2 (see "Findings ledger"). Never more than 3.
 - The current agent owns synthesis and next steps.
 - Never ask the secondary CLI to call back into the primary CLI.
 - Do not edit files during the review loop.
@@ -52,6 +52,49 @@ FINAL SYNTHESIS:
 - User decisions needed
 - Recommended next step
 ```
+
+## Findings ledger
+
+When a review runs more than one round, the primary agent keeps a ledger so
+each round builds on the last instead of starting over:
+
+- Give each finding a stable id (F1, F2, …) when it first appears, and keep
+  that id in every later round. A new finding takes the next number.
+- Record one outcome per id: **fixed**; **disputed**, with the evidence
+  (file:line, a test, command output); or **declined**, with the reason, and
+  listed as a follow-up.
+- Later rounds send the ledger plus only the parts that changed, and ask the
+  reviewer to mark each earlier id resolved or still open before adding new
+  findings.
+- The loop synthesis carries the ledger: ids still open go under remaining
+  disagreements or user decisions.
+
+A loop ends on evidence, not on fatigue:
+
+- A timeout, an error, or no reply is not approval. Reaching the round cap is
+  not approval either: report what is still open.
+- Never accept a finding just to end the loop.
+- If the review grew the change, cut first. Prefer fixes that delete or
+  narrow code over fixes that add it.
+- A 3rd round needs the user's request, with one exception: inside a loop the
+  user asked for, when a HIGH security, auth, data-loss or concurrency finding
+  is still open with evidence after round 2, run one more round without
+  asking, and say so in the synthesis. Never more than 3 rounds.
+
+## Severity
+
+Grade each finding by the case the change is meant to handle, whatever label
+the reviewer gave it:
+
+- **HIGH**: the intended case is wrong, or a security, auth or data-loss
+  defect.
+- **MEDIUM**: a real bug users will hit within the change's intent.
+- **LOW**: everything else — other paths, rare cases, small performance
+  costs, extra compatibility, style.
+
+The primary agent re-grades every finding, the other model's included, before
+acting on it or merging it. `review` uses these levels for its HIGH, MEDIUM
+and LOW sections.
 
 ## CLI preflight
 

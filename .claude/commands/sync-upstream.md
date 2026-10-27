@@ -1,5 +1,5 @@
 ---
-description: Check the upstream Serel Memory repo for updates and selectively pull changes
+description: "Check the upstream Serel Memory repo for framework updates (skills, commands, agent instructions) and selectively pull changes. Use when the user asks to update Serel Memory, update Basecamp, check for upstream changes, sync the framework, or pull latest skills."
 ---
 
 # /sync-upstream

@@ -1,5 +1,5 @@
 ---
-description: Review the current branch or uncommitted diff
+description: "Review the current branch, diff, or proposed change. Use when the user asks for a code review, branch review, diff review, or quality/risk pass."
 ---
 
 # /review
@@ -45,7 +45,7 @@ of the same diff, merged with provenance:
    returned, proceed single-model and say so.
 4. Merge: tag every finding `[both]`, `[claude]`, or `[codex]`. Verify
    `[codex]`-only findings against the actual code before including them —
-   drop what you can't confirm and note it under QUESTIONS instead. Then add one `DISAGREEMENTS:` line per explicit contradiction (one model says X, the other says not-X); silence from a model is not disagreement. Agreement is confidence, not priority — a single verified correctness or security finding outranks two matching style notes.
+   drop what you can't confirm and note it under QUESTIONS instead. Re-grade Codex's findings by the severity definitions below, whatever level Codex gave them. Then add one `DISAGREEMENTS:` line per explicit contradiction (one model says X, the other says not-X); silence from a model is not disagreement. Agreement is confidence, not priority — a single verified correctness or security finding outranks two matching style notes.
 
 This pass never blocks the review: if Codex is missing, slow, or the diff is
 trivial, complete single-model and label the SUMMARY accordingly.
@@ -76,6 +76,8 @@ MEMORY CONFLICTS:
 ```
 
 Omit the provenance tags when the review was single-model. `MEMORY USED` lists only entries that produced or changed a finding, not everything read.
+
+Severity is judged by the case the change is meant to handle ("Severity" in `docs/cross-agent-review.md`): **HIGH** — the intended case is wrong, or a security, auth or data-loss defect; **MEDIUM** — a real bug users will hit within the change's intent; **LOW** — everything else (other paths, rare cases, small performance costs, extra compatibility, style).
 
 At minimum, check for:
 

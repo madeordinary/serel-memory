@@ -1,5 +1,5 @@
 ---
-description: Initialize the memory bank by analyzing the existing codebase
+description: "Initialize memory-bank files by analyzing an existing codebase. Use when the memory bank has been added to a repo with code already present and the memory-bank files are blank, template-only, or partly filled."
 ---
 
 # /init-memory

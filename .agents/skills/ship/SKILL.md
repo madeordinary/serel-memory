@@ -20,6 +20,7 @@ Use this skill to decide whether the current branch or change is ready to merge.
 7. No leftover debug code such as `console.log`, `print(`, `debugger`, untracked TODOs, or commented-out blocks.
 8. No leaked secrets in the diff.
 9. Commit history is reasonable, or there is a sensible squash plan.
+10. Behavior is proven: each behavior change in the diff has evidence observed in this session (see below).
 
 ## Output
 
@@ -36,6 +37,7 @@ CHECKLIST:
 [pass/fail] 7. No leftover debug code - [detail]
 [pass/fail] 8. No secrets leaked - [detail]
 [pass/fail] 9. Commit history reasonable - [detail]
+[pass/fail] 10. Behavior proven - [per change: what was observed and how, or unproven]
 
 BLOCKERS (must fix):
 -
@@ -45,5 +47,9 @@ CAVEATS (should fix but not blocking):
 
 RECOMMENDATION: [one sentence]
 ```
+
+Behavior proven means evidence observed in this session, and how it was obtained: command output, a reproduction that failed before the change and passes after, running the app and looking at the change, or a screenshot. Mocked or unit tests alone do not prove user-facing behavior. If a changed feature has a verification map at `<effective bank>/verification/<feature>.md` (written by Serel Kit's optional verify pack; see "Resolving the effective bank" in `docs/workflow-contract.md`), follow its Recipe and report the date of its newest record, or that it has none. An older record does not prove this change. Read the map only when it exists, and never write it.
+
+Any blocker means NOT READY: failing tests stay NOT READY however well the rest is proven. Otherwise, never report READY while a behavior change is unproven: report READY WITH CAVEATS and list each unproven change under CAVEATS.
 
 If something is ambiguous, ask before declaring the change not ready.
