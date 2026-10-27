@@ -531,8 +531,13 @@ check_unmarked() {
 # Offline only: compares the framework files against the anchor ref when it
 # already resolves locally — a clone or fork that carries the upstream tags, or
 # a private `refs/serel-memory/anchor` left by an interrupted sync. No fetch.
+#
+# Findings are bounded by Memory ownership: a path is Memory's only when the
+# baseline ships it, or an upstream/main that a sync already fetched does. A
+# Serel Kit pack or the project's own workflow in the shared folders is never
+# a framework finding, tracked or Git-excluded.
 check_baseline() {
-  local git_ok="$1" ref base="" cand f changed rc=0 st ref_rc=0 excluded ex_rc=0 owned own_rc=0 hit=""
+  local git_ok="$1" ref base="" cand f changed rc=0 st ref_rc=0 excluded ex_rc=0 base_owned owned own_rc=0 hit=""
   [ "$git_ok" -eq 1 ] || return 0
   if [ ! -f "$ROOT/.serel-memory.json" ]; then
     # check_anchor has already reported the missing anchor; say plainly that
@@ -573,6 +578,26 @@ check_baseline() {
     finding INFO repo "no local baseline${ref:+ for $ref}; run sync-upstream to compare framework files"
     return 0
   fi
+  base_owned="$(gitc ls-tree -r --name-only "$base" -- "${FRAMEWORK_PATHS[@]}" 2>/dev/null)" || own_rc=$?
+  if [ "$own_rc" -ne 0 ]; then
+    finding INCOMPLETE repo "could not list the framework files in $base (git status $own_rc)"
+    return 0
+  fi
+  owned="$base_owned"
+  st=0
+  resolves_at "refs/remotes/upstream/main^{commit}" || st=$?
+  if [ "$st" -eq 2 ]; then
+    finding INCOMPLETE repo "git could not resolve refs/remotes/upstream/main"
+    return 0
+  fi
+  if [ "$st" -eq 0 ]; then
+    owned="$(gitc ls-tree -r --name-only refs/remotes/upstream/main -- "${FRAMEWORK_PATHS[@]}" 2>/dev/null)" || own_rc=$?
+    if [ "$own_rc" -ne 0 ]; then
+      finding INCOMPLETE repo "could not list the framework files in upstream/main (git status $own_rc)"
+      return 0
+    fi
+    owned="$base_owned"$'\n'"$owned"
+  fi
   # Any other Git-excluded file matters only if the baseline ships it: those
   # bytes would go unread too. Files the baseline does not have are not Memory's.
   ex_rc=0
@@ -582,14 +607,9 @@ check_baseline() {
     return 0
   fi
   if [ -n "$excluded" ]; then
-    owned="$(gitc ls-tree -r --name-only "$base" -- "${FRAMEWORK_PATHS[@]}" 2>/dev/null)" || own_rc=$?
-    if [ "$own_rc" -ne 0 ]; then
-      finding INCOMPLETE repo "could not list the framework files in $base (git status $own_rc)"
-      return 0
-    fi
     while IFS= read -r f; do
       [ -n "$f" ] || continue
-      case $'\n'"$owned"$'\n' in *$'\n'"$f"$'\n'*) hit="$f"; break ;; esac
+      case $'\n'"$base_owned"$'\n' in *$'\n'"$f"$'\n'*) hit="$f"; break ;; esac
     done < <(printf '%s\n' "$excluded")
     if [ -n "$hit" ]; then
       finding INFO repo "framework files are Git-excluded here (first: $hit, present in $base): their bytes were not compared against a baseline"
@@ -602,17 +622,49 @@ check_baseline() {
     return 0
   fi
   baseline_label="$base"   # name what we actually compared, not what the anchor wants
-  [ -n "$changed" ] || return 0
   # `git diff --name-only` already emits paths in sorted order, so this list
   # needs no `sort` — and a pipeline here would swallow its own status.
   while IFS= read -r f; do
     [ -n "$f" ] || continue
+    case $'\n'"$owned"$'\n' in *$'\n'"$f"$'\n'*) ;; *) continue ;; esac   # not Memory's
     if [ -e "$ROOT/$f" ]; then
       finding INFO "$f" "differs from anchor baseline $baseline_label (local customization or pending sync)"
     else
       finding DRIFT "$f" "framework file missing: present in anchor baseline $baseline_label, absent here"
     fi
   done < <(printf '%s\n' "$changed")
+  check_workflows "$owned"
+}
+
+# 7. WORKFLOW COPIES -------------------------------------------------------------
+# Memory-owned workflows only (paths the baseline or a fetched upstream/main
+# ships), and INFO only: copies that differ may be a deliberate per-CLI
+# customization, and a shadowed command is left for sync-upstream to retire.
+check_workflows() {
+  local owned="$1" names n cl cx cm rc
+  names="$(printf '%s\n' "$owned" | awk '
+    {
+      k = split($0, a, "/"); n = ""
+      if (k == 4 && (a[1] == ".agents" || a[1] == ".claude") && a[2] == "skills" && a[4] == "SKILL.md") n = a[3]
+      else if (k == 3 && a[1] == ".claude" && a[2] == "commands" && a[3] ~ /\.md$/) { n = a[3]; sub(/\.md$/, "", n) }
+      if (n != "" && !seen[n]++) print n
+    }')"
+  while IFS= read -r n; do
+    [ -n "$n" ] || continue
+    cl=".claude/skills/$n/SKILL.md" cx=".agents/skills/$n/SKILL.md" cm=".claude/commands/$n.md"
+    if [ -f "$ROOT/$cl" ] && [ -f "$ROOT/$cx" ]; then
+      rc=0
+      cmp -s "$ROOT/$cl" "$ROOT/$cx" || rc=$?
+      if [ "$rc" -eq 1 ]; then
+        finding INFO "$cl" "the Claude and Codex copies differ ($cx): fine when one CLI's copy is customized on purpose"
+      elif [ "$rc" -ne 0 ]; then
+        finding INCOMPLETE "$cl" "could not compare the Claude and Codex copies (cmp status $rc)"
+      fi
+    fi
+    if [ -f "$ROOT/$cm" ] && [ -d "$ROOT/.claude/skills/$n" ]; then
+      finding INFO "$cm" "shadowed by .claude/skills/$n/: Claude Code runs the skill; retire the command with sync-upstream"
+    fi
+  done < <(printf '%s\n' "$names")
 }
 
 case "${1:-}" in
