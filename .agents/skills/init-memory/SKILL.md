@@ -30,7 +30,7 @@ If it prints `LOCAL INSTALL`, stop before any other step. A local install holds 
 1. Read the repo structure. Map the top-level layout with fast shell tools (for example `ls` and `find`). Skip `node_modules/`, `.git/`, `dist/`, and `build/`.
 2. Read the existing `README.md` and anything in `docs/` for stated purpose, setup, and architecture.
 3. Read the package manifest (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `Gemfile`, etc.) for stack, dependencies, and scripts.
-4. Skim the source tree to understand component boundaries. Don't read every file unless needed — sample enough to see the architecture.
+4. Skim the source tree to understand component boundaries. Don't read every file — sample enough to see the architecture.
 5. Run `git log --oneline -20` for recent history and `git branch -a` to see active branches.
 6. If the user named a PRD or spec, or setup found one, read it after the code. The code, tests, and docs about current behavior say what exists; the spec supplies intent and planned scope. Put spec-only items in the brief and product context, and in activeContext/progress as planned or not built yet, citing the spec; never record a spec requirement as working without evidence in the code.
 7. Propose contents for each memory bank file (in a partial bank, only the files still missing, empty, or template-only), in this order:

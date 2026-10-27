@@ -13,7 +13,7 @@ Record a durable architectural or design decision in standard ADR (Architecture 
 
 ## Workflow
 
-1. If the user hasn't already stated the decision, ask: "What's the decision you want to record?"
+1. If the user hasn't already stated the decision, or the decision is not clear, ask: "What's the decision you want to record?"
 2. Read `memory-bank/systemPatterns.md`, `memory-bank/techContext.md`, `memory-bank/decisionLog.md`, and `.rules` for related context.
 3. Check `docs/decisions/` for existing ADRs to determine the next sequential number. If the directory is missing, plan to create it, and create it only when the ADR is approved.
 4. Draft the ADR and a short `memory-bank/decisionLog.md` entry. Use this structure for the ADR:
