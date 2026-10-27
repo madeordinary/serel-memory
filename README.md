@@ -100,7 +100,7 @@ Paste this into Claude Code or Codex opened at your project root.
 Update this project's Serel Memory framework. This project is the target; a fresh clone only supplies instructions.
 
 1. Inspect first, changing nothing: Git status, .serel-memory.json, legacy installation metadata, Git-excluded Memory files, and .serel-kit.json. If Memory is missing, stop; do not install it.
-2. Clone https://github.com/madeordinary/serel-memory into a temporary directory outside this project. Follow its sync-upstream workflow (.claude/commands/sync-upstream.md for Claude Code, .agents/skills/sync-upstream/SKILL.md for Codex), CHANGELOG, and referenced docs, not the installed copy.
+2. Clone https://github.com/madeordinary/serel-memory into a temporary directory outside this project. Follow its sync-upstream workflow (.claude/skills/sync-upstream/SKILL.md for Claude Code, .agents/skills/sync-upstream/SKILL.md for Codex), CHANGELOG, and referenced docs, not the installed copy.
 3. Run its preflights and prepare the proposed sync. If a safeguard stops it, explain and stop; never un-ignore, force-add, or untrack files. Leave missing, legacy, or unknown baselines to the workflow; never invent one.
 4. You may fetch upstream and create the remote and temporary refs required by the workflow to prepare the review. Use the fresh upstream docs/serel-setup.md section "Overlapping workflows" to compare new or changed workflows with my existing commands and skills, even if my installed sync workflow predates that guidance. Show overlaps and preserve recorded coexistence choices; hold affected workflow candidates until resolved, without deleting or disabling my workflows. Before editing project files or the anchor, show me the installed baseline, the proposed upstream commit and whether it is released, its benefits, diffs, and conflicts. Wait for approval, then apply only the approved changes through that workflow.
 5. Never reset, reseed, or overwrite memory-bank/, .rules, or project docs. Preserve customizations in any proposed AGENTS.md, command, or skill update. Keep my Git sharing choices.
@@ -108,9 +108,20 @@ Update this project's Serel Memory framework. This project is the target; a fres
 ```
 
 Sync targets upstream `main` and cannot select a release tag. Local,
-Git-excluded installs cannot be updated yet. Using the installed sync workflow
-instead of this prompt? From 0.6.0 it takes two runs; see the
-[0.7.0 upgrade note](CHANGELOG.md#070--2026-10-26).
+Git-excluded installs cannot be updated yet. The prompt works from 0.3.0, 0.6.0
+and 0.7.0, so use it to reach 0.8.0. Using the installed sync workflow instead?
+See the [0.8.0 upgrade note](CHANGELOG.md#080):
+
+- An installed Claude Code sync cannot reach 0.8.0 from any version: 0.8.0
+  moved the workflows to `.claude/skills/`, which its allowlist lacks, and
+  running it again loads the same old instructions. Use the prompt.
+- An installed Codex sync from 0.6.0 or 0.7.0 takes two runs. In run 1, do not
+  select deleting the commands listed under REMOVED UPSTREAM: the Claude skills
+  that replace them only arrive in run 2. Review and commit run 1's changes,
+  reload the sync workflow, then run it again. Run 2 adds the Claude skills and
+  offers to retire the old commands.
+- From 0.5.0 or earlier, use the prompt and read the
+  [0.6.0 upgrade note](CHANGELOG.md#060--2026-09-23) first.
 
 ## Quickstart
 
