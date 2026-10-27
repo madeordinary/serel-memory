@@ -60,7 +60,7 @@ Refresh every file in `memory-bank/`. Focus especially on `activeContext.md`, `p
 
 ## Available workflows
 
-The `.claude/commands/` directory contains Claude Code slash commands, and `.agents/skills/` contains Codex-native skills for core Serel Memory workflows:
+Each core Serel Memory workflow is written once, in `.agents/skills/<name>/SKILL.md`, and Claude Code runs its identical copy in `.claude/skills/<name>/SKILL.md` (the ask pair is the exception: `ask-codex` is Claude-only and `ask-claude` Codex-only). Claude Code calls a workflow as `/name`; Codex calls it as `$name`:
 
 - `/start` / `$start` — read the bank, summarize state, ask where to pick up (compact; use `/start full` for rich onboarding dashboard, `/start setup` for guided setup)
 - `/discover` / `$discover` — help the user define a project from a rough idea; produces initial memory bank (use when starting fresh with no code yet)
@@ -81,7 +81,7 @@ The `.claude/commands/` directory contains Claude Code slash commands, and `.age
 - `/runbook` / `$runbook` — generate or update an operational runbook
 - `/security-check` / `$security-check` — OWASP + STRIDE pass on the current change
 
-If a workflow does not yet have a Codex skill, read the corresponding `.claude/commands/<name>.md` file as guidance for the action.
+If a workflow cannot be called by name, read its `.agents/skills/<name>/SKILL.md` as guidance for the action.
 
 ## Cross-agent planning
 
