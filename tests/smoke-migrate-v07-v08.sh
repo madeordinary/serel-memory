@@ -3,11 +3,9 @@
 # .claude/skills/, no .claude/commands/), exercised the way users will run it.
 #
 # Starting points: degit-style scaffolds of v0.3.0, v0.6.0 and v0.7.0 (git
-# archive, fresh history, anchored at the tag). Upstream: this tree in the
-# 0.8.0 layout, as a bare repository whose history is this repository's. The
-# layout is built mechanically (each .agents/skills/<n>/SKILL.md copied to
-# .claude/skills/<n>/SKILL.md, ask-codex moved to a skill, commands dropped),
-# so the suite holds before and after every workflow is converted.
+# archive, fresh history, anchored at the tag). Upstream: the candidate as it
+# stands (this working tree, unchanged, on this repository's history), as a
+# bare repository. Only the starting fixtures carry historical layouts.
 #
 # Routes:
 #   - README update prompt: the fresh clone's sync body (its allowlist, guards
@@ -90,23 +88,7 @@ load_doc() {
     { echo "FAIL: could not read the sync procedure from $DOC"; exit 1; }
 }
 
-# --- The 0.8.0 layout, mechanically ------------------------------------------
-to_v08_layout() { # dir
-  local d="$1" s n
-  for s in "$d"/.agents/skills/*/SKILL.md; do
-    n="$(basename "$(dirname "$s")")"
-    [ "$n" = ask-claude ] && continue
-    mkdir -p "$d/.claude/skills/$n"
-    cp "$s" "$d/.claude/skills/$n/SKILL.md"
-  done
-  if [ -f "$d/.claude/commands/ask-codex.md" ] && [ ! -f "$d/.claude/skills/ask-codex/SKILL.md" ]; then
-    mkdir -p "$d/.claude/skills/ask-codex"
-    cp "$d/.claude/commands/ask-codex.md" "$d/.claude/skills/ask-codex/SKILL.md"
-  fi
-  rm -rf "$d/.claude/commands"
-}
-
-# --- Upstream: this working tree in the 0.8.0 layout, on this history -------
+# --- Upstream: the candidate, this working tree as it stands, on this history
 work="$tmp/upstream-work"
 git clone --quiet "$ROOT" "$work"
 git -C "$work" checkout --quiet -B main
@@ -120,8 +102,8 @@ while IFS= read -r f; do
   mkdir -p "$work/$(dirname "$f")"
   cp -p "$ROOT/$f" "$work/$f"
 done < <(git -C "$ROOT" ls-files -co --exclude-standard)
-to_v08_layout "$work"
-(cd "$work" && $GIT add -A && { $GIT diff --cached --quiet || $GIT commit --quiet -m "fixture: this tree in the 0.8.0 layout"; })
+(cd "$work" && $GIT add -A && { $GIT diff --cached --quiet || $GIT commit --quiet -m "fixture: this working tree, uncommitted changes included"; })
+[ ! -e "$work/.claude/commands" ] || { echo "FAIL: the candidate still ships .claude/commands/; this suite tests the 0.8.0 layout"; exit 1; }
 UPSTREAM="$tmp/upstream.git"
 git clone --quiet --bare "$work" "$UPSTREAM"
 

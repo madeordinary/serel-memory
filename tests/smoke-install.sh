@@ -2,9 +2,8 @@
 # End-to-end test of `install.sh --local` against real repositories in a temp
 # directory. The installer runs from a fixture checkout built from this working
 # tree (tracked files plus new, non-ignored ones), so the test covers what is on
-# disk whether or not it is committed yet. The fixture is put in the 0.8.0
-# layout mechanically (each source copied to .claude/skills/<n>/SKILL.md, no
-# .claude/commands/), so it holds before and after every workflow is converted.
+# disk whether or not it is committed yet. The fixture is the candidate as it
+# stands: no layout is synthesized.
 #
 # Cases:
 #   1. The preview writes nothing, to the target or the source. Apply leaves
@@ -54,23 +53,6 @@ G=(git -c user.email=smoke@test -c user.name=smoke-install -c commit.gpgsign=fal
 
 # --- fixtures ----------------------------------------------------------------
 
-# The 0.8.0 layout, built mechanically: each source gets a byte-identical
-# Claude copy, ask-codex becomes a skill, and no command is left. Idempotent.
-to_v08_layout() { # dir
-  local d="$1" s n
-  for s in "$d"/.agents/skills/*/SKILL.md; do
-    n="$(basename "$(dirname "$s")")"
-    [ "$n" = ask-claude ] && continue
-    mkdir -p "$d/.claude/skills/$n"
-    cp "$s" "$d/.claude/skills/$n/SKILL.md"
-  done
-  if [ -f "$d/.claude/commands/ask-codex.md" ] && [ ! -f "$d/.claude/skills/ask-codex/SKILL.md" ]; then
-    mkdir -p "$d/.claude/skills/ask-codex"
-    cp "$d/.claude/commands/ask-codex.md" "$d/.claude/skills/ask-codex/SKILL.md"
-  fi
-  rm -rf "$d/.claude/commands"
-}
-
 src="$tmp/source"
 mkdir "$src"
 while IFS= read -r f; do
@@ -78,7 +60,6 @@ while IFS= read -r f; do
   mkdir -p "$src/$(dirname "$f")"
   cp -p "$ROOT/$f" "$src/$f"
 done < <(git -C "$ROOT" ls-files -co --exclude-standard)
-to_v08_layout "$src"
 "${G[@]}" init -q "$src"
 "${G[@]}" -C "$src" add -A
 "${G[@]}" -C "$src" commit -qm "source fixture"
@@ -185,7 +166,7 @@ bash "$INSTALL" "$t1" --local --apply >"$tmp/1.apply" 2>&1 || { cat "$tmp/1.appl
 while IFS= read -r f; do
   cmp -s "$src/$f" "$t1/$f" || bad "installed file differs from the source: $f"
 done < <(git -C "$src" ls-files -- "${PAYLOAD_SPEC[@]}")
-[ -n "$(git -C "$src" ls-files -- .claude/skills)" ] || bad "fixture invalid: the source has no .claude/skills/"
+[ -n "$(git -C "$src" ls-files -- .claude/skills)" ] || bad "the candidate ships no .claude/skills/"
 while IFS= read -r f; do
   cmp -s "$src/.agents/skills/$f" "$t1/.claude/skills/$f" || bad "the Claude copy of .agents/skills/$f was not installed"
 done < <(cd "$src/.agents/skills" && find . -path ./ask-claude -prune -o -name SKILL.md -print | sed 's#^\./##')

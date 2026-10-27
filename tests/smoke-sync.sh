@@ -6,10 +6,8 @@
 # framework file added, NON-framework template changed), then mechanically
 # applies the procedure documented in .agents/skills/sync-upstream/SKILL.md
 # (and its byte-identical Claude copy): anchor-based discovery, per-file
-# restore, anchor advance. The upstream fixture is this tree in the 0.8.0
-# layout (Claude skills, no commands), built mechanically so the suite holds
-# before and after every workflow is converted. tests/smoke-migrate-v07-v08.sh
-# covers the move from the 0.7.0 layout itself.
+# restore, anchor advance. The upstream fixture is this tree at HEAD, unchanged.
+# tests/smoke-migrate-v07-v08.sh covers the move from the 0.7.0 layout itself.
 #
 # NOTE: this exercises the documented procedure, not live agent behavior —
 # an agent could still misread the doc, but the doc's steps are proven to
@@ -28,24 +26,6 @@ GIT="git -c user.email=test@test -c user.name=smoke-sync"
 SYNC_DOC=.agents/skills/sync-upstream/SKILL.md
 cmp -s "$SYNC_DOC" .claude/skills/sync-upstream/SKILL.md \
   || { echo "FAIL: .claude/skills/sync-upstream/SKILL.md is missing or differs from $SYNC_DOC"; exit 1; }
-
-# The 0.8.0 layout, built mechanically: each source gets a byte-identical
-# Claude copy, ask-codex becomes a skill, and no command is left. Idempotent,
-# so it holds before and after every workflow is converted in this tree.
-to_v08_layout() { # dir
-  local d="$1" s n
-  for s in "$d"/.agents/skills/*/SKILL.md; do
-    n="$(basename "$(dirname "$s")")"
-    [ "$n" = ask-claude ] && continue
-    mkdir -p "$d/.claude/skills/$n"
-    cp "$s" "$d/.claude/skills/$n/SKILL.md"
-  done
-  if [ -f "$d/.claude/commands/ask-codex.md" ] && [ ! -f "$d/.claude/skills/ask-codex/SKILL.md" ]; then
-    mkdir -p "$d/.claude/skills/ask-codex"
-    cp "$d/.claude/commands/ask-codex.md" "$d/.claude/skills/ask-codex/SKILL.md"
-  fi
-  rm -rf "$d/.claude/commands"
-}
 
 # The allowlist the procedure operates on — parsed from the workflow so
 # this test fails if the doc and the test ever disagree.
@@ -194,8 +174,6 @@ git clone --quiet "$ROOT" "$tmp/upstream"
 # CI checkouts are detached HEADs, so the clone may lack a main branch — the
 # sync procedure fetches upstream main, so pin one at HEAD.
 git -C "$tmp/upstream" checkout --quiet -B main
-to_v08_layout "$tmp/upstream"
-(cd "$tmp/upstream" && $GIT add -A && { $GIT diff --cached --quiet || $GIT commit --quiet -m "0.8.0 layout fixture"; })
 # The old install includes a shim and a framework file removed by the next sync.
 printf '# Claude Code instructions\n\n@AGENTS.md\n' > "$tmp/upstream/CLAUDE.md"
 # A downstream-era command that upstream later removes. It is outside the
