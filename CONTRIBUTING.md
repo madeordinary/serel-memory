@@ -8,34 +8,36 @@ Thanks for wanting to improve Serel Memory. It's a small, opinionated kit, so co
 
 Serel Memory has four kinds of files:
 
-- **Synced framework files** — the workflows (Claude commands + Codex skills), the hooks, and the framework docs. `sync-upstream` keeps these in step with the upstream repo. The exact allowlist lives in `.claude/commands/sync-upstream.md`.
+- **Synced framework files** — the workflows (one source each in `.agents/skills/`, with a Claude copy in `.claude/skills/`), the hooks, and the framework docs. `sync-upstream` keeps these in step with the upstream repo. The exact allowlist lives in `.agents/skills/sync-upstream/SKILL.md`.
 - **Shipped-once content** — the `memory-bank/` templates and `.rules`. Copied in at install, then **owned by the downstream project** and never synced — so a sync can't overwrite a user's context.
 - **Project metadata** — `docs/decisions/` and the OSS files above (`CONTRIBUTING`, `SECURITY`, `.github/`, …). The downstream project's to keep or delete.
 - **Installer tooling** — `install.sh` runs from a Serel Memory checkout to make a local, Git-excluded install. It copies the synced framework files plus the shipped-once templates, is never copied into a project, and is export-ignored. Its framework list must match the sync allowlist (`tests/check-allowlist.sh`); `tests/smoke-install.sh` covers it.
 
 When you add or change something, know which kind it is.
 
-## The one rule: dual-adapter parity
+## The one rule: one source per workflow
 
-Every workflow ships **two adapters plus a manifest**, and they must stay in sync:
+Every workflow has **one source**, `.agents/skills/<name>/SKILL.md`, and Claude Code runs a **byte-identical copy** of it:
 
-| Tool | File |
+| What | File |
 |------|------|
-| Claude Code | `.claude/commands/<name>.md` (a slash command) |
-| Codex | `.agents/skills/<name>/SKILL.md` (a skill) |
-| Codex | `.agents/skills/<name>/agents/openai.yaml` (the skill's display manifest) |
+| Source (Codex runs it; edit this one) | `.agents/skills/<name>/SKILL.md` |
+| Claude Code copy (a plain copy, alone in its folder) | `.claude/skills/<name>/SKILL.md` |
+| Codex display manifest | `.agents/skills/<name>/agents/openai.yaml` |
+| Other resources (RULES.md, templates, scripts) | in the source folder only, referred to by repo-root path |
 
-The one intentional exception is the cross-agent helper, which names the *other* agent on each side: `/ask-codex` (Claude) ↔ `$ask-claude` (Codex). They are the same workflow, inverted.
+Edit the source, then run `bash tests/check-single-source.sh --write`. It refreshes every Claude copy from its source and then runs the checks; CI runs the same script without `--write` and fails when a copy differs or is missing, when a manifest is missing, or when `.claude/commands/` comes back. The copies stay committed files: `--write` is a fix mode for the check, not a build step.
 
-`tests/check-parity.sh` enforces this. If you add `/foo`, you must add `$foo` (SKILL.md + openai.yaml) or CI fails. There is deliberately **no generator** — Serel Memory is pure markdown with no build step. Parity is a 30-second manual step plus a check, not a toolchain.
+The one intentional exception is the cross-agent helper, which names the *other* agent on each side: `/ask-codex` (Claude, `.claude/skills/ask-codex/SKILL.md`) ↔ `$ask-claude` (Codex, `.agents/skills/ask-claude/SKILL.md`). They are the same workflow, inverted, and kept by hand: neither has a copy.
 
 ## Adding or changing a workflow
 
 1. Follow `docs/workflow-contract.md`: state the trigger, required reads, allowed writes, output shape, and stop conditions.
-2. Write the Claude command and the Codex skill so they produce the **same** output contract. Diff a sibling pair (e.g. `start`) to match structure.
+2. Write the source once, in the shape its "Workflow files" section describes: frontmatter with `name` and `description` only, other workflows by bare name in backticks, resources by repo-root path, and a labeled "In Claude Code / In Codex" branch for any call to the other CLI. Diff a sibling (e.g. `start`) to match structure.
 3. Add the `agents/openai.yaml` manifest (copy a sibling's and edit `display_name`, `short_description`, `default_prompt`).
-4. If it's a new workflow, add it to the workflow table in `README.md` and the workflow list in `AGENTS.md`.
-5. Run the checks below.
+4. Run `bash tests/check-single-source.sh --write` to create or refresh the Claude copy.
+5. If it's a new workflow, add it to the workflow table in `README.md` and the workflow list in `AGENTS.md`.
+6. Run the checks below.
 
 ## Invariants (please don't break these)
 
