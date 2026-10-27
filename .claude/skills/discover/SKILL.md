@@ -90,4 +90,4 @@ Show proposals **one file at a time**. After each, wait for the user to approve,
 
 When the files are approved and written, end with:
 
-> "Memory bank seeded. Run `start` to verify the bootstrap, or `breakdown` (or just ask me to plan the first chunk of work) if you want to break the first chunk of work into steps."
+> "Memory bank seeded. Run `start` to verify the bootstrap, or `breakdown` (or just ask me) to break the first chunk of work into steps."
