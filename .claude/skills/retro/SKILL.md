@@ -1,26 +1,30 @@
 ---
+name: retro
 description: "Run a sprint or weekly retrospective from the memory bank and git activity. Use when the user asks for a retro, retrospective, post-mortem, or wants to reflect on what shipped, stalled, or surprised."
 ---
 
-# /retro
+# Retro
 
-Run a retrospective on the last sprint, week, or whatever timeframe makes sense for this project. Pulls from the memory bank and git activity so the conversation starts from facts, not vibes.
+Run a retrospective on the last sprint, week, or whatever timeframe makes sense for this project. Pull from the memory bank and git activity so the conversation starts from facts, not vibes.
 
 **Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), all memory-bank and `.rules` reads and writes below target it instead of the tracked templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
 **Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
 
-Steps:
+## Workflow
 
 1. Ask the user for the timeframe if it's not obvious: "Retro on the last week, the last sprint, since the last retro? Default: last 7 days."
-2. Read `memory-bank/activeContext.md` for current focus and recent changes.
-3. Read `memory-bank/progress.md` for status snapshot.
-4. Run `git log --since="<timeframe>" --oneline --all` to see what was done.
-5. If a `docs/retros/` directory exists, read the most recent retro for continuity (commitments made last time, recurring themes).
+2. Read:
+   - `memory-bank/activeContext.md` — current focus and recent changes
+   - `memory-bank/progress.md` — status snapshot
+3. Run `git log --since="<timeframe>" --oneline --all` to see what was done.
+4. If a `docs/retros/` directory exists, read the most recent retro for continuity (commitments made last time, recurring themes).
+
+## Output
 
 Produce a retro in this structure:
 
-~~~markdown
+```text
 # Retro — [timeframe]
 
 ## What we shipped
@@ -46,11 +50,11 @@ Produce a retro in this structure:
 
 ## Commitments from last retro (if applicable)
 - [what we said we'd do] — [did we do it?]
-~~~
+```
 
 Save to `docs/retros/YYYY-MM-DD.md`. Create the directory if it doesn't exist.
 
-Rules:
+## Rules
 
 - Be specific. "Communication was bad" is useless. "We didn't surface the API rate limit until day 4 of the sprint" is a retro entry.
 - Don't sugarcoat. The point of a retro is to learn; soft language hides the lessons.
