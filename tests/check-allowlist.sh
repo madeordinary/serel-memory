@@ -3,8 +3,8 @@
 # or per-project state. memory-bank/ and .rules are the user's project content,
 # and .serel-memory.json is the project's provenance anchor; if any of them ever
 # lands in the allowlist, `git restore --source=upstream` could clobber a
-# downstream user's memory or anchor on sync. This invariant must hold in both
-# adapters.
+# downstream user's memory or anchor on sync. This invariant must hold in the
+# source and in its byte-identical Claude copy.
 #
 # We inspect the canonical allowlist line (the space-separated path list that the
 # sync git commands consume), NOT a broad grep — the docs legitimately mention
@@ -13,7 +13,13 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 fail=0
-for f in .claude/commands/sync-upstream.md .agents/skills/sync-upstream/SKILL.md; do
+source=.agents/skills/sync-upstream/SKILL.md
+claude_copy=.claude/skills/sync-upstream/SKILL.md
+if [ ! -f "$claude_copy" ] || ! cmp -s "$source" "$claude_copy"; then
+  echo "DRIFT: $claude_copy is missing or differs from its source $source"
+  fail=1
+fi
+for f in "$source" "$claude_copy"; do
   # Every line that carries the allowlist signature (the fenced list and any git
   # command that inlines it). Anchored on the first two framework paths.
   # No `-n`: a line-number prefix would defeat the start-of-line `.rules` match.
@@ -31,13 +37,14 @@ for f in .claude/commands/sync-upstream.md .agents/skills/sync-upstream/SKILL.md
     fail=1
   fi
   # Positive coverage: every framework path must be IN the allowlist, or a
-  # downstream sync silently stops updating it. bin/serel-memory is the newest
-  # one — the drift checker ships with the framework, not with the project.
+  # downstream sync silently stops updating it. .claude/skills/ is the newest
+  # one: Claude Code's copies of the workflows live there from 0.8.0, and
+  # .claude/commands/ stays so sync can discover and retire 0.7.0-era commands.
   # Checked per LINE, never aggregated: one complete list must not vouch for a
-  # second line (or the other adapter) that dropped a path.
+  # second line (or the copy) that dropped a path.
   while IFS= read -r line; do
     [ -n "$line" ] || continue
-    for required in bin/serel-memory hooks/ AGENTS.md docs/serel-setup.md; do
+    for required in .claude/skills/ .claude/commands/ bin/serel-memory hooks/ AGENTS.md docs/serel-setup.md; do
       case "$line" in
         *"$required"*) ;;
         *) echo "MISSING: an allowlist line in $f does not include $required:"
@@ -51,7 +58,12 @@ done
 # The drift checker's baseline and the local installer's payload are copies of
 # the same list: a path added to one and not the others is either never
 # compared or never installed.
-canonical="$(grep -m1 '^\.agents/skills/ ' .claude/commands/sync-upstream.md || true)"
+canonical="$(grep -m1 '^\.agents/skills/ ' "$source" || true)"
+expected=".agents/skills/ .claude/commands/ .claude/skills/ AGENTS.md docs/workflow-contract.md docs/cross-agent-review.md docs/serel-setup.md hooks/ bin/serel-memory"
+if [ "$canonical" != "$expected" ]; then
+  echo "DRIFT: the canonical allowlist in $source is '$canonical', expected '$expected'"
+  fail=1
+fi
 for f in bin/serel-memory install.sh; do
   copy="$(awk '/^FRAMEWORK_PATHS=\(/,/\)$/' "$f" | tr -d '\\()' | sed 's/^FRAMEWORK_PATHS=//' | tr -s ' \n' '  ' | sed 's/^ //; s/ $//')"
   if [ -z "$canonical" ] || [ "$copy" != "$canonical" ]; then
@@ -61,6 +73,6 @@ for f in bin/serel-memory install.sh; do
 done
 
 if [ "$fail" -eq 0 ]; then
-  echo "allowlist OK: no memory-bank/, .rules, or .serel-memory.json in the sync scope of either adapter"
+  echo "allowlist OK: no memory-bank/, .rules, or .serel-memory.json in the sync scope; source, copy and both FRAMEWORK_PATHS agree"
 fi
 exit "$fail"

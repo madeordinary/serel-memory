@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
-# End-to-end smoke test of the /sync-upstream TEMPLATE-MODE procedure.
+# End-to-end smoke test of the sync-upstream TEMPLATE-MODE procedure.
 #
 # Scaffolds a downstream project the way degit does (git archive, no shared
 # history), creates a synthetic upstream delta (framework file changed, new
 # framework file added, NON-framework template changed), then mechanically
-# applies the procedure documented in .claude/commands/sync-upstream.md:
-# anchor-based discovery, per-file restore, anchor advance.
+# applies the procedure documented in .agents/skills/sync-upstream/SKILL.md
+# (and its byte-identical Claude copy): anchor-based discovery, per-file
+# restore, anchor advance. The upstream fixture is this tree in the 0.8.0
+# layout (Claude skills, no commands), built mechanically so the suite holds
+# before and after every workflow is converted. tests/smoke-migrate-v07-v08.sh
+# covers the move from the 0.7.0 layout itself.
 #
 # NOTE: this exercises the documented procedure, not live agent behavior —
 # an agent could still misread the doc, but the doc's steps are proven to
@@ -19,41 +23,56 @@ trap 'rm -rf "$tmp"' EXIT
 
 GIT="git -c user.email=test@test -c user.name=smoke-sync"
 
-# The allowlist the procedure operates on — parsed from the command doc so
+# One source, one byte-identical Claude copy: every snippet below comes from
+# the source, and the copy must say exactly the same.
+SYNC_DOC=.agents/skills/sync-upstream/SKILL.md
+cmp -s "$SYNC_DOC" .claude/skills/sync-upstream/SKILL.md \
+  || { echo "FAIL: .claude/skills/sync-upstream/SKILL.md is missing or differs from $SYNC_DOC"; exit 1; }
+
+# The 0.8.0 layout, built mechanically: each source gets a byte-identical
+# Claude copy, ask-codex becomes a skill, and no command is left. Idempotent,
+# so it holds before and after every workflow is converted in this tree.
+to_v08_layout() { # dir
+  local d="$1" s n
+  for s in "$d"/.agents/skills/*/SKILL.md; do
+    n="$(basename "$(dirname "$s")")"
+    [ "$n" = ask-claude ] && continue
+    mkdir -p "$d/.claude/skills/$n"
+    cp "$s" "$d/.claude/skills/$n/SKILL.md"
+  done
+  if [ -f "$d/.claude/commands/ask-codex.md" ] && [ ! -f "$d/.claude/skills/ask-codex/SKILL.md" ]; then
+    mkdir -p "$d/.claude/skills/ask-codex"
+    cp "$d/.claude/commands/ask-codex.md" "$d/.claude/skills/ask-codex/SKILL.md"
+  fi
+  rm -rf "$d/.claude/commands"
+}
+
+# The allowlist the procedure operates on — parsed from the workflow so
 # this test fails if the doc and the test ever disagree.
-ALLOWLIST_LINE="$(grep -m1 '^\.agents/skills/ ' .claude/commands/sync-upstream.md)"
+ALLOWLIST_LINE="$(grep -m1 '^\.agents/skills/ ' "$SYNC_DOC")"
 if [ -z "$ALLOWLIST_LINE" ]; then
-  echo "FAIL: could not parse the framework allowlist from sync-upstream.md"
+  echo "FAIL: could not parse the framework allowlist from $SYNC_DOC"
   exit 1
 fi
 read -r -a ALLOWLIST <<<"$ALLOWLIST_LINE"
 
-# Documented snippets, extracted verbatim from BOTH adapters and required to
-# agree — the test runs what the doc tells an agent to run.
+# Documented snippets, extracted verbatim — the test runs what the doc tells
+# an agent to run.
 extract() { awk "/^[[:space:]]*$2/,/^[[:space:]]*fi[[:space:]]*\$/" "$1"; }
-UPDATE_SNIPPET="$(extract .claude/commands/sync-upstream.md '# Anchor update: keep every other key')"
-[ -n "$UPDATE_SNIPPET" ] || { echo "FAIL: could not extract the anchor-update snippet from sync-upstream.md"; exit 1; }
-[ "$UPDATE_SNIPPET" = "$(extract .agents/skills/sync-upstream/SKILL.md '# Anchor update: keep every other key')" ] \
-  || { echo "FAIL: anchor-update snippet differs between command and skill adapters"; exit 1; }
+UPDATE_SNIPPET="$(extract "$SYNC_DOC" '# Anchor update: keep every other key')"
+[ -n "$UPDATE_SNIPPET" ] || { echo "FAIL: could not extract the anchor-update snippet from $SYNC_DOC"; exit 1; }
 # shellcheck disable=SC2016  # the \$ is a literal for grep, not an expansion
-ROOT_SNIPPET="$(grep -m1 '^[[:space:]]*cd "\$(git rev-parse --show-toplevel)"' .claude/commands/sync-upstream.md | sed 's/^[[:space:]]*//')"
-[ -n "$ROOT_SNIPPET" ] || { echo "FAIL: sync-upstream.md has no repo-root cd line"; exit 1; }
-# shellcheck disable=SC2016
-grep -q '^[[:space:]]*cd "\$(git rev-parse --show-toplevel)"' .agents/skills/sync-upstream/SKILL.md \
-  || { echo "FAIL: sync-upstream skill has no repo-root cd line"; exit 1; }
+ROOT_SNIPPET="$(grep -m1 '^[[:space:]]*cd "\$(git rev-parse --show-toplevel)"' "$SYNC_DOC" | sed 's/^[[:space:]]*//')"
+[ -n "$ROOT_SNIPPET" ] || { echo "FAIL: $SYNC_DOC has no repo-root cd line"; exit 1; }
 # shellcheck disable=SC2016  # fixed-string search for a literal $( in the doc
-create_start="$(grep -n -F 'UP="$(git remote get-url upstream' .claude/commands/sync-upstream.md | head -1 | cut -d: -f1)"
-create_end="$(grep -n -F '"linked": true }' .claude/commands/sync-upstream.md | awk -F: -v s="$create_start" '$1 > s {print $1; exit}')"
-CREATE_SNIPPET="$( [ -n "$create_start" ] && [ -n "$create_end" ] && sed -n "${create_start},${create_end}p" .claude/commands/sync-upstream.md | sed 's/^[[:space:]]*//')"
-RESOLVE_SNIPPET="$(awk '/^[[:space:]]*# Anchor resolve:/,/anchor does not resolve"$/' .claude/commands/sync-upstream.md | sed 's/^[[:space:]]*//')"
-[ -n "$RESOLVE_SNIPPET" ] || { echo "FAIL: could not extract the anchor-resolve snippet from sync-upstream.md"; exit 1; }
-[ "$RESOLVE_SNIPPET" = "$(awk '/^[[:space:]]*# Anchor resolve:/,/anchor does not resolve"$/' .agents/skills/sync-upstream/SKILL.md | sed 's/^[[:space:]]*//')" ] \
-  || { echo "FAIL: anchor-resolve snippet differs between command and skill adapters"; exit 1; }
-[ -n "$CREATE_SNIPPET" ] || { echo "FAIL: could not extract the anchor-create snippet from sync-upstream.md"; exit 1; }
-SHIM_SNIPPET="$(extract .claude/commands/sync-upstream.md '# Legacy shim check:')"
+create_start="$(grep -n -F 'UP="$(git remote get-url upstream' "$SYNC_DOC" | head -1 | cut -d: -f1)"
+create_end="$(grep -n -F '"linked": true }' "$SYNC_DOC" | awk -F: -v s="$create_start" '$1 > s {print $1; exit}')"
+CREATE_SNIPPET="$( [ -n "$create_start" ] && [ -n "$create_end" ] && sed -n "${create_start},${create_end}p" "$SYNC_DOC" | sed 's/^[[:space:]]*//')"
+RESOLVE_SNIPPET="$(awk '/^[[:space:]]*# Anchor resolve:/,/anchor does not resolve"$/' "$SYNC_DOC" | sed 's/^[[:space:]]*//')"
+[ -n "$RESOLVE_SNIPPET" ] || { echo "FAIL: could not extract the anchor-resolve snippet from $SYNC_DOC"; exit 1; }
+[ -n "$CREATE_SNIPPET" ] || { echo "FAIL: could not extract the anchor-create snippet from $SYNC_DOC"; exit 1; }
+SHIM_SNIPPET="$(extract "$SYNC_DOC" '# Legacy shim check:')"
 [ -n "$SHIM_SNIPPET" ] || { echo "FAIL: missing legacy-shim check"; exit 1; }
-[ "$SHIM_SNIPPET" = "$(extract .agents/skills/sync-upstream/SKILL.md '# Legacy shim check:')" ] \
-  || { echo "FAIL: legacy-shim checks differ between adapters"; exit 1; }
 
 # Exercise the documented discovery predicate; it must never mutate files.
 mkdir "$tmp/shims"
@@ -95,10 +114,8 @@ mkdir "$tmp/shims"
 # The local-install guard: a Git-excluded Memory file stops sync even after
 # the anchor's own exclusion is removed; a tracked install passes, and so does
 # one beside another tool's local files. It checks the checker's own list.
-LOCAL_SNIPPET="$(extract .claude/commands/sync-upstream.md '# Local-install guard:')"
+LOCAL_SNIPPET="$(extract "$SYNC_DOC" '# Local-install guard:')"
 [ -n "$LOCAL_SNIPPET" ] || { echo "FAIL: missing local-install guard"; exit 1; }
-[ "$LOCAL_SNIPPET" = "$(extract .agents/skills/sync-upstream/SKILL.md '# Local-install guard:')" ] \
-  || { echo "FAIL: local-install guards differ between adapters"; exit 1; }
 ENTRYPOINTS="$(awk -F'[()]' '/^MEMORY_ENTRYPOINTS=\(/ { print $2 }' bin/serel-memory)"
 case "$LOCAL_SNIPPET" in
   *"--exclude-standard -- $ENTRYPOINTS)"*) [ -n "$ENTRYPOINTS" ] || { echo "FAIL: no MEMORY_ENTRYPOINTS in bin/serel-memory"; exit 1; } ;;
@@ -113,20 +130,20 @@ mkdir "$tmp/local-guard"
 (
   cd "$tmp/local-guard"
   $GIT init --quiet
-  mkdir -p bin .claude/commands
-  echo "# start" > .claude/commands/start.md
+  mkdir -p bin .claude/skills/start
+  echo "# start" > .claude/skills/start/SKILL.md
   echo "checker" > bin/serel-memory
   echo '{ "upstream": "local/serel-memory", "ref": "v9.9.9", "linked": false }' > .serel-memory.json
   $GIT add -A
   $GIT commit --quiet -m "tracked install"
   guard "$LOCAL_SNIPPET" 0 "local-install guard, tracked install"
-  mkdir -p .agents/skills/polish
+  mkdir -p .agents/skills/polish .claude/skills/polish
   echo "# polish" > .agents/skills/polish/SKILL.md
-  echo "# polish" > .claude/commands/polish.md
-  printf '/.agents/skills/polish/SKILL.md\n/.claude/commands/polish.md\n' >> .git/info/exclude
+  echo "# polish" > .claude/skills/polish/SKILL.md
+  printf '/.agents/skills/polish/SKILL.md\n/.claude/skills/polish/SKILL.md\n' >> .git/info/exclude
   guard "$LOCAL_SNIPPET" 0 "local-install guard, tracked install beside a local Kit pack"
   $GIT rm --cached --quiet -r bin .claude .serel-memory.json
-  printf '/bin/serel-memory\n/.claude/commands/start.md\n/.serel-memory.json\n' >> .git/info/exclude
+  printf '/bin/serel-memory\n/.claude/skills/start/SKILL.md\n/.serel-memory.json\n' >> .git/info/exclude
   guard "$LOCAL_SNIPPET" 1 "local-install guard, local install"
   sed -i.bak '/serel-memory\.json/d' .git/info/exclude
   guard "$LOCAL_SNIPPET" 1 "local-install guard, anchor exclusion removed, framework still excluded"
@@ -136,35 +153,38 @@ mkdir "$tmp/local-guard"
 
 # The restore guard: once upstream is fetched, a path upstream ships that is
 # untracked or Git-excluded here stops sync, since a restore would replace it.
-# Local files upstream does not ship — a Kit pack, a custom command — do not.
-RESTORE_SNIPPET="$(extract .claude/commands/sync-upstream.md '# Restore guard:')"
+# Local files upstream does not ship — a Kit pack, a custom command or skill —
+# do not. Claude's skills sit in the allowlist from 0.8.0, so they are guarded.
+RESTORE_SNIPPET="$(extract "$SYNC_DOC" '# Restore guard:')"
 [ -n "$RESTORE_SNIPPET" ] || { echo "FAIL: missing restore guard"; exit 1; }
-[ "$RESTORE_SNIPPET" = "$(extract .agents/skills/sync-upstream/SKILL.md '# Restore guard:')" ] \
-  || { echo "FAIL: restore guards differ between adapters"; exit 1; }
 mkdir "$tmp/restore-guard"
 (
   cd "$tmp/restore-guard"
   $GIT init --quiet
-  mkdir -p bin .claude/commands .agents/skills/polish
-  echo "# start" > .claude/commands/start.md
+  mkdir -p bin .claude/skills/start .claude/skills/new-workflow .agents/skills/polish .claude/skills/polish .claude/commands
+  echo "# start" > .claude/skills/start/SKILL.md
   echo "checker" > bin/serel-memory
   $GIT add -A
   $GIT commit --quiet -m "tracked install"
-  echo "# new" > .claude/commands/new-workflow.md
+  echo "# new" > .claude/skills/new-workflow/SKILL.md
   $GIT add -A
   $GIT commit --quiet -m "upstream adds a workflow"
   $GIT update-ref refs/remotes/upstream/main HEAD
   $GIT reset --quiet --hard HEAD~1
   guard "$RESTORE_SNIPPET" 0 "restore guard, tracked install"
   echo "# polish" > .agents/skills/polish/SKILL.md
-  echo '/.agents/skills/polish/' >> .git/info/exclude
+  echo "# polish" > .claude/skills/polish/SKILL.md
+  printf '/.agents/skills/polish/\n/.claude/skills/polish/\n' >> .git/info/exclude
   echo "# custom" > .claude/commands/custom.md
+  mkdir -p .claude/skills/custom
+  echo "# custom skill" > .claude/skills/custom/SKILL.md
   guard "$RESTORE_SNIPPET" 0 "restore guard, local files upstream does not ship"
-  echo "# mine" > .claude/commands/new-workflow.md
-  guard "$RESTORE_SNIPPET" 1 "restore guard, an untracked file upstream ships"
-  echo '/.claude/commands/new-workflow.md' >> .git/info/exclude
-  guard "$RESTORE_SNIPPET" 1 "restore guard, a Git-excluded file upstream ships"
-  rm .claude/commands/new-workflow.md
+  mkdir -p .claude/skills/new-workflow
+  echo "# mine" > .claude/skills/new-workflow/SKILL.md
+  guard "$RESTORE_SNIPPET" 1 "restore guard, an untracked Claude skill upstream ships"
+  echo '/.claude/skills/new-workflow/' >> .git/info/exclude
+  guard "$RESTORE_SNIPPET" 1 "restore guard, a Git-excluded Claude skill upstream ships"
+  rm .claude/skills/new-workflow/SKILL.md
   $GIT update-ref -d refs/remotes/upstream/main
   guard "$RESTORE_SNIPPET" 1 "restore guard, upstream/main unreadable"
 )
@@ -174,8 +194,13 @@ git clone --quiet "$ROOT" "$tmp/upstream"
 # CI checkouts are detached HEADs, so the clone may lack a main branch — the
 # sync procedure fetches upstream main, so pin one at HEAD.
 git -C "$tmp/upstream" checkout --quiet -B main
+to_v08_layout "$tmp/upstream"
+(cd "$tmp/upstream" && $GIT add -A && { $GIT diff --cached --quiet || $GIT commit --quiet -m "0.8.0 layout fixture"; })
 # The old install includes a shim and a framework file removed by the next sync.
 printf '# Claude Code instructions\n\n@AGENTS.md\n' > "$tmp/upstream/CLAUDE.md"
+# A downstream-era command that upstream later removes. It is outside the
+# retirement inventory, so it must only ever be reported, never deleted.
+mkdir -p "$tmp/upstream/.claude/commands"
 echo "# Retired fixture workflow" > "$tmp/upstream/.claude/commands/retired-fixture.md"
 (cd "$tmp/upstream" && $GIT add -A && $GIT commit --quiet -m "legacy install fixture")
 # The install anchor is a TAG, as the README tells users to write it. Tags are
@@ -217,8 +242,9 @@ $GIT commit --quiet -m "user content"
 # --- Synthetic upstream delta ----------------------------------------------
 (
   cd "$tmp/upstream"
-  echo "UPSTREAM-CHANGE-MARKER" >> .claude/commands/ship.md
-  echo "# /new-workflow — added upstream" > .claude/commands/new-workflow.md
+  echo "UPSTREAM-CHANGE-MARKER" >> .claude/skills/ship/SKILL.md
+  mkdir -p .claude/skills/new-workflow
+  echo "# New Workflow — added upstream" > .claude/skills/new-workflow/SKILL.md
   echo "<!-- upstream template tweak — must NOT reach downstream via sync -->" >> memory-bank/activeContext.md
   git rm -q CLAUDE.md .claude/commands/retired-fixture.md
   $GIT add -A
@@ -250,9 +276,9 @@ $GIT tag -l | grep -qx "$ANCHOR_REF" && { echo "FAIL: resolve step polluted the 
 ANCHOR="refs/serel-memory/anchor"
 
 # Step 5: precise report since the anchor, plus files the project no longer has.
-changed="$($GIT diff --name-only --diff-filter=d "$ANCHOR" upstream/main -- "${ALLOWLIST[@]}")"
-removed="$($GIT diff --name-only --diff-filter=D "$ANCHOR" upstream/main -- "${ALLOWLIST[@]}")"
-absent="$($GIT diff --name-only --diff-filter=A HEAD upstream/main -- "${ALLOWLIST[@]}")"
+changed="$($GIT diff --no-renames --name-only --diff-filter=d "$ANCHOR" upstream/main -- "${ALLOWLIST[@]}")"
+removed="$($GIT diff --no-renames --name-only --diff-filter=D "$ANCHOR" upstream/main -- "${ALLOWLIST[@]}")"
+absent="$($GIT diff --no-renames --name-only --diff-filter=A HEAD upstream/main -- "${ALLOWLIST[@]}")"
 
 # Step 9: restore INDIVIDUAL files from both lists — never directories.
 while IFS= read -r f; do
@@ -266,16 +292,16 @@ done <<<"$(printf '%s\n%s\n' "$changed" "$absent" | sort -u)"
 # --- Assertions -------------------------------------------------------------
 fail=0
 
-echo "$changed" | grep -qx '.claude/commands/ship.md' \
-  || { echo "FAIL: changed-file report missed .claude/commands/ship.md"; fail=1; }
-echo "$changed" | grep -qx '.claude/commands/new-workflow.md' \
+echo "$changed" | grep -qx '.claude/skills/ship/SKILL.md' \
+  || { echo "FAIL: changed-file report missed .claude/skills/ship/SKILL.md"; fail=1; }
+echo "$changed" | grep -qx '.claude/skills/new-workflow/SKILL.md' \
   || { echo "FAIL: changed-file report missed the new upstream file"; fail=1; }
 echo "$changed" | grep -q '^memory-bank/' \
   && { echo "FAIL: allowlist leak — memory-bank/ showed up in the sync report"; fail=1; }
 
-grep -q "UPSTREAM-CHANGE-MARKER" .claude/commands/ship.md \
+grep -q "UPSTREAM-CHANGE-MARKER" .claude/skills/ship/SKILL.md \
   || { echo "FAIL: framework file was not updated from upstream"; fail=1; }
-[ -f .claude/commands/new-workflow.md ] \
+[ -f .claude/skills/new-workflow/SKILL.md ] \
   || { echo "FAIL: new upstream framework file was not pulled"; fail=1; }
 printf '%s\n' "$absent" | grep -qx 'docs/cross-agent-review.md' \
   || { echo "FAIL: allowlisted doc deleted downstream (unchanged upstream) was not offered back"; fail=1; }
