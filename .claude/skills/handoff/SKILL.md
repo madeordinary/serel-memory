@@ -1,23 +1,23 @@
 ---
+name: handoff
 description: "Generate a handoff document from a project. Use when the user asks for a handoff, onboarding summary, transfer doc, or context package for someone new."
 ---
 
-# /handoff
+# Handoff
 
-Produce a handoff document for someone who's never seen this project before. The audience is a smart engineer or PM who needs to be able to take this over within a few days.
+Produce a concise handoff document for someone who's never seen this project before. The audience is a smart engineer or PM who needs to be able to take this over within a few days.
 
 **Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
 
-Steps:
+## Workflow
 
-1. Read every file in `memory-bank/` for full project context (skip `memory-bank/archive/` unless the handoff needs that history).
+1. Read every file in `memory-bank/`, including `decisionLog.md`, for full project context (skip `memory-bank/archive/` unless the handoff needs that history).
 2. Read `.rules` for non-obvious patterns and preferences.
-3. Read the project's `README.md` (the user-facing one, not Serel Memory's).
+3. Read the project's `README.md` if present (the user-facing one, not Serel Memory's).
 4. Scan `docs/` if it exists, especially `docs/decisions/` and `docs/runbooks/`.
 5. Run `git log --oneline -30` for recent history.
 6. Note any open TODOs, FIXMEs, or in-progress branches.
-
-Then produce a handoff doc in this structure:
+7. Produce the handoff doc in this structure:
 
 ~~~markdown
 # [Project name] — Handoff
@@ -69,9 +69,9 @@ Then produce a handoff doc in this structure:
 [If the project has had multiple contributors, mention who has context on what. If solo, just say so.]
 ~~~
 
-Save to `docs/handoff.md` (overwrite if it exists — handoffs are point-in-time snapshots, not version-controlled history).
+8. Save it to `docs/handoff.md`. If that file already exists, show the proposed content before overwriting it. Overwrite rather than keep old versions — handoffs are point-in-time snapshots, not version-controlled history.
 
-Rules:
+## Rules
 
 - Write for someone who is *smart and skeptical*, not someone who needs hand-holding. Don't over-explain.
 - Be honest about what's broken or unfinished. The handoff is more valuable when it surfaces the rough edges than when it papers over them.
