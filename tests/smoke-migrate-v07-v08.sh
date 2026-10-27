@@ -26,7 +26,8 @@
 #      and the recheck refuses changed or uncommitted bytes before writing.
 #   2b. A matched command changed between preview and apply: nothing written,
 #      the command stays active, no skill shadows it, the Codex skill is as it
-#      was; a failure after writing puts the workflow's skills back to HEAD.
+#      was. A failure after writing puts back only what that attempt wrote (a
+#      Codex skill the safe pull updated keeps its bytes), and a retry works.
 #   3. Separately customized Claude and Codex handoff adapters: held together;
 #      ported per CLI, the copies stay different and the checker says so.
 #   4. An anchor already advanced to 0.8.0 with commands left behind: the
@@ -498,28 +499,62 @@ cmp -s "$P/.claude/commands/ship.md" "$tmp/late-ship" && ok "changed after previ
 out="$(cd "$P" && n=ship blob="$shown" bash -c "$APPLY" 2>&1)" && rc=0 || rc=$?
 [ "$rc" = 1 ] && [ ! -e "$P/.claude/skills/ship" ] && cmp -s "$P/.claude/commands/ship.md" "$tmp/late-ship" &&
   ok "changed after preview: a committed edit is refused the same way" || bad "changed after preview, committed: rc $rc: $out"
-# A failure after the skill is written (here the deletion itself fails): the
-# workflow's skills go back to HEAD, and the command stays the active one.
+# A failure after the skill is written (here the deletion itself fails). The
+# safe pull already updated the Codex skill in this sync; the attempt never
+# writes it, so the undo must leave it alone and put back only the Claude
+# skill it added. A retry then completes the workflow with upstream's bytes.
 P="$tmp/fails-after-writing"
 begin v0.7.0 "$P"
 RETIRE_CHOICE=none sync_run "$P" "$FRESH_DOC" "fails after writing"
 shown="$(sed -n 's/^RETIRE ship (blob \([0-9a-f]*\)).*/\1/p' "$P.out/inventory")"
+up_codex="$(git -C "$P" rev-parse upstream/main:.agents/skills/ship/SKILL.md)"
+up_claude="$(git -C "$P" rev-parse upstream/main:.claude/skills/ship/SKILL.md)"
+[ "$(git -C "$P" hash-object .agents/skills/ship/SKILL.md)" = "$up_codex" ] &&
+  [ "$(git -C "$P" rev-parse HEAD:.agents/skills/ship/SKILL.md)" != "$up_codex" ] && [ ! -e "$P/.claude/skills/ship" ] &&
+  ok "fails after writing: fixture — the safe pull updated the Codex skill; no Claude skill yet" ||
+  bad "fails after writing: fixture invalid (the Codex skill was not pulled, or a Claude skill exists)"
 mkdir -p "$tmp/rmshim"
 {
   printf '#!/bin/sh\n'
   # shellcheck disable=SC2016  # the shim's own $@ and $a, written literally
-  printf 'for a in "$@"; do case "$a" in *.claude/commands/ship.md) echo "simulated rm failure" >&2; exit 1 ;; esac; done\n'
+  printf 'for a in "$@"; do case "$a" in *.claude/commands/*.md) echo "simulated rm failure" >&2; exit 1 ;; esac; done\n'
   printf 'exec %s "$@"\n' "$(command -v rm)"
 } > "$tmp/rmshim/rm"
 chmod +x "$tmp/rmshim/rm"
 out="$(cd "$P" && PATH="$tmp/rmshim:$PATH" n=ship blob="$shown" bash -c "$APPLY" 2>&1)" && rc=0 || rc=$?
 case "$out" in
-  *"NOT RETIRED ship: the retirement failed after writing; .claude/skills/ship/SKILL.md and .agents/skills/ship/SKILL.md are back as HEAD has them, and .claude/commands/ship.md stays") ok "fails after writing: reported as not retired" ;;
+  *"NOT RETIRED ship: the retirement failed after writing; what it wrote is back as it was before this attempt, and .claude/commands/ship.md stays") ok "fails after writing: reported as not retired" ;;
   *) bad "fails after writing: rc $rc: $out" ;;
 esac
 [ "$rc" = 1 ] && [ -f "$P/.claude/commands/ship.md" ] && [ ! -e "$P/.claude/skills/ship" ] &&
-  [ "$(git -C "$P" hash-object .agents/skills/ship/SKILL.md)" = "$(git -C "$P" rev-parse HEAD:.agents/skills/ship/SKILL.md)" ] &&
-  ok "fails after writing: the new skill is gone, the Codex skill is HEAD's, the command stays" || bad "fails after writing: the undo left changes"
+  ok "fails after writing: the command stays and the Claude skill it added is gone" || bad "fails after writing: the Claude skill or the command is wrong"
+[ "$(git -C "$P" hash-object .agents/skills/ship/SKILL.md)" = "$up_codex" ] &&
+  ok "fails after writing: the Codex skill keeps the bytes this sync pulled" || bad "fails after writing: the undo touched the Codex skill it never wrote"
+out="$(cd "$P" && n=ship blob="$shown" bash -c "$APPLY" 2>&1)" && rc=0 || rc=$?
+[ "$rc" = 0 ] && [ ! -e "$P/.claude/commands/ship.md" ] &&
+  [ "$(git -C "$P" hash-object .claude/skills/ship/SKILL.md)" = "$up_claude" ] && [ "$(git -C "$P" hash-object .agents/skills/ship/SKILL.md)" = "$up_codex" ] &&
+  ok "fails after writing: a retry retires the command with both skills at upstream's bytes" || bad "fails after writing, retry: rc $rc: $out"
+
+# The same failure while installing ported copies of a held workflow: both
+# copies the attempt wrote go back to exactly their pre-apply bytes.
+P="$tmp/port-fails-after-writing"
+begin v0.7.0 "$P"
+echo "PROJECT RULE: hand off to the on-call channel." >> "$P/.claude/commands/handoff.md"
+echo "CODEX RULE: hand off in the PR description." >> "$P/.agents/skills/handoff/SKILL.md"
+user_commit "$P" "customize handoff per CLI"
+sync_run "$P" "$FRESH_DOC" "port fails after writing"
+shown="$(sed -n 's/^HOLD handoff (blob \([0-9a-f]*\)).*/\1/p' "$P.out/inventory")"
+cx_before="$(git -C "$P" hash-object .agents/skills/handoff/SKILL.md)"
+cc="$tmp/pf-claude" cx="$tmp/pf-codex"
+{ git -C "$P" show upstream/main:.claude/skills/handoff/SKILL.md; echo "PROJECT RULE: hand off to the on-call channel."; } > "$cc"
+{ git -C "$P" show upstream/main:.agents/skills/handoff/SKILL.md; echo "CODEX RULE: hand off in the PR description."; } > "$cx"
+out="$(cd "$P" && PATH="$tmp/rmshim:$PATH" n=handoff blob="$shown" claude_copy="$cc" codex_copy="$cx" bash -c "$APPLY" 2>&1)" && rc=0 || rc=$?
+[ "$rc" = 1 ] && [ -f "$P/.claude/commands/handoff.md" ] && [ ! -e "$P/.claude/skills/handoff" ] &&
+  [ "$(git -C "$P" hash-object .agents/skills/handoff/SKILL.md)" = "$cx_before" ] &&
+  ok "port fails after writing: both written copies are back as they were before the attempt" || bad "port fails after writing: rc $rc: $out"
+(cd "$P" && n=handoff blob="$shown" claude_copy="$cc" codex_copy="$cx" bash -c "$APPLY" >/dev/null 2>&1) &&
+  [ ! -e "$P/.claude/commands/handoff.md" ] && cmp -s "$P/.claude/skills/handoff/SKILL.md" "$cc" && cmp -s "$P/.agents/skills/handoff/SKILL.md" "$cx" &&
+  ok "port fails after writing: a retry installs both ported copies and retires the command" || bad "port fails after writing: the retry failed"
 
 # =============================================================================
 # 4. Separately customized Claude and Codex handoff adapters (README route)
