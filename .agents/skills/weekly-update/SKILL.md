@@ -21,44 +21,51 @@ Draft a weekly update suitable for stakeholders, pulling from the memory bank an
 
 ## Output
 
+Produce an update in this structure:
+
 ```text
 # [Project name] — Week of [Mon DD, YYYY]
 
 ## Headline
-[One sentence — the most important thing a stakeholder should know.]
+[One sentence — the most important thing a stakeholder should know about this week.]
 
 ## Shipped this week
 - [completed item — what it does, why it matters]
+- [completed item]
 
 ## In progress
 - [active work — what's being built, expected completion if known]
+- [active work]
 
 ## Up next
-- [planned next — what we're picking up, why]
+- [planned next — what we're picking up next, why]
+- [planned next]
 
 ## Risks and open questions
 - [risk or unresolved decision — impact, what's needed to resolve]
+- [risk]
 
 ## Decisions
 - [decision made or changed this week — why it matters]
-- (or "None this week")
+- (or write "None this week")
 
 ## Asks
 - [anything needed from stakeholders — decisions, resources, feedback]
-- (or "None this week")
+- (or write "None this week")
 ```
 
 ## Rules
 
-- Keep each bullet to one line. Longer items belong in a separate doc.
+- Keep each bullet to one line. If something needs more, it belongs in a separate doc with a link from the update.
 - "Shipped" means done and verifiable. Don't conflate intent with completion.
-- "Risks" should be specific, not vague concerns.
-- If a section has nothing, write "(none)" — empty sections are signal too.
-- This is for stakeholders, not engineers. Skip technical detail unless they need it.
+- "Risks" should be specific. "Things might be hard" is not a risk. "External API rate limits could block X by Y date unless we get a quota increase" is.
+- "Decisions" should be durable choices, not normal task progress.
+- If a section has nothing to report, write "(none)" rather than omitting the section. Empty sections are signal too — they tell the reader you considered it.
+- This is a stakeholder document, not an engineering log. Skip technical detail unless a stakeholder needs to know it. If a teammate would need more detail, mention there's a longer doc available.
 
-After generating, ask:
+After generating the draft, ask the user:
 
-- Is the headline right for this audience?
+- Is the headline the right one for this audience?
 - Tighter, longer, or about right?
 - Format for a specific channel (Slack, email, Confluence) or keep generic?
 
