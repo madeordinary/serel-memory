@@ -211,8 +211,11 @@ is everything when Git cannot read that history: a shallow clone, or no
 - **RETIRE:** the command, and any skill copy already present, hold bytes
   upstream shipped. Sync offers to add the skill and retire the command
   together, separately from "pull all safe changes", and shows the command
-  against its replacement. Only after you select it does it add the skill,
-  recheck the command's bytes just before deleting, and delete it.
+  against its replacement. Only after you select it does it recheck every
+  adapter of the workflow; if any changed since it was shown, nothing is
+  written. Then it adds the skill and deletes the command. If the deletion
+  still fails after the skill is written, the workflow's skills go back as
+  `HEAD` has them, so the command stays the active one.
 - **HOLD:** unknown bytes (customized) in any adapter: the command, the Codex
   skill or the Claude skill. The Claude skill, the Codex skill and the
   command's retirement are held out of "pull all safe changes" together, and
@@ -222,7 +225,8 @@ is everything when Git cannot read that history: a shallow clone, or no
   otherwise against upstream's last version), then you choose:
   - port the customizations into the new skill copies, which may stay
     different per CLI: sync shows the proposed copies against upstream's,
-    writes them only after your approval, then retires the command;
+    and after your approval installs them and retires the command in one
+    step that first rechecks every adapter;
   - or keep the command and skip the skill for now. That is a skipped change,
     so the anchor choice applies, and the next sync offers it again.
 - **SKIP:** upstream does not ship that workflow's skill in place of its
@@ -232,8 +236,9 @@ is everything when Git cannot read that history: a shallow clone, or no
 
 - Retirements stay uncommitted: the command is deleted from the worktree only,
   and `HEAD` keeps the old bytes, like the other restored framework files.
-  A command that changed since it was shown, or is not committed, is not
-  deleted: sync runs the inventory again and shows what changed.
+  If the command or either skill changed since it was shown, or the command
+  is not committed, nothing is written and nothing is deleted: sync runs the
+  inventory again and shows what changed.
 - Project commands and Serel Kit's commands are never touched, nor anything
   else outside the inventory. Kit retires its own.
 - An untracked, Git-excluded or symlinked command is never deleted, because
