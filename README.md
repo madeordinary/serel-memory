@@ -173,10 +173,10 @@ Serel Memory is the other fix: a small, opinionated directory of markdown files 
 
 Memory banks aren't new — Serel Memory's own is adapted from [Cline's](https://github.com/nickbaumann98/cline_docs), and says so. What you can't get elsewhere is the engineering around the bank:
 
-- **Dual-CLI parity that's enforced, not promised.** Every workflow has a native Claude Code command *and* a native Codex skill — 18 of each, and CI fails if either side of a pair goes missing. Not a Claude tool with a Codex shim bolted on.
+- **One source per workflow, enforced for both CLIs.** Each of the 18 workflows is written once, in `.agents/skills/<name>/SKILL.md`, and Claude Code runs a byte-identical copy in `.claude/skills/<name>/SKILL.md`. CI fails if a copy differs or goes missing. The ask pair (`ask-codex` for Claude Code, `ask-claude` for Codex) is the one hand-kept exception, because each names the other agent. Not a Claude tool with a Codex shim bolted on.
 - **Cross-agent second opinions.** Claude can shell out to Codex to review a plan, and vice versa — with a documented loop policy, and an honestly-labeled self-critique fallback when the other CLI isn't installed.
 - **Framework updates that can't touch your memory.** `sync-upstream` pulls updates through an explicit allowlist; `memory-bank/`, `.rules`, and your ADRs are structurally outside it — and a test enforces that the allowlist never grows to include them.
-- **Tested like software, because it is.** Parity, sync-allowlist, and degit-export smoke tests run in CI. The export test guarantees a fresh install ships clean templates — never someone else's project context.
+- **Tested like software, because it is.** The single-source copy check, the sync allowlist, and degit-export smoke tests run in CI. The export test guarantees a fresh install ships clean templates — never someone else's project context.
 
 ## The shape
 
@@ -194,8 +194,8 @@ your-project/
 │   ├── activeContext.md    # current focus — changes most often
 │   └── progress.md         # what works, what's left
 ├── .agents/
-│   └── skills/             # Codex-native workflow skills
-│       ├── start/
+│   └── skills/             # each workflow's source; Codex runs it from here
+│       ├── start/          # SKILL.md, agents/openai.yaml, any resources
 │       ├── discover/
 │       ├── from-prd/
 │       ├── init-memory/
@@ -207,32 +207,32 @@ your-project/
 │       ├── decision-log/
 │       ├── handoff/
 │       ├── ship/
-│       ├── ask-claude/
+│       ├── ask-claude/     # Codex-only: ask Claude for a second opinion
 │       ├── sync-upstream/
 │       ├── retro/
 │       ├── weekly-update/
 │       ├── runbook/
 │       └── security-check/
 ├── .claude/
-│   └── commands/
-│       ├── start.md          # session opener
-│       ├── discover.md       # define a project from a rough idea (no code yet)
-│       ├── from-prd.md       # seed memory bank from a PRD or brief
-│       ├── init-memory.md    # analyze codebase, propose memory bank contents
-│       ├── breakdown.md      # break down before executing
-│       ├── review.md         # code review the current branch
-│       ├── update-memory.md  # refresh the bank
-│       ├── analyze.md        # read-only memory accuracy audit
-│       ├── weekly-update.md  # stakeholder-ready weekly update
-│       ├── retro.md          # sprint or weekly retrospective
-│       ├── risk-review.md    # surface undocumented risks
-│       ├── decision-log.md   # record an architectural decision (ADR)
-│       ├── handoff.md        # generate a handoff doc for the next person
-│       ├── ask-codex.md      # ask Codex CLI for a second opinion
-│       ├── ship.md           # pre-merge checklist
-│       ├── sync-upstream.md  # pull framework updates from upstream
-│       ├── runbook.md        # generate/update an operational runbook
-│       └── security-check.md # OWASP + STRIDE pass
+│   └── skills/             # Claude Code copies, byte-identical to the sources
+│       ├── start/SKILL.md          # session opener
+│       ├── discover/SKILL.md       # define a project from a rough idea (no code yet)
+│       ├── from-prd/SKILL.md       # seed memory bank from a PRD or brief
+│       ├── init-memory/SKILL.md    # analyze codebase, propose memory bank contents
+│       ├── breakdown/SKILL.md      # break down before executing
+│       ├── review/SKILL.md         # code review the current branch
+│       ├── update-memory/SKILL.md  # refresh the bank
+│       ├── analyze/SKILL.md        # read-only memory accuracy audit
+│       ├── weekly-update/SKILL.md  # stakeholder-ready weekly update
+│       ├── retro/SKILL.md          # sprint or weekly retrospective
+│       ├── risk-review/SKILL.md    # surface undocumented risks
+│       ├── decision-log/SKILL.md   # record an architectural decision (ADR)
+│       ├── handoff/SKILL.md        # generate a handoff doc for the next person
+│       ├── ask-codex/SKILL.md      # Claude-only: ask Codex CLI for a second opinion
+│       ├── ship/SKILL.md           # pre-merge checklist
+│       ├── sync-upstream/SKILL.md  # pull framework updates from upstream
+│       ├── runbook/SKILL.md        # generate/update an operational runbook
+│       └── security-check/SKILL.md # OWASP + STRIDE pass
 ├── hooks/                    # optional auto-fire (off by default)
 │   ├── session-start.sh      # auto-load memory bank at session start
 │   ├── pre-compact.sh        # remind agent to update bank before context loss
@@ -278,7 +278,7 @@ Then open the project in Claude Code or Codex. There are three paths from here d
 
 Codex also discovers the checked-in skills from `.agents/skills/`; use `/skills` or type `$...` to invoke one explicitly.
 
-If Codex shows "Select settings to import" and offers to migrate `.claude/commands` into `.agents/skills`, choose **Not now**. Serel Memory already includes native Codex skills, so importing the Claude commands is unnecessary and may create duplicate workflows.
+If Codex shows "Select settings to import" and offers to migrate Claude Code workflow files (`.claude/skills` or an older `.claude/commands`) into `.agents/skills`, choose **Not now**. Serel Memory already ships every workflow as a Codex skill in `.agents/skills/`, so importing the Claude Code files is unnecessary and may create duplicate workflows.
 
 ### On a new project with an existing PRD
 
@@ -367,7 +367,7 @@ and `sync-upstream` on one, are not supported yet. Full rules:
 
 **At session end:** run `/update-memory`. The agent refreshes `activeContext.md`, `progress.md`, and `decisionLog.md` when decisions changed, shows you the diffs, and asks before writing.
 
-Claude slash commands and Codex skills are just markdown files. Read them. Change them. They're your workflows, not anyone else's.
+The workflows are just markdown files: `.agents/skills/<name>/SKILL.md` for Codex and its identical copy `.claude/skills/<name>/SKILL.md` for Claude Code. Read them. Change them. They're your workflows, not anyone else's.
 
 ## When context gets full
 
@@ -469,13 +469,15 @@ compatibility file; current sync workflows leave it alone. Retire only an
 unchanged Serel Memory shim after confirming every Claude setup used on the
 project loads `AGENTS.md` without it.
 
-The adapters are native to each tool:
+Each workflow is written once and both tools read the same markdown:
 
-- Claude Code uses `.claude/commands/<name>.md` slash commands.
-- Codex uses `.agents/skills/*/SKILL.md` skills.
+- The source is `.agents/skills/<name>/SKILL.md`, which Codex runs as a skill (`$name`).
+- Claude Code runs a byte-identical copy at `.claude/skills/<name>/SKILL.md` (`/name`). `tests/check-single-source.sh` keeps the copies identical in CI.
+- The ask pair is the one exception, kept by hand: `ask-codex` exists only for Claude Code and `ask-claude` only for Codex, since each calls the other agent.
+- Projects installed before 0.8.0 may still hold `.claude/commands/<name>.md` files. Claude Code runs a same-name skill instead of a command, and `sync-upstream` offers to retire the old ones ([Retiring old command files](docs/serel-setup.md#retiring-old-command-files)).
 - Optional hooks can auto-load context for either tool, but the memory bank still works without hooks.
 
-Every workflow has native adapters on both sides:
+Every workflow can be called from both tools; the ask pair names the other agent on each side:
 
 | Workflow | Claude Code | Codex |
 |----------|-------------|-------|
