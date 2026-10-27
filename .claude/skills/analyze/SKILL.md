@@ -1,15 +1,16 @@
 ---
+name: analyze
 description: "Audit a Serel Memory bank against code and evidence without editing it. Use when asked to check memory accuracy, stale claims, unsupported status, or gaps between memory and implementation."
 ---
 
-# /analyze
+# Analyze
 
 Audit the selected memory bank against repository evidence. This is an
 on-demand accuracy review; routine `update-memory` captures and reconciles
 subjects changed during a session. Use this workflow when asked whether
 existing memory is accurate, stale, unsupported, or missing durable facts.
 
-Invoke as `/analyze [topic] [--scope <path>]`.
+Invoke as `analyze [topic] [--scope <path>]`.
 
 ## Scope and required reads
 
@@ -29,7 +30,7 @@ A maintainer overlay is partial: missing core files get intent from
    `systemPatterns.md`, `techContext.md`, `decisionLog.md`, `activeContext.md`,
    `progress.md`, then its rules. A normal bank with missing, empty, or
    template-only core files is uninitialized: name them and stop; suggest
-   discover, init-memory, or from-prd as appropriate. Do not seed it here.
+   `discover`, `init-memory`, or `from-prd` as appropriate. Do not seed it here.
 3. Inspect recent git history and working-tree status, including staged,
    unstaged and relevant untracked files. Inspect source, manifests and test
    definitions needed to assess the selected subjects. Do not assume an
@@ -110,6 +111,6 @@ For each finding, give:
 End with **Coverage and unassessed areas**, including unresolved evidence and
 decisions. If there are no findings, say "No discrepancies found within the
 inspected subjects," not "the bank is accurate." No score or semantic CI verdict.
-Offer `/update-memory` for a separate, reviewed bank update; do not invoke it or
+Offer `update-memory` for a separate, reviewed bank update; do not invoke it or
 write the corrections automatically. Possible regressions need an owner
 decision before intent or code changes.
