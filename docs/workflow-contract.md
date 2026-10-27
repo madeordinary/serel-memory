@@ -1,7 +1,7 @@
 # Workflow Contract
 
 Serel Memory workflows should be small, explicit, and portable across agents. Use this
-contract when adding or revising a Claude command, Codex skill, or future adapter.
+contract when adding or revising a workflow.
 
 ## Required sections
 
@@ -12,6 +12,40 @@ Every workflow should make these things clear:
 - **Allowed writes**: files the workflow may edit, and whether confirmation is required.
 - **Output contract**: the exact shape users should expect back.
 - **Stop conditions**: when the agent must pause for user input instead of guessing.
+
+## Workflow files
+
+Each workflow has one source, `.agents/skills/<name>/SKILL.md`, and Claude
+Code runs a byte-identical copy at `.claude/skills/<name>/SKILL.md`. Serel
+Memory ships no `.claude/commands/`. The rules:
+
+- **One source, one copy.** Edit the source, then run
+  `bash tests/check-single-source.sh --write` to refresh the copy. CI runs the
+  same check without `--write` and fails when a copy differs or is missing. The
+  copy sits alone in its folder.
+- **Resources by repo-root path.** `agents/openai.yaml` (its `default_prompt`
+  keeps `$<name>`) and any other resource live only in the source folder. A
+  body points to them by repo-root path (`.agents/skills/<name>/...`), which
+  both CLIs resolve.
+- **Frontmatter.** `name` and `description` only. The description carries the
+  trigger wording.
+- **Bare workflow names.** A body refers to another workflow by bare name in
+  backticks (`update-memory`), never `/name` or `$name`. `AGENTS.md` says once
+  how each CLI calls a workflow: `/name` in Claude Code, `$name` in Codex.
+- **CLI-specific steps.** Describe the capability ("ask the user and wait"),
+  not a tool name. Where behavior truly differs, write one labeled branch,
+  **In Claude Code:** and **In Codex:**.
+- **Cross-CLI calls.** A step that can call the other CLI asks "Which CLI am I
+  running in?", then gives one labeled branch per CLI: in Claude Code the other
+  reviewer is Codex (`codex exec`), in Codex it is Claude (`claude -p`). A
+  workflow never calls its own CLI. See `docs/cross-agent-review.md`.
+- **The ask pair is the exception.** `ask-codex` (Claude Code only, at
+  `.claude/skills/ask-codex/SKILL.md`) and `ask-claude` (Codex only, at
+  `.agents/skills/ask-claude/SKILL.md`) are kept by hand, each naming the
+  other agent, with no copy.
+
+A project's two copies may differ after local edits: the drift check reports
+that as `INFO` ("Drift check" below), and nothing forces them back together.
 
 ## Resolving scope
 
@@ -80,13 +114,13 @@ gets done (systems of record, rituals, who decides) and `techContext.md`
 lists tools, data sources, and access. A project whose spec lives in an
 external system of record keeps `projectbrief.md` as a declared mirror.
 Project-specific preflights (a warehouse connectivity probe, say) belong in a
-project-local command, never in `start.md`, so `sync-upstream` stays clean.
+project-local workflow, never in the `start` workflow, so `sync-upstream` stays clean.
 
 ## Setup routing
 
-`docs/serel-setup.md` is the canonical setup guide. Both start adapters enter
-setup mode when asked for `setup`, whatever the bank's state, and on their own
-when the resolved bank is missing or no core file has real content. Setup is
+`docs/serel-setup.md` is the canonical setup guide. `start` enters setup mode
+when asked for `setup`, whatever the bank's state, and on its own when the
+resolved bank is missing or no core file has real content. Setup is
 read-only until its plan is approved: it orients in the resolved scope first
 (Serel Memory's own files, and code in another scope, are not the project's
 code), asks only what it could not detect, one question per message and at
@@ -103,9 +137,11 @@ workflows" in `docs/serel-setup.md`), and `sync-upstream` does the same for
 new and changed workflows before approval. Existing and incoming workflows
 that do the same job, whatever their names, or a project's own file at an
 incoming path, are reported in the plan with the rules to preserve, the
-primary entry point and a disposition. A resembling name, the Claude/Codex
-pair of one workflow, or a specialized workflow with a different job is not a
-finding. An unresolved overlap pauses the affected capability as a whole. A
+primary entry point and a disposition. A resembling name, the Claude and Codex
+copies of one workflow, the old Serel Memory command that its skill replaces
+(that is command retirement, "Retiring old command files" in
+`docs/serel-setup.md`), or a specialized workflow with a different job is not
+a finding. An unresolved overlap pauses the affected capability as a whole. A
 coexistence the user chose is recorded in the project's workflow or
 instruction docs and respected while it applies. Retiring or merging a
 workflow is a separate migration with its own shown diffs and explicit
@@ -408,7 +444,8 @@ finding:
 - `WARN` — a soft target is exceeded (retention). Exit-neutral.
 - `INFO` — context, never a verdict: overlay gaps, unmarked bullets, framework
   files that differ from the baseline, no local baseline to compare against,
-  Git-excluded framework files that went uncompared.
+  Git-excluded framework files that went uncompared, and the two workflow
+  notes below.
 
 Then exactly one summary line:
 `serel-memory check: <d> drift, <s> stale, <i> incomplete, <w> warn, <f> fresh,
@@ -453,6 +490,24 @@ ships is: `git diff` cannot read those bytes, so the comparison is skipped
 with an `INFO` line instead of vouching for them. Another tool's Git-excluded
 files in the shared folders (a Serel Kit pack in `.agents/skills/`, say) are
 not in the baseline and leave the comparison on.
+
+**Memory ownership.** Framework findings cover only Memory-owned paths: a path
+is Memory's only when the anchor baseline ships it, or an `upstream/main` that
+a sync already fetched does (the checker still fetches nothing). A Serel Kit
+pack or a project's own workflow in the shared folders (`.claude/commands/`,
+`.claude/skills/`, `.agents/skills/`) produces no framework finding, tracked or
+Git-excluded.
+
+**Workflow notes.** For each Memory-owned workflow, alongside the baseline
+comparison and `INFO` only:
+
+- `INFO .claude/skills/<n>/SKILL.md the Claude and Codex copies differ
+  (.agents/skills/<n>/SKILL.md): fine when one CLI's copy is customized on
+  purpose`. The checker never forces the copies back together.
+- `INFO .claude/commands/<n>.md shadowed by .claude/skills/<n>/: Claude Code
+  runs the skill; retire the command with sync-upstream`. The old command no
+  longer runs; "Retiring old command files" in `docs/serel-setup.md` covers
+  how `sync-upstream` retires it.
 
 **A failed check is never a clean one.** Every subprocess status is checked; a
 command that fails becomes `INCOMPLETE`, and the summary line prints even when
