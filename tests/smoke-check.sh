@@ -517,6 +517,81 @@ assert_not "differs from anchor baseline" "no comparison is claimed beside an ex
   || bad "baseline field is '$(baseline_field)', want unavailable"
 
 # =============================================================================
+# 8b. Memory ownership and the workflow copies (0.8.0 layout)
+# =============================================================================
+# Only paths Memory ships — in the baseline, or in a fetched upstream/main —
+# are framework findings. A tracked Kit pack, a Git-excluded Kit pack and a
+# project's own command and skill produce none, and the two new INFO notes
+# speak only about Memory's own workflows.
+W="$tmp/workflows"
+build_fixture "$W"
+git -C "$W" update-ref refs/serel-memory/anchor HEAD
+# upstream/main in the 0.8.0 layout: demo's Claude copy is a skill, its
+# command is gone. Built on a side branch, then the project returns to its tip.
+(
+  cd "$W"
+  $GIT checkout --quiet -b fixture-upstream
+  mkdir -p .claude/skills/demo
+  cp .agents/skills/demo/SKILL.md .claude/skills/demo/SKILL.md
+  $GIT rm --quiet .claude/commands/demo.md
+  $GIT add -A
+  $GIT commit --quiet -m "upstream: demo becomes a skill"
+  $GIT update-ref refs/remotes/upstream/main HEAD
+  $GIT checkout --quiet -
+  $GIT branch --quiet -D fixture-upstream
+)
+# Tracked Kit pack (shared install), with copies that differ on purpose.
+mkdir -p "$W/.agents/skills/polish" "$W/.claude/skills/polish"
+echo "# polish" > "$W/.claude/commands/polish.md"
+echo "# polish skill" > "$W/.agents/skills/polish/SKILL.md"
+echo "# polish, Claude copy" > "$W/.claude/skills/polish/SKILL.md"
+# The project's own command and skill of the same name.
+mkdir -p "$W/.claude/skills/deploy"
+echo "# deploy" > "$W/.claude/commands/deploy.md"
+echo "# deploy skill" > "$W/.claude/skills/deploy/SKILL.md"
+(cd "$W" && $GIT add -A && $GIT commit --quiet -m "tracked Kit pack and project workflows")
+# Git-excluded Kit pack (local install), command and skill side by side.
+mkdir -p "$W/.agents/skills/verify-map" "$W/.claude/skills/verify-map"
+echo "# verify-map" > "$W/.claude/commands/verify-map.md"
+echo "# verify-map skill" > "$W/.agents/skills/verify-map/SKILL.md"
+echo "# verify-map, Claude copy" > "$W/.claude/skills/verify-map/SKILL.md"
+printf '/.claude/commands/verify-map.md\n/.agents/skills/verify-map/\n/.claude/skills/verify-map/\n' >> "$W/.git/info/exclude"
+run --root "$W"
+assert_rc 0 "Kit packs and project workflows beside Memory"
+[ "$(baseline_field)" = "refs/serel-memory/anchor" ] && ok "the baseline is still compared beside them" \
+  || bad "baseline field is '$(baseline_field)', want refs/serel-memory/anchor"
+assert_not "polish" "a tracked Kit pack is not a framework finding"
+assert_not "verify-map" "a Git-excluded Kit pack is not a framework finding"
+assert_not "deploy" "a project-only command and skill are not framework findings"
+assert_not "shadowed" "no Memory workflow is shadowed yet"
+assert_not "copies differ" "no Memory workflow has two copies yet"
+
+# A sync restores demo's skill and leaves the command: the command is shadowed.
+mkdir -p "$W/.claude/skills/demo"
+cp "$W/.agents/skills/demo/SKILL.md" "$W/.claude/skills/demo/SKILL.md"
+(cd "$W" && $GIT add -A && $GIT commit --quiet -m "sync: demo skill restored, command kept")
+run --root "$W"
+assert_rc 0 "a shadowed command is exit-neutral"
+assert_has "^INFO .claude/commands/demo.md shadowed by .claude/skills/demo/: Claude Code runs the skill; retire the command with sync-upstream" \
+  "a Memory command beside its new skill is reported as shadowed"
+assert_not "copies differ" "identical copies are not reported"
+assert_not "polish" "Kit stays silent beside a shadowed Memory command"
+
+# One CLI's copy customized: INFO, never drift.
+echo "Project rule for Claude only." >> "$W/.claude/skills/demo/SKILL.md"
+run --root "$W"
+assert_rc 0 "differing copies are exit-neutral"
+assert_has "^INFO .claude/skills/demo/SKILL.md the Claude and Codex copies differ (.agents/skills/demo/SKILL.md)" \
+  "differing Memory copies are reported"
+assert_not "^INFO .claude/skills/polish" "differing Kit copies are not reported"
+
+# Retiring the command clears the shadow note.
+rm "$W/.claude/commands/demo.md"
+run --root "$W"
+assert_not "shadowed" "a retired command is no longer reported"
+assert_has "^DRIFT .claude/commands/demo.md framework file missing" "the retirement is still visible against the old baseline until the anchor moves"
+
+# =============================================================================
 # 9. The documented shape of a real report: two fresh markers, one stale
 # =============================================================================
 write_bank "$F/memory-bank"
