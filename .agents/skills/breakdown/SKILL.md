@@ -54,7 +54,9 @@ For high-impact or hard-to-reverse plans (architecture, security/auth, data migr
 
 Which CLI am I running in? Use only the matching branch below; never call your own CLI.
 
-- **In Claude Code:** your model is Claude and the other model is Codex. It is available if `codex --version` succeeds. Run Codex in read-only mode. Write the prompt to a temp file and pipe it — long inline prompts can hang `codex exec`:
+- **In Claude Code:** your model is Claude and the other model is Codex. It is available if `codex --version` succeeds.
+
+  Run Codex in read-only mode. Write the prompt to a temp file and pipe it — long inline prompts can hang `codex exec`:
 
   ```bash
   PROMPT_FILE="$(mktemp)"
@@ -65,7 +67,9 @@ Which CLI am I running in? Use only the matching branch below; never call your o
   rm -f "$PROMPT_FILE"
   ```
 
-- **In Codex:** your model is Codex and the other model is Claude. It is available if `claude --version` succeeds. Shell out to Claude in read-only mode. Write the prompt to a temp file and pipe it via stdin — long inline prompts are unreliable as CLI arguments:
+- **In Codex:** your model is Codex and the other model is Claude. It is available if `claude --version` succeeds.
+
+  Shell out to Claude in read-only mode. Write the prompt to a temp file and pipe it via stdin — long inline prompts are unreliable as CLI arguments:
 
   ```bash
   PROMPT_FILE="$(mktemp)"
