@@ -1,5 +1,5 @@
 ---
-description: Lightweight OWASP + STRIDE pass on the current change
+description: "Lightweight OWASP Top 10 + STRIDE security pass on the current change. Use when the user asks for a security review, security check, threat model, or vulnerability scan of the current diff."
 ---
 
 # /security-check

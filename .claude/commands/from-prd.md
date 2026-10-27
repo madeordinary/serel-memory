@@ -1,5 +1,5 @@
 ---
-description: Seed the memory bank from an existing PRD or product brief
+description: "Seed memory-bank files from an existing PRD, product brief, spec, or requirements document. Use when a new project has a source document but little or no code yet."
 ---
 
 # /from-prd

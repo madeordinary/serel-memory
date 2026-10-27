@@ -1,5 +1,5 @@
 ---
-description: Audit memory accuracy against repository evidence without editing files
+description: "Audit a Serel Memory bank against code and evidence without editing it. Use when asked to check memory accuracy, stale claims, unsupported status, or gaps between memory and implementation."
 ---
 
 # /analyze

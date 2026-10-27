@@ -1,5 +1,5 @@
 ---
-description: Refresh the memory bank from this session's work
+description: "Refresh memory-bank files after a work session. Use when the user asks to update memory, preserve session context, refresh activeContext/progress, or capture new project learnings."
 ---
 
 # /update-memory

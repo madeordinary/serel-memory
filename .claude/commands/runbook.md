@@ -1,5 +1,5 @@
 ---
-description: Generate or update an operational runbook for the current service or change
+description: "Generate or update an operational runbook for a service or change. Use when the user asks for a runbook, ops doc, on-call guide, or deployment documentation."
 ---
 
 # /runbook

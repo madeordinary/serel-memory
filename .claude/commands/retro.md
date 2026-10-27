@@ -1,5 +1,5 @@
 ---
-description: Sprint or weekly retrospective drawing from memory bank and recent activity
+description: "Run a sprint or weekly retrospective from the memory bank and git activity. Use when the user asks for a retro, retrospective, post-mortem, or wants to reflect on what shipped, stalled, or surprised."
 ---
 
 # /retro
