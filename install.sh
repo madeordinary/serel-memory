@@ -47,8 +47,9 @@ Options:
 Rules:
   - The target must be the root of a git work tree (a linked worktree is fine).
   - A tracked destination (names compared without case), an existing name
-    that differs only in case, or an existing file that differs, stops the
-    run before anything is written. An existing AGENTS.md is left alone.
+    that differs only in case, an existing file that differs, or a command
+    that an installed skill of the same name would replace, stops the run
+    before anything is written. An existing AGENTS.md is left alone.
   - Re-running changes nothing and keeps the bank, .rules, and the anchor.
   - For a shared install that you commit, see the README's Install section.
 USAGE_END
@@ -132,7 +133,7 @@ in_payload() {
   for p in "${payload[@]}"; do [ "$p" = "$1" ] && return 0; done
   return 1
 }
-for rel in AGENTS.md .rules bin/serel-memory docs/serel-setup.md .claude/commands/start.md \
+for rel in AGENTS.md .rules bin/serel-memory docs/serel-setup.md .claude/skills/start/SKILL.md \
   .agents/skills/start/SKILL.md "${bank_paths[@]}"; do
   in_payload "$rel" || die "the source checkout is incomplete: $rel is missing"
 done
@@ -350,6 +351,18 @@ for rel in "${payload[@]}" .serel-memory.json; do
       continue
     fi
   fi
+  # Claude Code runs a skill instead of a same-name command, so installing
+  # .claude/skills/<n>/ beside the repository's own .claude/commands/<n>.md
+  # would silently replace that command in this clone.
+  case "$rel" in
+    .claude/skills/*/SKILL.md)
+      cmd="${rel#.claude/skills/}"
+      cmd=".claude/commands/${cmd%/SKILL.md}.md"
+      if ! in_payload "$cmd" && { [ -e "$target/$cmd" ] || [ -L "$target/$cmd" ] || [ -n "$(tracked_match "$cmd")" ]; }; then
+        problem "a command with the same name exists: $cmd (the skill $rel would replace it in Claude Code)"
+        continue
+      fi ;;
+  esac
   case "$rel" in
     memory-bank/*) line="/memory-bank/"; kind=memory ;;
     .rules|.serel-memory.json) line="/$rel"; kind=memory ;;
