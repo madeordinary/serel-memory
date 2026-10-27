@@ -85,10 +85,10 @@ clone and is not copied into projects.
    "Overlapping workflows".
 5. **Seed** (Serel Memory, or a pack that needs an initialized bank).
    Continue into the seed workflow in the same session by reading its file
-   (`.claude/skills/<name>/SKILL.md` for Claude Code,
-   `.agents/skills/<name>/SKILL.md` for Codex; a Kit pack's workflow is
-   wherever Kit's installer put it, such as `.claude/commands/<name>.md`),
-   carrying the answers you already have; a new session is only needed to
+   (for Claude Code `.claude/skills/<name>/SKILL.md` when it exists,
+   otherwise the retained `.claude/commands/<name>.md`; for Codex
+   `.agents/skills/<name>/SKILL.md`; a Kit pack's workflow is wherever Kit's
+   installer put it), carrying the answers you already have; a new session is only needed to
    call the workflow by name. The workflow still shows its proposals and
    waits for approval before writing any bank file.
 
@@ -378,7 +378,7 @@ another tool added after the installer's comment.
 | `memory-bank/`, `.rules` | the project (templates are copied once, never synced) | committed | excluded at the root only; `/memory-bank/` as a whole |
 | `.serel-memory.json` | the project (records the starting version) | committed | excluded |
 | `CLAUDE.md`, `.claude/CLAUDE.md`, `CLAUDE.local.md` | the project; Serel Memory never creates them | — | — |
-| Kit pack files in `.claude/commands/` (Kit 0.3.0 and earlier) or `.claude/skills/` (where a Kit release puts Claude skills), `.agents/skills/`, and `.serel-kit.json` | Serel Kit | committed | excluded by Kit's own local mode, never by Serel Memory |
+| Kit pack files where Kit's installer puts them (today `.claude/commands/` and `.agents/skills/`), and `.serel-kit.json` | Serel Kit | committed | excluded by Kit's own local mode, never by Serel Memory |
 
 Serel Memory needs Bash and Git. The drift checker, scoped banks and the hook
 enable scripts also use `jq`. Hooks are optional and off until you run their
