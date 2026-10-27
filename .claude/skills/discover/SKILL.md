@@ -1,12 +1,13 @@
 ---
+name: discover
 description: "Shape a brand-new project from a rough idea and seed memory-bank files. Use when there is no code yet, the memory bank is blank, template-only, or partly filled, or the user asks to discover, define, clarify, or scope a new project."
 ---
 
-# /discover
+# Discover
 
 Use this at the start of a brand-new project, when the user has an idea but hasn't yet articulated it as a brief. You'll guide them through structured discovery, then propose memory bank contents based on the dialogue.
 
-This is the inverse of `/init-memory`. That command analyzes existing code. This one helps shape a project that doesn't exist yet.
+This is the inverse of `init-memory`. That workflow analyzes existing code. This one helps shape a project that doesn't exist yet.
 
 **Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), it is the working bank — the bank check below and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
@@ -24,9 +25,9 @@ If it prints `LOCAL INSTALL`, stop before any other step. A local install holds 
 
 **Setup context:** if setup already ran in this session (`docs/serel-setup.md`, or start's setup mode), treat its answers as given — skip the open prompt when the idea is already described and mark those items clear in Phase 2 — and ask only about what is still missing. The proposal and approval steps below are unchanged.
 
-**Existing bank content:** check each core file in the effective bank. If every one has real content beyond the template placeholders, this is the wrong command — point the user toward `/breakdown` or `/start` instead. If only some do (a partial bank, such as a `projectbrief.md` the user wrote), keep those files exactly as they are and treat them as the user's answers: skip the open prompt when they already describe the idea, mark what they cover as clear in Phase 2, and propose only the files that are missing, empty, or template-only.
+**Existing bank content:** check each core file in the effective bank. If every one has real content beyond the template placeholders, this is the wrong workflow — point the user toward `breakdown` (planning) or `start` instead. If only some do (a partial bank, such as a `projectbrief.md` the user wrote), keep those files exactly as they are and treat them as the user's answers: skip the open prompt when they already describe the idea, mark what they cover as clear in Phase 2, and propose only the files that are missing, empty, or template-only.
 
-**Stage:** in the selected scope, if there is meaningful product code — not counting Serel Memory's own files (its workflows, `hooks/`, `bin/serel-memory`, framework docs, bank templates, and the `tests/` and `.github/` a degit copy brings) or code in another scope — recommend `/init-memory` instead (it can read a spec too); if there is a PRD or spec but no code, recommend `/from-prd`. Otherwise, proceed.
+**Stage:** in the selected scope, if there is meaningful product code — not counting Serel Memory's own files (its workflows, `hooks/`, `bin/serel-memory`, framework docs, bank templates, and the `tests/` and `.github/` a degit copy brings) or code in another scope — recommend `init-memory` instead (it can read a spec too); if there is a PRD or spec but no code, recommend `from-prd`. Otherwise, proceed.
 
 ## Phase 1 — Open prompt
 
@@ -70,18 +71,18 @@ Once you have enough, draft proposals for these files (in a partial bank, only t
 - `memory-bank/productContext.md` — user, job, today's solution, UX principles
 - `memory-bank/systemPatterns.md` — keep light. Architecture often emerges later. Only capture what the user has clear opinions on.
 - `memory-bank/techContext.md` — keep light. Stack often emerges as the project takes shape.
-- `memory-bank/decisionLog.md` — only explicit decisions made during discovery; otherwise keep template-light.
+- `memory-bank/decisionLog.md` — only explicit decisions made during discovery; otherwise keep template-light (empty).
 - `memory-bank/activeContext.md` — immediate next focus and open questions.
 - `memory-bank/progress.md` — planning status and what exists so far.
 
-Show proposals **one file at a time**. After each, wait for the user to approve, revise, or push back before moving to the next.
+Show proposals **one file at a time**. After each, wait for the user to approve, revise, or push back before writing it and before moving to the next.
 
 ## Rules
 
 - Don't pretend to know things the user hasn't told you.
-- If the user gives a weak answer ("idk, just kind of an AI thing"), push back gently: "I don't have enough yet to write a brief that's actually useful. Can you tell me more about [specific thing]?"
+- If the user gives a weak answer ("idk, just kind of an AI thing") or one too vague to create useful memory-bank content, push back gently: "I don't have enough yet to write a brief that's actually useful. Can you tell me more about [specific thing]?"
 - Resist adding scope. Users usually come in wanting to do too much for v1. Help them carve back to a minimum useful version.
-- Don't validate the idea itself. Your job is to help them articulate it, not endorse it.
+- Don't validate the idea itself. Your job is to help them articulate, document and clarify it, not endorse it.
 - Don't synthesize until you have real material. Better to ask one more question than to fabricate.
 - After synthesis, the project is still in their hands. You've documented what they said; you haven't blessed it.
 
@@ -89,4 +90,4 @@ Show proposals **one file at a time**. After each, wait for the user to approve,
 
 When the files are approved and written, end with:
 
-> "Memory bank seeded. Run `/start` to verify the bootstrap, or `/breakdown` if you want to break the first chunk of work into steps."
+> "Memory bank seeded. Run `start` to verify the bootstrap, or `breakdown` (or just ask me to plan the first chunk of work) if you want to break the first chunk of work into steps."
