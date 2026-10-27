@@ -616,7 +616,9 @@ check_baseline() {
       return 0
     fi
   fi
-  changed="$(gitc diff --name-only "$base" -- "${FRAMEWORK_PATHS[@]}" 2>&1)" || rc=$?
+  # --no-renames: a Memory file moved to a project-only path must show as its
+  # own deletion, or the ownership filter below would drop the only name left.
+  changed="$(gitc diff --no-renames --name-only "$base" -- "${FRAMEWORK_PATHS[@]}" 2>&1)" || rc=$?
   if [ "$rc" -ne 0 ]; then
     finding INCOMPLETE repo "framework baseline comparison failed against $base (status $rc)"
     return 0
