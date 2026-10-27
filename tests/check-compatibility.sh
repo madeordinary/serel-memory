@@ -14,10 +14,12 @@
 #      the legacy ANCHOR FILENAME, because detecting a leftover v0.x anchor is
 #      the check. The retired kill switch and repository slug are still
 #      forbidden there — asserted separately in step 1b.
-#      Adapter exception: the two sync-upstream adapters may name the legacy
-#      anchor ONLY on lines that also say "legacy" (the fail-fast instruction).
-#   2. Both sync-upstream adapters carry the legacy-anchor fail-fast guard,
-#      byte-identical (parity of behavior, not just prose).
+#      Workflow exception: the sync-upstream source and its Claude copy may
+#      name the legacy anchor ONLY on lines that also say "legacy" (the
+#      fail-fast instruction).
+#   2. The sync-upstream source and its Claude copy both carry the
+#      legacy-anchor fail-fast guard, byte-identical (parity of behavior, not
+#      just prose).
 #   3. Canonical upstream references and the CI repo guard stay intact.
 #   4. Hooks honor SEREL_MEMORY_HOOKS=off and no longer honor the retired
 #      spelling.
@@ -26,7 +28,7 @@ cd "$(dirname "$0")/.."
 
 fail=0
 canonical="madeordinary/serel-memory"
-claude_sync=".claude/commands/sync-upstream.md"
+claude_sync=".claude/skills/sync-upstream/SKILL.md"
 codex_sync=".agents/skills/sync-upstream/SKILL.md"
 
 # --- 1. Retired-identifier scan over tracked live surfaces -------------------
@@ -35,7 +37,7 @@ scan_files="$(git ls-files | grep -vE \
   -e '^docs/research/' \
   -e '^tests/check-compatibility\.sh$' \
   -e '^tests/smoke-migrate-v02-v03\.sh$' \
-  -e '^\.claude/commands/sync-upstream\.md$' \
+  -e '^\.claude/skills/sync-upstream/SKILL\.md$' \
   -e '^\.agents/skills/sync-upstream/SKILL\.md$')"
 
 if [ -z "$scan_files" ]; then
@@ -68,7 +70,7 @@ else
   fail=1
 fi
 
-# --- 2. Adapters: legacy anchor named only in the fail-fast context ----------
+# --- 2. Source and copy: legacy anchor named only in the fail-fast context ---
 for f in "$claude_sync" "$codex_sync"; do
   if grep -qE 'BASECAMP_HOOKS|gusfeliciano/basecamp' "$f"; then
     echo "RETIRED IDENTIFIER in $f (old kill switch or old repository slug)"
@@ -89,10 +91,10 @@ done
 guard_cmd="$(awk '/^[[:space:]]*# Legacy-anchor guard: fail fast/,/^[[:space:]]*fi[[:space:]]*$/' "$claude_sync")"
 guard_skill="$(awk '/^[[:space:]]*# Legacy-anchor guard: fail fast/,/^[[:space:]]*fi[[:space:]]*$/' "$codex_sync")"
 if [ -z "$guard_cmd" ] || [ -z "$guard_skill" ]; then
-  echo "MISSING: legacy-anchor guard snippet in one or both adapters"
+  echo "MISSING: legacy-anchor guard snippet in the source or its copy"
   fail=1
 elif [ "$guard_cmd" != "$guard_skill" ]; then
-  echo "DRIFT: legacy-anchor guard snippet differs between adapters"
+  echo "DRIFT: legacy-anchor guard snippet differs between the source and its copy"
   fail=1
 fi
 
@@ -131,6 +133,6 @@ for hook in hooks/session-start.sh hooks/pre-compact.sh; do
 done
 
 if [ "$fail" -eq 0 ]; then
-  echo "identifier cutover OK: no retired v0.x identifiers on live surfaces; fail-fast guard in both adapters; hooks honor only SEREL_MEMORY_HOOKS"
+  echo "identifier cutover OK: no retired v0.x identifiers on live surfaces; fail-fast guard in the sync source and its copy; hooks honor only SEREL_MEMORY_HOOKS"
 fi
 exit "$fail"

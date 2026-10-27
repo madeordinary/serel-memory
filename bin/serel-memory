@@ -32,10 +32,10 @@ SELF="serel-memory"
 # reads through /dev/fd instead, and a pipe is out wherever the loop body has
 # to update a counter. tests/smoke-check.sh enforces that structurally.
 
-# The sync-upstream framework allowlist (see .claude/commands/sync-upstream.md).
+# The sync-upstream framework allowlist (see .agents/skills/sync-upstream/SKILL.md).
 # Baseline comparison is bounded to these paths: everything else in a repo is
 # the user's own project.
-FRAMEWORK_PATHS=(.agents/skills/ .claude/commands/ AGENTS.md \
+FRAMEWORK_PATHS=(.agents/skills/ .claude/commands/ .claude/skills/ AGENTS.md \
   docs/workflow-contract.md docs/cross-agent-review.md docs/serel-setup.md hooks/ bin/serel-memory)
 
 # Files only Serel Memory installs, outside the folders other tools share.

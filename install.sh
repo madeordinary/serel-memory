@@ -23,9 +23,9 @@ export GIT_OPTIONAL_LOCKS=0
 unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR
 
 UPSTREAM="madeordinary/serel-memory"
-# The sync-upstream framework allowlist (.claude/commands/sync-upstream.md).
+# The sync-upstream framework allowlist (.agents/skills/sync-upstream/SKILL.md).
 # tests/check-allowlist.sh keeps this copy equal to it.
-FRAMEWORK_PATHS=(.agents/skills/ .claude/commands/ AGENTS.md \
+FRAMEWORK_PATHS=(.agents/skills/ .claude/commands/ .claude/skills/ AGENTS.md \
   docs/workflow-contract.md docs/cross-agent-review.md docs/serel-setup.md hooks/ bin/serel-memory)
 BANK_FILES=(projectbrief productContext systemPatterns techContext decisionLog activeContext progress)
 EXCLUDE_HEADER="# Serel Memory local install (install.sh --local): kept out of Git in this clone"
