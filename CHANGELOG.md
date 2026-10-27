@@ -6,7 +6,67 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [Unreleased]
 
-No changes yet.
+### Changed
+
+- **One source per workflow.**
+  - The 17 shared workflows each ship one source plus a byte-identical Claude
+    copy, with frontmatter of only `name` and `description`.
+  - Resources stay in `.agents/skills/<name>/`, read by their repo-root path.
+  - `ask-codex` moves to `.claude/skills/ask-codex/SKILL.md` and stays the one
+    hand-kept, Claude-only exception; `ask-claude` stays Codex-only.
+  - Bodies name other workflows bare, like `update-memory`.
+- **Cross-agent workflows choose by CLI.** `breakdown`, `review`,
+  `security-check` and `update-memory` each have one "Which CLI am I running
+  in" branch. In Claude Code the second opinion comes from Codex; in Codex it
+  comes from Claude. A workflow never calls its own CLI.
+- **Behavior differences resolved while merging** (the safer side won):
+  - `handoff` shows the new handoff before overwriting the old one. The
+    Claude command used to overwrite without showing it.
+  - `ship` always runs the tests. If it can't find how, it asks for the
+    command instead of skipping.
+  - `decision-log` asks what the decision is when it's unstated or unclear.
+  - `breakdown` says what's missing in the memory bank and asks before
+    guessing.
+  - `init-memory` samples the source tree instead of reading every file.
+- **`breakdown` plans in Claude Code** now use the same text layout as Codex
+  (`GOAL:`, `SCOPE:`, `STEPS:` and the rest), with the same seven fields in
+  the same order.
+- **`start`** follows `.claude/skills/<workflow>/SKILL.md` in Claude Code, or a
+  command you kept, when it hands off to a setup workflow.
+- **`sync-upstream`:**
+  - Its allowlist adds `.claude/skills/` and keeps `.claude/commands/`, so it
+    can see the retired files.
+  - A command-retirement step checks a fixed list of Memory's own workflows on
+    every run. It shows RETIRE and HELD lines in the summary and two new
+    options.
+  - Added-and-deleted discovery uses `--no-renames`.
+  - A command counts as known when its bytes match any version that path had
+    upstream, or the anchor's version. Anything else is held. A shallow clone
+    holds every workflow until you run `git fetch --unshallow`.
+  - It states which installed versions can reach 0.8.0 and how.
+- **The drift checker** reports only paths Serel Memory ships, so Kit and
+  project files no longer show up as framework findings. Two new INFO lines:
+  - a workflow's Claude and Codex copies differ;
+  - an old command is shadowed by its skill (retire it with `sync-upstream`).
+- **`install.sh --local`** installs `.claude/skills/`. It refuses when the
+  target already has a same-name `.claude/commands/<name>.md`, which the new
+  skill would silently replace.
+- **Contributing:** edit the source, then run
+  `bash tests/check-single-source.sh --write`. CI checks every copy.
+
+### Added
+
+- `tests/check-single-source.sh`, which replaces `tests/check-parity.sh`. It
+  checks byte-identical copies, manifests, the ask exception, read-only
+  file-piped invocations, the review output contract and the labeled CLI
+  branches.
+- `tests/smoke-migrate-v07-v08.sh`: migrations from v0.3.0, v0.6.0 and v0.7.0,
+  covering:
+  - unmodified projects;
+  - customized commands and adapters, which are held;
+  - an advanced anchor;
+  - rename-shaped history;
+  - project-only commands and Kit commands and skills, which are untouched.
 
 ## [0.7.0] — 2026-10-26
 
