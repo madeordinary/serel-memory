@@ -214,8 +214,9 @@ is everything when Git cannot read that history: a shallow clone, or no
   against its replacement. Only after you select it does it recheck every
   adapter of the workflow; if any changed since it was shown, nothing is
   written. Then it adds the skill and deletes the command. If the deletion
-  still fails after the skill is written, the workflow's skills go back as
-  `HEAD` has them, so the command stays the active one.
+  still fails after the skill is written, what it wrote goes back exactly as
+  it was before that attempt (a Codex skill this sync already pulled keeps its
+  new bytes), so the command stays the active one.
 - **HOLD:** unknown bytes (customized) in any adapter: the command, the Codex
   skill or the Claude skill. The Claude skill, the Codex skill and the
   command's retirement are held out of "pull all safe changes" together, and
