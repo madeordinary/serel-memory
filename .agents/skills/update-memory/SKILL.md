@@ -5,7 +5,7 @@ description: "Refresh memory-bank files after a work session. Use when the user 
 
 # Update Memory
 
-Use this skill to update the memory bank from the current session. Always show proposed diffs before writing.
+Update the memory bank to reflect the work done this session. Always show proposed diffs before writing anything.
 
 **Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), all reads and writes below target it and its `.rules` — never the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
@@ -24,9 +24,9 @@ Use this skill to update the memory bank from the current session. Always show p
    history and accepted intent; flag possible regressions and missing evidence.
    Before the diffs, summarize **Captured**, **Reconciled**, and **Unresolved**
    with evidence/locations and the bounds of what was checked.
-3. Propose updates, focusing on:
-   - `memory-bank/activeContext.md` - current focus, recent changes, next steps, open questions
-   - `memory-bank/progress.md` - what works, in progress, known issues, phase
+3. Propose updates. Focus especially on:
+   - **`activeContext.md`** — refresh current focus, recent changes (top of list), next steps, open questions.
+   - **`progress.md`** — move items from "in progress" to "what works"; add new known issues; update phase if it changed.
 4. Touch other files only if needed, including correcting or removing stale
    current-fact claims even when intent has not changed. Keep volatile status
    in its owning file rather than duplicating it across the bank:
@@ -41,19 +41,19 @@ Use this skill to update the memory bank from the current session. Always show p
      Preserve the original rationale and history. If a past
      decision changed, **supersede, don't delete**: append "SUPERSEDED by …
      (date)" and move it to the Superseded section.
-   - `productContext.md` or `projectbrief.md` for changed intent or obsolete
+   - `productContext.md` / `projectbrief.md` — changed intent or obsolete
      factual content; preserve still-valid goals and user needs
-5. Append to `.rules` a lesson learned this session — a user preference, a gotcha, a rejected approach — only if it clears the contract's "Lesson bar": non-obvious, reusable, costly to rediscover, and not already captured in code, tests, comments, or docs. Do not edit product code to capture one. Name any candidate you skipped, and why, under **Captured**. If the entry is a repeat, or the same correction has recurred, first ask why the existing guidance did not take, then propose a test or hook check instead of a second line (contract "Memory writes" item 5). Then **prune** it: if it's over ~40 lines or holds stale lines, drop what's no longer true and promote stabilized conventions into `systemPatterns.md`.
-6. **Retention (required).** Write the proposed `activeContext.md` and `progress.md` to a temp location and run the read-only helper on each - it measures the file *as it would be after this update*:
+5. Append to `.rules` a lesson learned this session — a user preference, a gotcha, a rejected approach — only if it clears the contract's "Lesson bar": non-obvious, reusable, costly to rediscover, and not already captured in code, tests, comments, or docs. Don't edit product code to capture one. Name any candidate you skipped, and why, under **Captured**. If the entry is a repeat, or the same correction has recurred, first ask why the existing guidance did not take, then propose a test or hook check instead of a second line (contract "Memory writes" item 5). Then **prune `.rules`**: if it's over ~40 lines or holds stale/obsolete lines, drop what's no longer true and promote stabilized conventions into `systemPatterns.md`. Keep it high-signal, not append-forever.
+6. **Retention (required).** Write the proposed `activeContext.md` and `progress.md` to a temp location and run the read-only helper on each — it measures the file *as it would be after this update*:
 
    ```bash
    hooks/lib/rotate-check.sh "$TMP/activeContext.md" activeContext
    hooks/lib/rotate-check.sh "$TMP/progress.md" progress
    ```
 
-   - `RESULT: NO-OP` - nothing to do.
-   - `RESULT: ROTATE n` - add to the proposal, for each selected line range: an append of those lines verbatim to the named `memory-bank/archive/<file>-<YYYY-MM>.md` (create it with a one-line header if missing), their removal from the live file, the heading named by any `ARCHIVE-PREFIX` line copied into the archive ahead of its span (it stays live), and - if `POINTER: missing` - one line `Older entries: archive/<file>-*.md` directly under the first `## Recent ...` heading. Never rotate a protected section; never paraphrase what moves.
-   - `RESULT: OVERAGE-REMAINS` - rotate what it selected (if anything) and say plainly that current-state content alone is over the target; the user decides whether to trim it.
+   - `RESULT: NO-OP` — nothing to do.
+   - `RESULT: ROTATE n` — add to the proposal below, for each selected line range: an append of those lines verbatim to the named `memory-bank/archive/<file>-<YYYY-MM>.md` (create it with a one-line header if missing), their removal from the live file, the heading named by any `ARCHIVE-PREFIX` line copied into the archive ahead of its span (it stays live), and — if `POINTER: missing` — one line `Older entries: archive/<file>-*.md` directly under the first `## Recent ...` heading. Never rotate a protected section; never paraphrase what moves.
+   - `RESULT: OVERAGE-REMAINS` — rotate what it selected (if anything) and say plainly that current-state content alone is over the target; the user decides whether to trim it.
 
    After the user confirms and the files are written, run the helper again on the live files and report its `RESULT` lines. Targets and rules: `docs/workflow-contract.md` "Retention".
 
@@ -71,35 +71,53 @@ For each proposed change, show:
 FILE: [path]
 CHANGE: [add / update / remove]
 DIFF:
-[actual before/after for the affected section]
+[show the actual before/after for the affected section]
 ```
 
 ## Bank-vs-reality audit (offered)
 
 The bank update is the agent writing the durable record of its own session —
-the purest self-grading moment in the framework. After showing the proposed
-diffs and before asking for confirmation, if `claude --version` succeeds and
-the session wasn't trivial (docs-only or a tiny diff), offer once:
+the purest self-grading moment in the framework.
 
-> Want Claude to verify these updates against the actual repo? (~30–90s, read-only)
+Which CLI am I running in? Use only the matching branch below; never call your own CLI.
+
+- **In Claude Code:** your model is Claude and the other model is Codex. It is available if `codex --version` succeeds. The offer reads:
+
+  > Want Codex to verify these updates against the actual repo? (~30–90s, read-only)
+
+  Run it read-only with:
+
+  ```bash
+  codex exec --cd "$PWD" --sandbox read-only - < "$PROMPT_FILE"
+  ```
+
+- **In Codex:** your model is Codex and the other model is Claude. It is available if `claude --version` succeeds. The offer reads:
+
+  > Want Claude to verify these updates against the actual repo? (~30–90s, read-only)
+
+  Run it read-only with:
+
+  ```bash
+  claude -p --permission-mode plan < "$PROMPT_FILE"
+  ```
+
+Then, in either CLI: after showing the proposed diffs and before asking for
+confirmation, if the other model is available and the session wasn't trivial
+(docs-only or a tiny diff), make your branch's offer once.
 
 If accepted:
 
 1. Write a prompt file containing the proposed diff blocks, the coverage
    summary and relevant evidence, the selected effective bank path, the
    instructions below, and a read-only instruction (do not edit
-   files or run write operations), then run Claude read-only — synchronous
-   form, `docs/cross-agent-review.md` has the canonical invocation:
-
-   ```bash
-   claude -p --permission-mode plan < "$PROMPT_FILE"
-   ```
-
-2. Ask Claude to read the relevant live bank sections alongside the proposed
-   diffs, looking for old claims about the changed subjects that the proposal
-   leaves behind. Classify claims as **current fact**, **durable decision**,
-   **intended future**, or **open question**. Flag only *current-fact* claims
-   the code, tests, or git history
+   files or run write operations), then run the other model read-only with
+   your branch's command — synchronous form, `docs/cross-agent-review.md` has
+   the canonical invocation.
+2. Ask the other model to read the relevant live bank sections alongside the
+   proposed diffs, looking for old claims about the changed subjects that the
+   proposal leaves behind. Classify claims as **current fact**, **durable
+   decision**, **intended future**, or **open question**. Flag only
+   *current-fact* claims the code, tests, or git history
    don't support. Intent is allowed to lead the code; facts are not. When a
    claim is ambiguous between fact and intent (present-tense statements in
    `projectbrief.md`, `productContext.md`, or `systemPatterns.md` often
@@ -112,17 +130,16 @@ If accepted:
 4. Fold accepted findings into the proposed diffs, mark which lines changed
    because of the audit, and show the revised diffs.
 
-If Claude is unavailable or the user declines, continue single-model — the
-audit never blocks a bank update.
+If the other model is unavailable or the user declines, continue single-model —
+the audit never blocks a bank update.
 
-Wait for confirmation before writing.
+Wait for confirmation before writing any file. If the user pushes back, revise — don't argue.
 
 ## Rules
 
-- Do not bloat the bank.
+- Don't bloat the bank. Every line in the bank should still be earning its place.
 - The `## Checkpoint` is the resume note (branch and HEAD, uncommitted, verified, first action). No `wip:` commit unless the user asked for a pause (contract "Clean stop").
-- Do not journal one-off events.
+- Don't journal one-off events — this isn't a log. Keep `activeContext.md` current: current-state sections (`Current focus`, `Checkpoint`, `Next steps`, `Open questions`, `Notes for next session`) are rewritten in place; historical entries rotate losslessly to `archive/` per step 6, never deleted, never paraphrased.
 - Never write to two scopes in one pass. If a learning clearly belongs to another project bank or to the root, say so and offer to run this workflow again with that `--scope`, rather than writing outside the resolved scope.
 - If `.rules` already covers a learning, refine the existing entry instead of duplicating it.
-- Keep `activeContext.md` current: current-state sections (`Current focus`, `Checkpoint`, `Next steps`, `Open questions`, `Notes for next session`) are rewritten in place; historical entries rotate losslessly to `archive/` per step 6, never deleted, never paraphrased.
-- Promote information according to `docs/workflow-contract.md`: session state to `activeContext.md`, completed status to `progress.md`, durable decisions to `decisionLog.md`, reusable gotchas to `.rules`.
+- Follow `docs/workflow-contract.md` when present to promote information: session state goes to `activeContext.md`, completed status to `progress.md`, durable decisions to `decisionLog.md`, reusable gotchas to `.rules`.
