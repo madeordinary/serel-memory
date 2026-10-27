@@ -25,7 +25,10 @@
 #      (worktree only, uncommitted), every framework file equal to upstream.
 #   2. A customized ship command: held (its Claude skill, Codex skill and
 #      retirement), the other workflows proceed; porting then retiring works,
-#      and the recheck refuses changed or uncommitted bytes.
+#      and the recheck refuses changed or uncommitted bytes before writing.
+#   2b. A matched command changed between preview and apply: nothing written,
+#      the command stays active, no skill shadows it, the Codex skill is as it
+#      was; a failure after writing puts the workflow's skills back to HEAD.
 #   3. Separately customized Claude and Codex handoff adapters: held together;
 #      ported per CLI, the copies stay different and the checker says so.
 #   4. An anchor already advanced to 0.8.0 with commands left behind: the
@@ -257,10 +260,10 @@ sync_run() {
     git restore --source=upstream/main -- "$f"
     applied=$((applied + 1))
   done < <(LC_ALL=C sort -u "$O/changed" "$O/absent")
-  # Retire every matched command: the skill first, then the rechecked deletion.
+  # Retire every matched command (unless RETIRE_CHOICE=none): the apply
+  # snippet rechecks, adds the skill, then deletes the command.
   while IFS=' ' read -r n blob; do
-    [ -n "$n" ] || continue
-    [ -f ".claude/skills/$n/SKILL.md" ] || git restore --source=upstream/main -- ".claude/skills/$n/SKILL.md"
+    [ -n "$n" ] && [ "${RETIRE_CHOICE:-all}" = all ] || continue
     if n="$n" blob="$blob" bash -c "$APPLY" >> "$O/apply" 2>&1; then applied=$((applied + 1)); else bad "$label: retiring $n failed"; fi
   done < "$O/retire"
   # Step 10: advance the anchor only for an applied change.
@@ -458,30 +461,83 @@ for tag in v0.7.0 v0.3.0; do
     bad "customized ship from $tag: a held file changed"
   assert_migrated "$P" "customized ship from $tag" ship
   assert_untouched "$P" "$BEFORE" "customized ship from $tag"
-  # The recheck: a command changed after it was shown, or left uncommitted, is never deleted.
+  # Port: the approved copies go to temporary files; the snippet installs them
+  # only after its recheck. A command edited after it was shown stops it first.
   shown="$(sed -n 's/^HOLD ship (blob \([0-9a-f]*\)).*/\1/p' "$O/inventory")"
+  cc="$tmp/ship-claude-copy-$tag" cx="$tmp/ship-codex-copy-$tag"
+  { git -C "$P" show upstream/main:.claude/skills/ship/SKILL.md; echo "PROJECT RULE: ship only on Fridays."; } > "$cc"
+  { git -C "$P" show upstream/main:.agents/skills/ship/SKILL.md; echo "PROJECT RULE: ship only on Fridays."; } > "$cx"
   (
     cd "$P"
-    mkdir -p .claude/skills/ship
-    { git show upstream/main:.claude/skills/ship/SKILL.md; echo "PROJECT RULE: ship only on Fridays."; } > .claude/skills/ship/SKILL.md
-    { git show upstream/main:.agents/skills/ship/SKILL.md; echo "PROJECT RULE: ship only on Fridays."; } > .agents/skills/ship/SKILL.md
     echo "one more edit" >> .claude/commands/ship.md
-    if n=ship blob="$shown" bash -c "$APPLY" >/dev/null 2>&1; then exit 1; fi
-    [ -f .claude/commands/ship.md ] || exit 1
+    out="$(n=ship blob="$shown" claude_copy="$cc" codex_copy="$cx" bash -c "$APPLY" 2>&1)" && exit 1
+    case "$out" in "NOT RETIRED ship: "*"; nothing written") ;; *) exit 1 ;; esac
+    [ -f .claude/commands/ship.md ] && [ ! -e .claude/skills/ship ] && [ "$(git hash-object .agents/skills/ship/SKILL.md)" = "$codex_ship" ] || exit 1
     git restore -- .claude/commands/ship.md
-    if n=ship blob="$(git hash-object .claude/commands/ship.md)" bash -c "$APPLY" >/dev/null 2>&1; then :; else exit 1; fi
-    [ ! -e .claude/commands/ship.md ] || exit 1
-  ) && ok "customized ship from $tag: ported, then retired; the recheck refused the edited bytes first" ||
+    n=ship blob="$shown" claude_copy="$cc" codex_copy="$cx" bash -c "$APPLY" >/dev/null 2>&1 || exit 1
+    [ ! -e .claude/commands/ship.md ] && cmp -s .claude/skills/ship/SKILL.md "$cc" && cmp -s .agents/skills/ship/SKILL.md "$cx"
+  ) && ok "customized ship from $tag: the recheck refused edited bytes before writing; then ported and retired" ||
     bad "customized ship from $tag: the port-then-retire path failed"
   (
     cd "$P"
-    git restore -- .claude/commands/ship.md
+    git restore -- .claude/commands/ship.md .agents/skills/ship/SKILL.md
+    rm -rf .claude/skills/ship
     echo "uncommitted" >> .claude/commands/ship.md
     if n=ship blob="$(git hash-object .claude/commands/ship.md)" bash -c "$APPLY" >/dev/null 2>&1; then exit 1; fi
-    [ -f .claude/commands/ship.md ] || exit 1
+    [ -f .claude/commands/ship.md ] && [ ! -e .claude/skills/ship ] || exit 1
     git restore -- .claude/commands/ship.md
   ) && ok "customized ship from $tag: an uncommitted command is never deleted" || bad "customized ship from $tag: an uncommitted command was deleted"
 done
+
+# =============================================================================
+# 3b. A matched command changed between preview and apply
+# =============================================================================
+# The inventory shows ship as RETIRE; the safe pull runs; then the user edits
+# the command before selecting the retirement. The apply snippet must write
+# nothing, so the edited command stays the active one.
+P="$tmp/changed-after-preview"
+begin v0.7.0 "$P"
+RETIRE_CHOICE=none sync_run "$P" "$FRESH_DOC" "changed after preview"
+O="$P.out"
+shown="$(sed -n 's/^RETIRE ship (blob \([0-9a-f]*\)).*/\1/p' "$O/inventory")"
+[ -n "$shown" ] || bad "changed after preview: ship was not offered"
+codex_before="$(git -C "$P" hash-object .agents/skills/ship/SKILL.md)"
+echo "A late edit, made during the review." >> "$P/.claude/commands/ship.md"
+cp "$P/.claude/commands/ship.md" "$tmp/late-ship"
+out="$(cd "$P" && n=ship blob="$shown" bash -c "$APPLY" 2>&1)" && rc=0 || rc=$?
+[ "$rc" = 1 ] && [ "$out" = "NOT RETIRED ship: .claude/commands/ship.md, .claude/skills/ship/SKILL.md or .agents/skills/ship/SKILL.md changed since it was shown (or the command is not committed); nothing written" ] &&
+  ok "changed after preview: refused before writing anything" || bad "changed after preview: rc $rc: $out"
+cmp -s "$P/.claude/commands/ship.md" "$tmp/late-ship" && ok "changed after preview: the edited command is kept" || bad "changed after preview: the command changed"
+[ ! -e "$P/.claude/skills/ship" ] && ok "changed after preview: no skill shadows the kept command" || bad "changed after preview: a skill was written"
+[ "$(git -C "$P" hash-object .agents/skills/ship/SKILL.md)" = "$codex_before" ] && ok "changed after preview: the Codex skill is unchanged" ||
+  bad "changed after preview: the Codex skill changed"
+# The same edit, committed: HEAD no longer holds the shown bytes either.
+(cd "$P" && $GIT commit --quiet -am "commit the late edit")
+out="$(cd "$P" && n=ship blob="$shown" bash -c "$APPLY" 2>&1)" && rc=0 || rc=$?
+[ "$rc" = 1 ] && [ ! -e "$P/.claude/skills/ship" ] && cmp -s "$P/.claude/commands/ship.md" "$tmp/late-ship" &&
+  ok "changed after preview: a committed edit is refused the same way" || bad "changed after preview, committed: rc $rc: $out"
+# A failure after the skill is written (here the deletion itself fails): the
+# workflow's skills go back to HEAD, and the command stays the active one.
+P="$tmp/fails-after-writing"
+begin v0.7.0 "$P"
+RETIRE_CHOICE=none sync_run "$P" "$FRESH_DOC" "fails after writing"
+shown="$(sed -n 's/^RETIRE ship (blob \([0-9a-f]*\)).*/\1/p' "$P.out/inventory")"
+mkdir -p "$tmp/rmshim"
+{
+  printf '#!/bin/sh\n'
+  # shellcheck disable=SC2016  # the shim's own $@ and $a, written literally
+  printf 'for a in "$@"; do case "$a" in *.claude/commands/ship.md) echo "simulated rm failure" >&2; exit 1 ;; esac; done\n'
+  printf 'exec %s "$@"\n' "$(command -v rm)"
+} > "$tmp/rmshim/rm"
+chmod +x "$tmp/rmshim/rm"
+out="$(cd "$P" && PATH="$tmp/rmshim:$PATH" n=ship blob="$shown" bash -c "$APPLY" 2>&1)" && rc=0 || rc=$?
+case "$out" in
+  *"NOT RETIRED ship: the retirement failed after writing; .claude/skills/ship/SKILL.md and .agents/skills/ship/SKILL.md are back as HEAD has them, and .claude/commands/ship.md stays") ok "fails after writing: reported as not retired" ;;
+  *) bad "fails after writing: rc $rc: $out" ;;
+esac
+[ "$rc" = 1 ] && [ -f "$P/.claude/commands/ship.md" ] && [ ! -e "$P/.claude/skills/ship" ] &&
+  [ "$(git -C "$P" hash-object .agents/skills/ship/SKILL.md)" = "$(git -C "$P" rev-parse HEAD:.agents/skills/ship/SKILL.md)" ] &&
+  ok "fails after writing: the new skill is gone, the Codex skill is HEAD's, the command stays" || bad "fails after writing: the undo left changes"
 
 # =============================================================================
 # 4. Separately customized Claude and Codex handoff adapters (README route)
@@ -507,13 +563,12 @@ assert_migrated "$P" "customized handoff" handoff
 assert_untouched "$P" "$BEFORE" "customized handoff"
 # Resolve together: port each CLI's rule into its own copy, then retire.
 shown="$(sed -n 's/^HOLD handoff (blob \([0-9a-f]*\)).*/\1/p' "$O/inventory")"
-(
-  cd "$P"
-  mkdir -p .claude/skills/handoff
-  { git show upstream/main:.claude/skills/handoff/SKILL.md; echo "CLAUDE RULE: hand off to the on-call channel."; } > .claude/skills/handoff/SKILL.md
-  { git show upstream/main:.agents/skills/handoff/SKILL.md; echo "CODEX RULE: hand off in the PR description."; } > .agents/skills/handoff/SKILL.md
-  n=handoff blob="$shown" bash -c "$APPLY" >/dev/null
-) && [ ! -e "$P/.claude/commands/handoff.md" ] && ok "customized handoff: ported per CLI, then retired" || bad "customized handoff: port and retire failed"
+cc="$tmp/handoff-claude-copy" cx="$tmp/handoff-codex-copy"
+{ git -C "$P" show upstream/main:.claude/skills/handoff/SKILL.md; echo "CLAUDE RULE: hand off to the on-call channel."; } > "$cc"
+{ git -C "$P" show upstream/main:.agents/skills/handoff/SKILL.md; echo "CODEX RULE: hand off in the PR description."; } > "$cx"
+(cd "$P" && n=handoff blob="$shown" claude_copy="$cc" codex_copy="$cx" bash -c "$APPLY" >/dev/null) &&
+  [ ! -e "$P/.claude/commands/handoff.md" ] && cmp -s "$P/.claude/skills/handoff/SKILL.md" "$cc" && cmp -s "$P/.agents/skills/handoff/SKILL.md" "$cx" &&
+  ok "customized handoff: ported per CLI, then retired" || bad "customized handoff: port and retire failed"
 user_commit "$P"
 assert_no_drift "$P" "customized handoff" '^INFO \.(claude|agents)/skills/handoff/SKILL\.md '
 printf '%s\n' "$CHECK_OUT" | grep -q '^INFO .claude/skills/handoff/SKILL.md the Claude and Codex copies differ' &&
@@ -613,7 +668,7 @@ printf '%s\n' "$ref_out" | grep -q '^HOLD review ' && [ "$(printf '%s\n' "$ref_o
 blob="$(git -C "$P" hash-object "$P/.claude/commands/start.md")"
 for sh in sh zsh; do
   command -v "$sh" >/dev/null 2>&1 || continue
-  (cd "$P" && git restore --source=upstream/main -- .claude/skills/start/SKILL.md && n=start blob="$blob" "$sh" -c "$APPLY" >/dev/null) &&
+  (cd "$P" && n=start blob="$blob" "$sh" -c "$APPLY" >/dev/null) && [ -f "$P/.claude/skills/start/SKILL.md" ] &&
     [ ! -e "$P/.claude/commands/start.md" ] && ok "the apply snippet works in $sh" || bad "the apply snippet failed in $sh"
   git -C "$P" restore -- .claude/commands/start.md
   rm -rf "$P/.claude/skills/start"
