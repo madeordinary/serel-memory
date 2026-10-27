@@ -2,7 +2,9 @@
 # End-to-end test of `install.sh --local` against real repositories in a temp
 # directory. The installer runs from a fixture checkout built from this working
 # tree (tracked files plus new, non-ignored ones), so the test covers what is on
-# disk whether or not it is committed yet.
+# disk whether or not it is committed yet. The fixture is put in the 0.8.0
+# layout mechanically (each source copied to .claude/skills/<n>/SKILL.md, no
+# .claude/commands/), so it holds before and after every workflow is converted.
 #
 # Cases:
 #   1. The preview writes nothing, to the target or the source. Apply leaves
@@ -10,8 +12,9 @@
 #      as they were; it installs the declared payload only, writes exact
 #      exclude lines, and the anchor names the clean release tag.
 #   2. Re-running changes nothing and keeps the user's bank and .rules.
-#   3. A tracked destination, a tracked bank, a differing untracked file or an
-#      unknown file in memory-bank/ stops preview and apply with zero writes.
+#   3. A tracked destination, a tracked bank, a differing untracked file, an
+#      unknown file in memory-bank/, or a same-name command that an installed
+#      skill would replace stops preview and apply with zero writes.
 #   4. An existing AGENTS.md (with CLAUDE.md) stays intact and unexcluded.
 #   5. An ignore negation, in .gitignore or info/exclude, is refused, and so
 #      is one that keeps the memory-bank/ folder visible while each template
@@ -19,8 +22,9 @@
 #   6. A linked worktree: exclusions go to the shared info/exclude, the files
 #      stay in that worktree, and a second install adds no duplicate lines.
 #   7. Source/target safety: same or nested source and target, a subdirectory
-#      target, a copy that is not a checkout, symlinks, hard links, a nested
-#      repository, and a missing --local.
+#      target, a copy that is not a checkout, symlinks (in the target and in the
+#      source's .claude/skills/), hard links, a nested repository, and a
+#      missing --local.
 #   8. An ordinary copy failure rolls back every file and the exclusions,
 #      including an info/ directory the run created.
 #   9. Provenance: uncommitted payload changes give a linked anchor; a clean
@@ -50,6 +54,23 @@ G=(git -c user.email=smoke@test -c user.name=smoke-install -c commit.gpgsign=fal
 
 # --- fixtures ----------------------------------------------------------------
 
+# The 0.8.0 layout, built mechanically: each source gets a byte-identical
+# Claude copy, ask-codex becomes a skill, and no command is left. Idempotent.
+to_v08_layout() { # dir
+  local d="$1" s n
+  for s in "$d"/.agents/skills/*/SKILL.md; do
+    n="$(basename "$(dirname "$s")")"
+    [ "$n" = ask-claude ] && continue
+    mkdir -p "$d/.claude/skills/$n"
+    cp "$s" "$d/.claude/skills/$n/SKILL.md"
+  done
+  if [ -f "$d/.claude/commands/ask-codex.md" ] && [ ! -f "$d/.claude/skills/ask-codex/SKILL.md" ]; then
+    mkdir -p "$d/.claude/skills/ask-codex"
+    cp "$d/.claude/commands/ask-codex.md" "$d/.claude/skills/ask-codex/SKILL.md"
+  fi
+  rm -rf "$d/.claude/commands"
+}
+
 src="$tmp/source"
 mkdir "$src"
 while IFS= read -r f; do
@@ -57,6 +78,7 @@ while IFS= read -r f; do
   mkdir -p "$src/$(dirname "$f")"
   cp -p "$ROOT/$f" "$src/$f"
 done < <(git -C "$ROOT" ls-files -co --exclude-standard)
+to_v08_layout "$src"
 "${G[@]}" init -q "$src"
 "${G[@]}" -C "$src" add -A
 "${G[@]}" -C "$src" commit -qm "source fixture"
@@ -65,7 +87,7 @@ INSTALL="$src/install.sh"
 [ -f "$INSTALL" ] || { echo "FAIL: install.sh is missing from the working tree"; exit 1; }
 
 # The declared payload: the sync allowlist plus the starter bank and .rules.
-PAYLOAD_SPEC=(.agents/skills .claude/commands AGENTS.md docs/workflow-contract.md
+PAYLOAD_SPEC=(.agents/skills .claude/commands .claude/skills AGENTS.md docs/workflow-contract.md
   docs/cross-agent-review.md docs/serel-setup.md hooks bin/serel-memory memory-bank .rules)
 
 new_repo() { # dir [git-init args...] -> a repository with one commit
@@ -137,10 +159,11 @@ printf 'print(2)\n' >>"$t1/src/app.py"
 printf 'staged\n' >"$t1/staged.txt"
 git -C "$t1" add staged.txt
 printf 'mine\n' >"$t1/notes.txt"
-mkdir -p "$t1/.claude/commands" "$t1/docs"
+mkdir -p "$t1/.claude/commands" "$t1/.claude/skills/mine" "$t1/docs"
 printf '# my own command\n' >"$t1/.claude/commands/mine.md"
+printf '# my own skill\n' >"$t1/.claude/skills/mine/SKILL.md"
 printf '# PRD\n' >"$t1/docs/prd.md"
-existing=(README.md src/app.py staged.txt notes.txt .claude/commands/mine.md docs/prd.md)
+existing=(README.md src/app.py staged.txt notes.txt .claude/commands/mine.md .claude/skills/mine/SKILL.md docs/prd.md)
 sums() { (cd "$1" && for f in "${existing[@]}"; do cksum "$f"; done); }
 before="$(snapshot "$t1")"
 state="$(git_state "$t1")"
@@ -151,7 +174,7 @@ bash "$INSTALL" "$t1" --local >"$tmp/1.preview" 2>&1 || { cat "$tmp/1.preview"; 
 [ "$(snapshot "$t1")" = "$before" ] || bad "the preview wrote to the target"
 [ "$(snapshot "$src")" = "$src_before" ] || bad "the preview wrote to the source checkout"
 grep -q 'preview (nothing written)' "$tmp/1.preview" || bad "the preview did not say it wrote nothing"
-grep -qx '  .claude/commands/start.md' "$tmp/1.preview" || bad "the preview did not list .claude/commands/start.md"
+grep -qx '  .claude/skills/start/SKILL.md' "$tmp/1.preview" || bad "the preview did not list .claude/skills/start/SKILL.md"
 grep -qx '  /memory-bank/' "$tmp/1.preview" || bad "the preview did not list the bank exclusion"
 grep -q 'git clean -x' "$tmp/1.preview" || bad "the preview did not state the durability limits"
 
@@ -162,6 +185,11 @@ bash "$INSTALL" "$t1" --local --apply >"$tmp/1.apply" 2>&1 || { cat "$tmp/1.appl
 while IFS= read -r f; do
   cmp -s "$src/$f" "$t1/$f" || bad "installed file differs from the source: $f"
 done < <(git -C "$src" ls-files -- "${PAYLOAD_SPEC[@]}")
+[ -n "$(git -C "$src" ls-files -- .claude/skills)" ] || bad "fixture invalid: the source has no .claude/skills/"
+while IFS= read -r f; do
+  cmp -s "$src/.agents/skills/$f" "$t1/.claude/skills/$f" || bad "the Claude copy of .agents/skills/$f was not installed"
+done < <(cd "$src/.agents/skills" && find . -path ./ask-claude -prune -o -name SKILL.md -print | sed 's#^\./##')
+[ ! -e "$t1/.claude/commands/start.md" ] || bad "a command was installed from a source that ships none"
 if [ ! -x "$t1/bin/serel-memory" ] || [ ! -x "$t1/hooks/session-start.sh" ]; then
   bad "executable bits were not kept"
 fi
@@ -174,7 +202,7 @@ grep -qxF '{ "upstream": "madeordinary/serel-memory", "ref": "v9.9.9-fixture", "
 
 ex="$t1/.git/info/exclude"
 [ "$(grep -c '^# Serel Memory local install' "$ex")" = 1 ] || bad "expected one installer comment in info/exclude"
-for l in /.claude/commands/start.md /.agents/skills/start/SKILL.md /docs/serel-setup.md /bin/serel-memory \
+for l in /.claude/skills/start/SKILL.md /.agents/skills/start/SKILL.md /docs/serel-setup.md /bin/serel-memory \
   /memory-bank/ /.rules /.serel-memory.json /AGENTS.md; do
   grep -qxF -- "$l" "$ex" || bad "info/exclude lacks $l"
 done
@@ -183,7 +211,7 @@ if grep -qxE '/?(\.claude|\.agents|docs|hooks|bin)(/|/\*)?' "$ex"; then
 fi
 git -C "$t1" check-ignore -q memory-bank/archive/activeContext-2026-09.md ||
   bad "a later bank file would not be ignored"
-for f in .claude/commands/mine.md .claude/settings.json docs/handoff.md docs/prd.md; do
+for f in .claude/commands/mine.md .claude/skills/mine/SKILL.md .claude/settings.json docs/handoff.md docs/prd.md; do
   if git -C "$t1" check-ignore -q "$f"; then bad "a user path is ignored: $f"; fi
 done
 
@@ -212,7 +240,21 @@ mkdir -p "$t3/.claude/commands"
 printf '# the team review\n' >"$t3/.claude/commands/review.md"
 "${G[@]}" -C "$t3" add -A
 "${G[@]}" -C "$t3" commit -qm "team command"
-refused "tracked command" "$tmp/3a" "tracked by this repository: .claude/commands/review.md" "$t3" "$t3" --local
+refused "tracked same-name command" "$tmp/3a" "a command with the same name exists: .claude/commands/review.md" "$t3" "$t3" --local
+
+t3s="$tmp/tracked-skill"
+new_repo "$t3s"
+mkdir -p "$t3s/.claude/skills/review"
+printf '# the team review skill\n' >"$t3s/.claude/skills/review/SKILL.md"
+"${G[@]}" -C "$t3s" add -A
+"${G[@]}" -C "$t3s" commit -qm "team skill"
+refused "tracked skill" "$tmp/3s" "tracked by this repository: .claude/skills/review/SKILL.md" "$t3s" "$t3s" --local
+
+t3u="$tmp/untracked-command"
+new_repo "$t3u"
+mkdir -p "$t3u/.claude/commands"
+printf '# my own ship\n' >"$t3u/.claude/commands/ship.md"
+refused "untracked same-name command" "$tmp/3u" "a command with the same name exists: .claude/commands/ship.md" "$t3u" "$t3u" --local
 
 t3b="$tmp/tracked-bank"
 new_repo "$t3b"
@@ -352,6 +394,32 @@ mkdir "$tmp/elsewhere"
 ln -s "$tmp/elsewhere" "$t7b/.claude"
 refused "symlinked .claude" "$tmp/7b" "UNSAFE PATH: .claude is a symlink" "$t7b" "$t7b" --local
 [ -z "$(ls -A "$tmp/elsewhere")" ] || bad "the install wrote through a symlink"
+
+t7s="$tmp/symlinked-skills"
+new_repo "$t7s"
+mkdir -p "$t7s/.claude" "$tmp/elsewhere-skills"
+ln -s "$tmp/elsewhere-skills" "$t7s/.claude/skills"
+refused "symlinked .claude/skills" "$tmp/7s" "UNSAFE PATH: .claude/skills is a symlink" "$t7s" "$t7s" --local
+[ -z "$(ls -A "$tmp/elsewhere-skills")" ] || bad "the install wrote through a symlinked skills folder"
+
+# A symlinked file in the source's .claude/skills/ is not a payload file.
+srcl="$tmp/source-link"
+cp -R "$src" "$srcl"
+rm "$srcl/.claude/skills/start/SKILL.md"
+ln -s ../../../.agents/skills/start/SKILL.md "$srcl/.claude/skills/start/SKILL.md"
+"${G[@]}" -C "$srcl" add -A
+"${G[@]}" -C "$srcl" commit -qm "symlinked Claude copy"
+t7l="$tmp/from-linked-source"
+new_repo "$t7l"
+before="$(snapshot "$t7l")"
+for mode in "" --apply; do
+  if bash "$srcl/install.sh" "$t7l" --local ${mode:+"$mode"} >"$tmp/7l.log" 2>&1; then
+    bad "symlinked skill in the source: ${mode:-preview} succeeded (expected a refusal)"
+  fi
+  grep -qF "payload file is missing or not a regular file in the source: .claude/skills/start/SKILL.md" "$tmp/7l.log" ||
+    { cat "$tmp/7l.log"; bad "symlinked skill in the source: ${mode:-preview} did not name the symlink"; }
+  [ "$(snapshot "$t7l")" = "$before" ] || bad "symlinked skill in the source: ${mode:-preview} wrote to the target"
+done
 
 t7c="$tmp/exclude-link"
 new_repo "$t7c"
