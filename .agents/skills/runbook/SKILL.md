@@ -5,7 +5,7 @@ description: "Generate or update an operational runbook for a service or change.
 
 # Runbook
 
-Produce an operational runbook entry for the service or change being made. This is for the person on-call at 3am, not the developer who already knows the codebase.
+Produce an operational runbook entry for the service or change being made. This is for the person on-call at 3am, not for the developer who already knows the codebase.
 
 **Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
 
@@ -19,7 +19,9 @@ Produce an operational runbook entry for the service or change being made. This 
 
 ## Output
 
-```text
+Produce a runbook in this structure:
+
+~~~text
 # Runbook: [service name]
 
 ## What this is
@@ -32,7 +34,13 @@ Produce an operational runbook entry for the service or change being made. This 
 - Repo / branch:
 
 ## How to run it locally
-[clone, install, env, start — exact commands]
+[exact commands for each step]
+```bash
+# clone
+# install
+# env
+# start
+```
 
 ## How to deploy
 [steps, prerequisites, who can press the button]
@@ -56,9 +64,9 @@ Produce an operational runbook entry for the service or change being made. This 
 
 ## Recent changes
 [link to last few deploys / changelog entries]
-```
+~~~
 
-Save to `docs/runbooks/<service>.md`. Create the directory if needed.
+Save to `docs/runbooks/<service>.md`. Create the directory if needed. If a runbook already exists there, propose updates as a diff before overwriting.
 
 ## Rules
 

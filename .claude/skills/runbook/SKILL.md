@@ -1,23 +1,27 @@
 ---
+name: runbook
 description: "Generate or update an operational runbook for a service or change. Use when the user asks for a runbook, ops doc, on-call guide, or deployment documentation."
 ---
 
-# /runbook
+# Runbook
 
 Produce an operational runbook entry for the service or change being made. This is for the person on-call at 3am, not for the developer who already knows the codebase.
 
 **Scope:** resolve which bank this targets per "Resolving scope" in `docs/workflow-contract.md` — an optional `--scope <path>` argument selects a project bank when the repo configures `scopes`; otherwise the root bank, as always.
 
-Determine the target:
+## Workflow
 
-- If the user named a specific service, use that.
-- Otherwise, infer from the current branch / changes — what's being deployed?
+1. Determine the target:
+   - If the user named a specific service, use that.
+   - Otherwise, infer from the current branch or changes — what's being deployed?
+2. Read relevant code, deploy config, and `memory-bank/techContext.md` for stack/hosting context.
+3. If a runbook already exists at `docs/runbooks/<service>.md`, read it and propose updates as a diff.
 
-Read relevant code, deploy config, and `memory-bank/techContext.md` for stack/hosting context.
+## Output
 
 Produce a runbook in this structure:
 
-~~~markdown
+~~~text
 # Runbook: [service name]
 
 ## What this is
@@ -30,6 +34,7 @@ Produce a runbook in this structure:
 - Repo / branch:
 
 ## How to run it locally
+[exact commands for each step]
 ```bash
 # clone
 # install
@@ -61,9 +66,9 @@ Produce a runbook in this structure:
 [link to last few deploys / changelog entries]
 ~~~
 
-Save to `docs/runbooks/<service>.md`. If a runbook already exists there, propose updates as a diff before overwriting.
+Save to `docs/runbooks/<service>.md`. Create the directory if needed. If a runbook already exists there, propose updates as a diff before overwriting.
 
-Rules:
+## Rules
 
 - Be specific. "Check the logs" is useless. `aws logs tail /aws/apprunner/foo --follow | grep ERROR_TIMEOUT` is a runbook.
 - Don't invent details. If you don't know the on-call rotation, write `<TBD>` rather than guessing.
