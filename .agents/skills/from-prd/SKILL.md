@@ -5,7 +5,13 @@ description: "Seed memory-bank files from an existing PRD, product brief, spec, 
 
 # From PRD
 
-Use this skill when a project has a PRD, product brief, strategy doc, or similar source document, but little or no code yet. This sits between `$discover` for rough ideas and `$init-memory` for existing codebases.
+Use this when a new project has a PRD, product brief, strategy doc, or similar source document, but little or no code yet. You'll read the document, ask only for important gaps, then propose initial memory bank contents.
+
+This sits between `discover` and `init-memory`:
+
+- `discover` is for rough ideas with no source document.
+- `from-prd` is for a project with a PRD or brief but no meaningful code yet.
+- `init-memory` is for an existing codebase.
 
 **Effective bank:** if `memory-bank.local/` exists (upstream Serel Memory development only), it is the working bank — the substantive-content check and any proposed writes target it, not the tracked starter templates. See "Resolving the effective bank" in `docs/workflow-contract.md`.
 
@@ -23,7 +29,7 @@ If it prints `LOCAL INSTALL`, stop before any other step. A local install holds 
 
 **Setup context:** if setup already ran in this session (`docs/serel-setup.md`, or start's setup mode), treat its answers as given (PRD path, stage, users, constraints) and ask only about what is still missing. The proposal and approval steps below are unchanged.
 
-**Stage:** after resolving the scope, check the selected scope for meaningful product code, not counting Serel Memory's own files (its workflows, `hooks/`, `bin/serel-memory`, framework docs, bank templates, and the `tests/` and `.github/` a degit copy brings) or code in another scope. If there is some, this is the code-plus-spec case: stop and recommend `$init-memory` naming this PRD, with the same `--scope`. It inspects the implementation first and keeps the PRD as planned intent (see `docs/serel-setup.md`).
+**Stage:** after resolving the scope, check the selected scope for meaningful product code, not counting Serel Memory's own files (its workflows, `hooks/`, `bin/serel-memory`, framework docs, bank templates, and the `tests/` and `.github/` a degit copy brings) or code in another scope. If there is some, this is the code-plus-spec case: stop and recommend `init-memory` naming this PRD, with the same `--scope`. It inspects the implementation first and keeps the PRD as planned intent (see `docs/serel-setup.md`).
 
 ## Workflow
 
@@ -32,7 +38,7 @@ If it prints `LOCAL INSTALL`, stop before any other step. A local install holds 
    - If not, look for likely files in `docs/`, the repo root, or filenames containing `prd`, `brief`, `spec`, `requirements`, or `product`.
    - If there are multiple plausible files, ask which one to use.
 2. Read the PRD in full.
-3. Check each core file in the effective bank. If every one has real content beyond the template placeholders, the bank is initialized: do not re-seed it; point to `$start` to resume or `$update-memory` to correct it. If only some do (a partial bank, such as a `projectbrief.md` the user wrote), keep those files exactly as they are, read them first as given, and propose only the files that are missing, empty, or template-only; where the PRD disagrees with an existing file, say so instead of rewriting it.
+3. Check each core file in the effective bank. If every one has real content beyond the template placeholders, the bank is initialized: do not re-seed it; point to `start` to resume or `update-memory` to correct it. If only some do (a partial bank, such as a `projectbrief.md` the user wrote), keep those files exactly as they are, read them first as given, and propose only the files that are missing, empty, or template-only; where the PRD disagrees with an existing file, say so instead of rewriting it.
 4. Extract what the PRD clearly says about:
    - Problem
    - User
@@ -75,7 +81,7 @@ QUESTIONS / ASSUMPTIONS: <only if needed>
 
 After all proposals, stop and wait. Do not write anything until the user approves or revises.
 
-## Output Quality
+## Output quality
 
 - Do not wrap an entire file proposal in a Markdown code fence if the proposed file itself contains fenced code blocks.
 - If a proposal includes a code block, close the fence before continuing with the next heading or metadata line.
@@ -88,12 +94,14 @@ After all proposals, stop and wait. Do not write anything until the user approve
 - Treat the PRD as source material, not absolute truth.
 - Do not invent details to fill empty sections. Use `<TBD>` or ask.
 - Keep `systemPatterns.md` and `techContext.md` light unless the PRD states real technical decisions.
+- Use `decisionLog.md` only for explicit decisions in the PRD; otherwise state that no durable decisions have been recorded yet.
 - Use `activeContext.md` to capture the immediate next focus after seeding the bank.
 - Use `progress.md` to reflect that the project is initialized/planning unless code already exists.
-- Use `decisionLog.md` only for explicit decisions in the PRD; otherwise state that no durable decisions have been recorded yet.
 - Do not overwrite the PRD.
 - Do not bloat the bank; preserve signal.
 
 ## Handoff
 
-When approved files are written, end with: **"Memory bank seeded from the PRD. Use `$start` to verify the bootstrap, or use `$breakdown` to break the first implementation chunk into steps."**
+When approved files are written, end with:
+
+> "Memory bank seeded from the PRD. Run `start` to verify the bootstrap, or `breakdown` to break the first implementation chunk into steps."
