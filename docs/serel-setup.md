@@ -18,7 +18,8 @@ clone and is not copied into projects.
    ("Resolving scope" in `docs/workflow-contract.md`). Then, for that scope:
    - Product code: manifests and source folders of the project itself. Serel
      Memory's own files are not product code: its workflows in
-     `.claude/commands/` and `.agents/skills/`, `hooks/`, `bin/serel-memory`,
+     `.claude/skills/` and `.agents/skills/` (`.claude/commands/` before
+     0.8.0), `hooks/`, `bin/serel-memory`,
      its framework docs, the bank templates, `.rules`, the anchor, and the
      `tests/`, `.github/` CI and project metadata a degit copy brings along.
      Code in another folder of a monorepo is not the selected project's
@@ -68,8 +69,8 @@ clone and is not copied into projects.
    Next: [one action: resolve an overlap / review migration diffs / install / seed / add Kit packs / resume with /start]
    ```
 
-   Defaults: Serel Memory only, hooks off, and both adapters (each tool
-   ignores the other's files). The agent answer picks the entry point and the
+   Defaults: Serel Memory only, hooks off, and both agents' workflow files
+   (each tool ignores the other's). The agent answer picks the entry point and the
    instruction-file notes, not the payload. A chosen pack's requirements are
    never met silently: when `verify` is chosen and Serel Memory is missing or
    the bank is not initialized, `Requires` names the install or seed workflow
@@ -84,7 +85,9 @@ clone and is not copied into projects.
    "Overlapping workflows".
 5. **Seed** (Serel Memory, or a pack that needs an initialized bank).
    Continue into the seed workflow in the same session by reading its file
-   (`.claude/commands/<name>.md` or `.agents/skills/<name>/SKILL.md`),
+   (`.claude/skills/<name>/SKILL.md` for Claude Code,
+   `.agents/skills/<name>/SKILL.md` for Codex; a Kit pack's workflow is
+   wherever Kit's installer put it, such as `.claude/commands/<name>.md`),
    carrying the answers you already have; a new session is only needed to
    call the workflow by name. The workflow still shows its proposals and
    waits for approval before writing any bank file.
@@ -114,11 +117,17 @@ finding:
 - **Same-path customization:** an existing file at an incoming path, whether
   the project's own workflow or an edited copy. The shared install's
   `rsync --ignore-existing` skips it and the local installer stops on it; it
-  is never overwritten, and its project rules are listed to preserve.
+  is never overwritten, and its project rules are listed to preserve. A
+  project's own `.claude/commands/<name>.md` beside an incoming
+  `.claude/skills/<name>/` is a same-name collision of the same kind: Claude
+  Code runs the skill instead of a same-name command, so the command would
+  stop running. The local installer stops on it; in a shared install, settle it
+  in the plan before writing.
 
 These are not findings: a resembling name alone (`/start-server` that
-launches a dev server); a Claude command and a Codex skill for the same
-workflow, the intended two-agent pair alone; and a
+launches a dev server); the Claude and Codex copies of one Serel Memory
+workflow, the intended two-agent pair alone; the old Serel Memory command that
+its own skill replaces (see "Retiring old command files"); and a
 specialized workflow that shares a topic but does a different job or serves a
 different audience (a customer release email beside `/weekly-update`). When
 unsure, state the difference instead of calling it a duplicate.
@@ -134,7 +143,7 @@ approved on its own. An unresolved overlap pauses the whole affected unit,
 all of Serel Memory or one Kit pack, while unaffected choices go ahead. Never
 list installation as the next action for an unresolved unit: name the pending
 choice or migration review instead. Never install it minus the overlapping
-file, or one adapter of a pack without the other; never forge an anchor or
+file, or one agent's files of a pack without the other's; never forge an anchor or
 receipt to hide an incomplete install or customizations. Follow the documented
 install procedure for truthful metadata.
 Never move, rename or overwrite a file merely to bypass a collision check.
@@ -171,11 +180,66 @@ workflows already installed, even when nothing new would be added: a custom
 `/kickoff` installed beside `/start` is reported like an incoming one. Left
 unresolved, it stays reported and nothing changes; resolving it is a recorded
 coexistence or a migration. `sync-upstream` applies the same review to new and changed workflows before
-offering its options, since an update can add workflows too.
+offering its options, since an update can add workflows too. It also retires
+Serel Memory's own old command files ("Retiring old command files" below).
 
 **After.** Once an approved setup or migration is applied, list each agent's
 workflows again and check that the selected entry points are the ones
 installed and that the instruction files and docs name them.
+
+## Retiring old command files
+
+Serel Memory 0.8.0 moved each Claude Code workflow from
+`.claude/commands/<name>.md` to `.claude/skills/<name>/SKILL.md`. Claude Code
+runs a same-name skill instead of a command, so a command left beside its new
+skill no longer runs, and the skill would silently shadow any customization in
+it. `sync-upstream` retires Serel Memory's old commands; setup and the
+installers do not. To reach 0.8.0, use the
+[README's update prompt](../README.md#update-an-existing-installation).
+
+**What it checks.** A fixed inventory: Serel Memory's 18 workflows, each
+pairing its old command `.claude/commands/<name>.md` with its new skill
+`.claude/skills/<name>/SKILL.md` (and its Codex skill
+`.agents/skills/<name>/SKILL.md`). It is checked on every run, independent of
+the anchor diff, so a project whose anchor already moved past 0.8.0 with
+commands left behind still gets the offer. A file counts as a version upstream
+shipped only when its blob is one that path had in upstream's history, or has
+at the anchor. Anything else is unknown bytes, treated as customized, and so
+is everything when Git cannot read that history: a shallow clone, or no
+`upstream/main`.
+
+- **RETIRE:** the command, and any skill copy already present, hold bytes
+  upstream shipped. Sync offers to add the skill and retire the command
+  together, separately from "pull all safe changes", and shows the command
+  against its replacement. Only after you select it does it add the skill,
+  recheck the command's bytes just before deleting, and delete it.
+- **HOLD:** unknown bytes (customized) in any adapter: the command, the Codex
+  skill or the Claude skill. The Claude skill, the Codex skill and the
+  command's retirement are held out of "pull all safe changes" together, and
+  the customizations on the Claude and Codex sides are resolved together,
+  before either replacement is written. Sync shows each customization diff
+  (against the anchor's version of that path when the anchor has one,
+  otherwise against upstream's last version), then you choose:
+  - port the customizations into the new skill copies, which may stay
+    different per CLI: sync shows the proposed copies against upstream's,
+    writes them only after your approval, then retires the command;
+  - or keep the command and skip the skill for now. That is a skipped change,
+    so the anchor choice applies, and the next sync offers it again.
+- **SKIP:** upstream does not ship that workflow's skill in place of its
+  command yet; nothing to retire.
+
+**Limits.**
+
+- Retirements stay uncommitted: the command is deleted from the worktree only,
+  and `HEAD` keeps the old bytes, like the other restored framework files.
+  A command that changed since it was shown, or is not committed, is not
+  deleted: sync runs the inventory again and shows what changed.
+- Project commands and Serel Kit's commands are never touched, nor anything
+  else outside the inventory. Kit retires its own.
+- An untracked, Git-excluded or symlinked command is never deleted, because
+  Git would keep no copy: commit it and sync again, or keep it.
+- A shallow clone is held: every inventory file reads as customized. Run
+  `git fetch --unshallow`, then sync again, before resolving anything by hand.
 
 ## Bank states and seed workflows
 
@@ -241,7 +305,9 @@ What it does, in this order:
    capitalization (a tracked `.RULES` counts as `.rules`), a symlink, or
    inside a nested repository; no existing name differs from its destination
    only in case; no existing file differs from the one it would copy; no
-   ignore rule re-includes a destination or the `memory-bank/` folder itself
+   `.claude/skills/<name>/` it would add sits beside the project's own
+   `.claude/commands/<name>.md` (Claude Code runs a skill instead of a
+   same-name command); no ignore rule re-includes a destination or the `memory-bank/` folder itself
    (ignoring each template is not enough: files added there later must stay
    out of Git too). Any problem stops the run with
    nothing written. It never untracks anything, so a tracked path cannot be
@@ -307,12 +373,12 @@ another tool added after the installer's comment.
 
 | Path | Owner | Shared install | Local install |
 |------|-------|----------------|---------------|
-| `.claude/commands/`, `.agents/skills/` (Memory's workflows), `docs/workflow-contract.md`, `docs/cross-agent-review.md`, `docs/serel-setup.md`, `hooks/`, `bin/serel-memory` | Serel Memory framework; `sync-upstream` updates them | committed | excluded, one line per file |
+| `.claude/skills/`, `.agents/skills/` (Memory's workflows; before 0.8.0 `.claude/commands/`, which `sync-upstream` retires), `docs/workflow-contract.md`, `docs/cross-agent-review.md`, `docs/serel-setup.md`, `hooks/`, `bin/serel-memory` | Serel Memory framework; `sync-upstream` updates them | committed | excluded, one line per file |
 | `AGENTS.md` | Serel Memory framework, synced; a project's existing file is never replaced | committed | installed and excluded only when absent |
 | `memory-bank/`, `.rules` | the project (templates are copied once, never synced) | committed | excluded at the root only; `/memory-bank/` as a whole |
 | `.serel-memory.json` | the project (records the starting version) | committed | excluded |
 | `CLAUDE.md`, `.claude/CLAUDE.md`, `CLAUDE.local.md` | the project; Serel Memory never creates them | — | — |
-| Kit pack files in `.claude/commands/`, `.agents/skills/`, and `.serel-kit.json` | Serel Kit | committed | excluded by Kit's own local mode, never by Serel Memory |
+| Kit pack files in `.claude/commands/` (Kit 0.3.0 and earlier) or `.claude/skills/` (where a Kit release puts Claude skills), `.agents/skills/`, and `.serel-kit.json` | Serel Kit | committed | excluded by Kit's own local mode, never by Serel Memory |
 
 Serel Memory needs Bash and Git. The drift checker, scoped banks and the hook
 enable scripts also use `jq`. Hooks are optional and off until you run their
