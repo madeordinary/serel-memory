@@ -110,7 +110,7 @@ Update this project's Serel Memory framework. This project is the target; a fres
 Sync targets upstream `main` and cannot select a release tag. Local,
 Git-excluded installs cannot be updated yet. The prompt works from 0.3.0, 0.6.0
 and 0.7.0, so use it to reach 0.8.0. Using the installed sync workflow instead?
-See the [0.8.0 upgrade note](CHANGELOG.md#080):
+See the [0.8.0 upgrade note](CHANGELOG.md#080--2026-10-27):
 
 - An installed Claude Code sync cannot reach 0.8.0 from any version: 0.8.0
   moved the workflows to `.claude/skills/`, which its allowlist lacks, and
@@ -126,10 +126,10 @@ See the [0.8.0 upgrade note](CHANGELOG.md#080):
 ## Quickstart
 
 ```bash
-npx degit madeordinary/serel-memory#v0.7.0 my-project
+npx degit madeordinary/serel-memory#v0.8.0 my-project
 cd my-project
 git init
-printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.7.0", "linked": false }\n' > .serel-memory.json
+printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.8.0", "linked": false }\n' > .serel-memory.json
 ```
 
 (The last line records which Serel Memory version you started from — `sync-upstream` uses
@@ -264,10 +264,10 @@ It pays off when you return to a project across many sessions and want continuit
 ### On a new project
 
 ```bash
-npx degit madeordinary/serel-memory#v0.7.0 my-new-project
+npx degit madeordinary/serel-memory#v0.8.0 my-new-project
 cd my-new-project
 git init
-printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.7.0", "linked": false }\n' > .serel-memory.json
+printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.8.0", "linked": false }\n' > .serel-memory.json
 ```
 
 Then open the project in Claude Code or Codex. There are three paths from here depending on how formed your idea is:
@@ -285,12 +285,12 @@ If Codex shows "Select settings to import" and offers to migrate Claude Code wor
 If all you have is a PRD, make Serel Memory the starting repo and bring the PRD into it:
 
 ```bash
-npx degit madeordinary/serel-memory#v0.7.0 my-new-project
+npx degit madeordinary/serel-memory#v0.8.0 my-new-project
 cd my-new-project
 mkdir -p docs
 cp /path/to/prd.md docs/prd.md
 git init
-printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.7.0", "linked": false }\n' > .serel-memory.json
+printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.8.0", "linked": false }\n' > .serel-memory.json
 ```
 
 Then run:
@@ -303,7 +303,7 @@ Then run:
 $from-prd docs/prd.md
 ```
 
-`degit madeordinary/serel-memory#v0.7.0` uses GitHub shorthand for `https://github.com/madeordinary/serel-memory` pinned to the `v0.7.0` tag, and downloads that tag's contents without the `.git` history. It is a starter-copy step, not a future `git pull` relationship — which is why the install writes `.serel-memory.json`: it records which upstream version you started from, so `sync-upstream` can later show you precisely what changed upstream since, instead of guessing. Pin to the latest tag on the [releases page](https://github.com/madeordinary/serel-memory/releases) and put that same tag in the `ref` field. (Unpinned `npx degit madeordinary/serel-memory` works too, but then the anchor's `ref` is your best guess — if you skip the anchor entirely, `sync-upstream` will offer to reconstruct one marked `"linked": true`, meaning "exact starting version unknown".)
+`degit madeordinary/serel-memory#v0.8.0` uses GitHub shorthand for `https://github.com/madeordinary/serel-memory` pinned to the `v0.8.0` tag, and downloads that tag's contents without the `.git` history. It is a starter-copy step, not a future `git pull` relationship — which is why the install writes `.serel-memory.json`: it records which upstream version you started from, so `sync-upstream` can later show you precisely what changed upstream since, instead of guessing. Pin to the latest tag on the [releases page](https://github.com/madeordinary/serel-memory/releases) and put that same tag in the `ref` field. (Unpinned `npx degit madeordinary/serel-memory` works too, but then the anchor's `ref` is your best guess — if you skip the anchor entirely, `sync-upstream` will offer to reconstruct one marked `"linked": true`, meaning "exact starting version unknown".)
 
 A `degit` copy also brings along Serel Memory's own project metadata — `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, `.github/`, and `tests/`. These describe *Serel Memory the project*, not your project, and they aren't part of the framework. Delete them whenever you like; `sync-upstream` never touches them.
 
@@ -314,11 +314,11 @@ If the project already has code or important files, drop Serel Memory's files in
 ```bash
 cd ~/path/to/your-existing-project
 
-git clone --depth 1 --branch v0.7.0 https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
+git clone --depth 1 --branch v0.8.0 https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
 rsync -av --ignore-existing --exclude 'settings.local.json' /tmp/serel-memory/memory-bank /tmp/serel-memory/.agents /tmp/serel-memory/.claude /tmp/serel-memory/.rules /tmp/serel-memory/AGENTS.md /tmp/serel-memory/hooks /tmp/serel-memory/bin .
 mkdir -p docs && rsync -av --ignore-existing /tmp/serel-memory/docs/workflow-contract.md /tmp/serel-memory/docs/cross-agent-review.md /tmp/serel-memory/docs/serel-setup.md docs/
 rm -rf /tmp/serel-memory
-[ -e .serel-memory.json ] || printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.7.0", "linked": false }\n' > .serel-memory.json
+[ -e .serel-memory.json ] || printf '{ "upstream": "madeordinary/serel-memory", "ref": "v0.8.0", "linked": false }\n' > .serel-memory.json
 ```
 
 Each `rsync` command is intentionally one line so shell line-continuation mistakes cannot drop the source/destination arguments. Existing files and folders, including something like `docs/prd.md`, are preserved because `--ignore-existing` skips paths that are already present. Only the three framework docs are copied into `docs/`; Serel Memory's own research notes and decision records stay out of your project.
@@ -340,7 +340,7 @@ To use Serel Memory in a repository without committing it — someone else's
 project, or a team that has not adopted it — install it into your clone only:
 
 ```bash
-git clone --branch v0.7.0 https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
+git clone --branch v0.8.0 https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
 bash /tmp/serel-memory/install.sh ~/path/to/your-project --local          # preview, writes nothing
 bash /tmp/serel-memory/install.sh ~/path/to/your-project --local --apply  # install
 ```
@@ -574,7 +574,7 @@ One repo, several initiatives — a portfolio workspace, a product manager's dai
 Opt in by naming the parent folders that hold projects:
 
 ```json
-{ "upstream": "madeordinary/serel-memory", "ref": "v0.7.0", "linked": false,
+{ "upstream": "madeordinary/serel-memory", "ref": "v0.8.0", "linked": false,
   "scopes": ["projects/running", "projects/watching"] }
 ```
 

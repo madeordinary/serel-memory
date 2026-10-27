@@ -51,7 +51,7 @@ A small file at the project root recording which upstream version this project w
 scaffolded from or last synced to:
 
 ```json
-{ "upstream": "madeordinary/serel-memory", "ref": "v0.7.0", "linked": false }
+{ "upstream": "madeordinary/serel-memory", "ref": "v0.8.0", "linked": false }
 ```
 
 - `ref` — the upstream tag or commit this project is anchored to.

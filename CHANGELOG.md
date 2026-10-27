@@ -6,6 +6,39 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html) once it reache
 
 ## [Unreleased]
 
+No changes yet.
+
+## [0.8.0] — 2026-10-27
+
+One file per workflow. Each workflow now has a single source,
+`.agents/skills/<name>/SKILL.md`, which Codex reads, and Claude Code reads a
+byte-identical copy at `.claude/skills/<name>/SKILL.md`. `.claude/commands/`
+is gone. You still call workflows the same way: `/name` in Claude Code and
+`$name` in Codex. The two adapters of each workflow used to be written
+separately and had drifted apart. Merging them kept every rule from both.
+Where they disagreed and nothing recorded which side was right, the safer
+behavior won.
+
+Upgrade: use the README's update prompt. It follows a fresh copy of the sync
+workflow and works from 0.3.0, 0.6.0 and 0.7.0 in one pass.
+
+- An installed Claude Code `/sync-upstream` can't reach 0.8.0 from any
+  version: its own file is one of the files being retired.
+- An installed Codex `$sync-upstream` from 0.6.0 or 0.7.0 can do it in two
+  runs. In the first run, don't select deleting the old command files it
+  lists under REMOVED UPSTREAM. The second run adds the Claude skills and
+  offers to retire those files.
+- Coming from 0.5.0 or earlier, use the prompt and read the 0.6.0 upgrade
+  note too.
+
+Sync offers to retire each old `.claude/commands/<name>.md` only when it
+matches a version upstream shipped, and adds the new skill in the same step.
+A workflow you customized, on either side, is held instead: you port your
+changes into the new skill or keep your command for now. Nothing is retired
+without your selection, retirements stay uncommitted, and your own and Kit's
+commands are never touched. Local, Git-excluded installs still can't be
+upgraded.
+
 ### Changed
 
 - **One source per workflow.**
@@ -578,7 +611,8 @@ remain intact. Pin it from the canonical home with
   to parity; fixed a duplicate step number in the `ask-codex`/`ask-claude` workflows.
 - Fixed the broken file-tree rendering and tightened install instructions in the README.
 
-[Unreleased]: https://github.com/madeordinary/serel-memory/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/madeordinary/serel-memory/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.8.0
 [0.7.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.7.0
 [0.6.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.6.0
 [0.5.0]: https://github.com/madeordinary/serel-memory/releases/tag/v0.5.0

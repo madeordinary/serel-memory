@@ -287,7 +287,7 @@ Use the README's [Install](../README.md#install) commands. The files become
 ordinary project files: review them and commit them. Updates come through
 `/sync-upstream`.
 
-Those commands are pinned to v0.7.0, which installs this guide and the
+Those commands are pinned to v0.8.0, which installs this guide and the
 workflows it describes: `/start setup`, code-plus-spec routing and
 partial-bank handling. Continue in the same session: run the chosen seed
 workflow from the installed files and carry this guide's answers into it.
@@ -299,7 +299,7 @@ else's project, or a team that has not adopted it. Run it from a clone of
 Serel Memory that contains this guide, outside your project:
 
 ```bash
-git clone --branch v0.7.0 https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
+git clone --branch v0.8.0 https://github.com/madeordinary/serel-memory.git /tmp/serel-memory
 bash /tmp/serel-memory/install.sh /path/to/your-project --local          # preview
 bash /tmp/serel-memory/install.sh /path/to/your-project --local --apply  # install
 ```
