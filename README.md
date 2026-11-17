@@ -1,5 +1,7 @@
 # Serel Memory
 
+> **Serel Memory continues as [Tavo Stack](https://github.com/gusfeliciano/tavostack).** This repository is archived and no longer maintained. Existing installs keep working; new projects should start with Tavo Stack.
+
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) ![Works with Claude Code + Codex](https://img.shields.io/badge/works%20with-Claude%20Code%20%2B%20Codex-5436DA) ![No dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
 
 A portable memory bank with workflows for setting up, planning, reviewing, and maintaining AI-assisted projects. Works with Claude Code and Codex. Memory works without Serel Kit. Formerly known as **Basecamp**.
